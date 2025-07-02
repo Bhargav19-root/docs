@@ -16,13 +16,13 @@
 {
 "group": "Getting Started",
 "pages": [
-"index/index.mdx"
+"index"
 ]
 },
 {
 "group": "Link Management",
 "pages": [
-"link-management/create-link",
+"link-management/link/create-link",
 "link-management/tags-folders",
 "link-management/deep-links",
 "link-management/link-cloaking",
