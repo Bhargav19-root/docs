@@ -1,0 +1,88 @@
+---
+title: 'API Authentication'
+description: 'Learn how to authenticate with the UTM Builder API'
+---
+
+# API Authentication
+
+Learn how to authenticate your requests to the UTM Builder API.
+
+## Authentication Methods
+
+### API Keys
+```bash
+# Header Authentication
+curl -H "Authorization: Bearer YOUR_API_KEY" \
+  https://api.utmbuilder.com/v1/links
+
+# Query Parameter
+curl https://api.utmbuilder.com/v1/links?api_key=YOUR_API_KEY
+```
+
+### OAuth 2.0
+```bash
+# OAuth Token
+curl -H "Authorization: Bearer YOUR_OAUTH_TOKEN" \
+  https://api.utmbuilder.com/v1/links
+```
+
+## Security
+
+### Key Management
+- Secure storage
+- Regular rotation
+- Access logging
+- Revocation process
+
+### Best Practices
+- Use HTTPS only
+- Implement timeouts
+- Handle errors
+- Monitor usage
+
+## Access Control
+
+### Permission Levels
+- Read only
+- Write access
+- Admin rights
+- Custom scopes
+
+### Rate Limiting
+- Default limits
+- Burst allowance
+- Overage handling
+- Status codes
+
+## Implementation Guide
+
+### Getting Started
+1. Generate API key
+2. Set up authentication
+3. Test connection
+4. Monitor usage
+
+### Code Examples
+
+```python
+import requests
+
+headers = {
+    'Authorization': 'Bearer YOUR_API_KEY'
+}
+
+response = requests.get(
+    'https://api.utmbuilder.com/v1/links',
+    headers=headers
+)
+```
+
+```javascript
+fetch('https://api.utmbuilder.com/v1/links', {
+    headers: {
+        'Authorization': 'Bearer YOUR_API_KEY'
+    }
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
