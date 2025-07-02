@@ -1,102 +1,165 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mint Starter Kit",
-  "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
-  },
-  "favicon": "/favicon.svg",
-  "navigation": {
-    "tabs": [
-      {
-        "tab": "Guides",
-        "groups": [
-          {
-            "group": "Get Started",
-            "pages": [
-              "index",
-              "quickstart",
-              "development"
-            ]
-          },
-          {
-            "group": "Essentials",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "API Reference",
-        "groups": [
-          {
-            "group": "API Documentation",
-            "pages": [
-              "api-reference/introduction"
-            ]
-          },
-          {
-            "group": "Endpoint Examples",
-            "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
-            ]
-          }
-        ]
-      }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Community",
-          "href": "https://mintlify.com/community",
-          "icon": "slack"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
-  }
+"$schema": "https://mintlify.com/docs.json",
+"theme": "mint",
+"name": "UTM Builder Docs",
+"colors": {
+"primary": "#16A34A",
+"light": "#07C983",
+"dark": "#15803D"
+},
+"favicon": "/favicon.svg",
+"navigation": {
+"tabs": [
+{
+"tab": "Guides",
+"groups": [
+{
+"group": "Getting Started",
+"pages": [
+"index",
+"getting-started/how-it-works",
+"getting-started/key-terms",
+"getting-started/plans"
+]
+},
+{
+"group": "Link Management",
+"pages": [
+"link-management/create-link",
+"link-management/tags-folders",
+"link-management/deep-links",
+"link-management/link-cloaking",
+"link-management/password-protection",
+"link-management/link-expiry-targeting",
+"link-management/qr-codes"
+]
+},
+{
+"group": "UTM Tools",
+"pages": [
+"utm-tools/utm-builder",
+"utm-tools/utm-templates",
+"utm-tools/utm-parameters",
+"utm-tools/utm-groupings"
+]
+},
+{
+"group": "Workspaces & Projects",
+"pages": [
+"workspaces/manage-workspaces",
+"workspaces/user-roles",
+"workspaces/projects-notes"
+]
+},
+{
+"group": "Domains",
+"pages": [
+"domains/our-domain",
+"domains/custom-domain",
+"domains/ssl-setup",
+"domains/dns-troubleshooting"
+]
+},
+{
+"group": "Analytics & Reporting",
+"pages": [
+"analytics/overview",
+"analytics/ga4-integration",
+"analytics/reports",
+"analytics/data-retention"
+]
+},
+{
+"group": "Integrations",
+"pages": [
+"integrations/zapier",
+"integrations/bitly",
+"integrations/webhooks",
+"integrations/api-overview"
+]
+},
+{
+"group": "Billing & Account",
+"pages": [
+"account/billing",
+"account/change-plan",
+"account/cancel"
+]
+},
+{
+"group": "Troubleshooting & FAQs",
+"pages": [
+"help/common-issues",
+"help/feature-requests",
+"help/contact-support"
+]
+}
+]
+},
+{
+"tab": "API Reference",
+"groups": [
+{
+"group": "API Documentation",
+"pages": [
+"api/index",
+"api/authentication"
+]
+},
+{
+"group": "Endpoint Examples",
+"pages": [
+"api/links",
+"api/analytics",
+"api/webhooks",
+"api/rate-limits"
+]
+}
+]
+}
+],
+"global": {
+"anchors": [
+{
+"anchor": "Documentation",
+"href": "https://mintlify.com/docs",
+"icon": "book-open-cover"
+},
+{
+"anchor": "Community",
+"href": "https://mintlify.com/community",
+"icon": "slack"
+},
+{
+"anchor": "Blog",
+"href": "https://mintlify.com/blog",
+"icon": "newspaper"
+}
+]
+}
+},
+"logo": {
+"light": "/logo/light.svg",
+"dark": "/logo/dark.svg"
+},
+"navbar": {
+"links": [
+{
+"label": "Support",
+"href": "mailto:support@yourdomain.com"
+}
+],
+"primary": {
+"type": "button",
+"label": "Dashboard",
+"href": "https://yourapp.com/dashboard"
+}
+},
+"footer": {
+"socials": {
+"x": "https://x.com/yourcompany",
+"github": "https://github.com/yourrepo",
+"linkedin": "https://linkedin.com/company/yourcompany"
+}
+}
 }
