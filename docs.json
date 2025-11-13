@@ -96,13 +96,15 @@
 {
 "tab": "API Reference",
 "groups": [
-{
-"group": "API Documentation",
-"pages": [
-"api/index",
-"api/authentication"
-]
-},
+        {
+          "group": "API Documentation",
+          "pages": [
+            "api/index",
+            "api/authentication",
+            "api/url-management",
+            "api/api-tokens"
+          ]
+        },
 {
 "group": "Endpoint Examples",
 "pages": [

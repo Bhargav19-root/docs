@@ -1,0 +1,142 @@
+---
+title: 'URL Management API'
+description: 'Manage shortened URLs with UTM parameters, aliases, domains, and analytics'
+---
+
+# URL Management API
+
+Endpoints under `/api/v1` for creating, retrieving, updating, deleting, and analyzing shortened URLs.
+
+## Authentication
+
+- Include an API token in the `Authorization` header. Accepts `Bearer ez_<token>` or raw `ez_<token>`.
+- Optional `X-Timezone` header, e.g., `UTC`.
+
+## HTTP Status Codes
+
+- 200: OK — Request succeeded
+- 400: Bad Request — Invalid request parameters
+- 401: Unauthorized — Missing or invalid API key
+- 402: Payment Required — Payment required
+- 403: Forbidden — API key doesn’t have required access
+- 404: Not Found — Resource doesn’t exist
+- 429: Too Many Requests — Rate limit exceeded
+- 500: Internal Server Error — Something went wrong on our end
+
+## Endpoints
+
+### Create URL
+```bash
+POST /api/v1/urls
+
+Headers:
+Authorization: Bearer ez_<token>
+Content-Type: application/json
+X-Timezone: UTC
+
+Body:
+{
+  "target_url": "https://example.com/landing",
+  "utm_source": "newsletter",
+  "utm_medium": "email",
+  "utm_campaign": "spring-2025",
+  "utm_term": "campaign-term",
+  "utm_content": "content-A",
+  "custom_alias": "spring-sale",
+  "custom_domain": "short.example.com",
+  "expiry_date": "2025-12-31T00:00:00Z",
+  "description": "Campaign link",
+  "click_limit": 1000,
+  "password": "optional-pass"
+}
+```
+
+### Bulk Create URLs
+```bash
+POST /api/v1/bulk
+
+Headers:
+Authorization: Bearer ez_<token>
+Content-Type: application/json
+X-Timezone: UTC
+
+Body:
+{
+  "default_domain": "short.example.com",
+  "urls": [
+    {
+      "target_url": "https://example.com/product1",
+      "utm_source": "social",
+      "utm_medium": "facebook",
+      "utm_campaign": "launch"
+    },
+    {
+      "target_url": "https://example.com/product2",
+      "utm_source": "social",
+      "utm_medium": "twitter",
+      "utm_campaign": "launch",
+      "utm_content": "video"
+    }
+  ]
+}
+```
+
+### Get URL by ID
+```bash
+GET /api/v1/urls/{id}
+
+Headers:
+Authorization: Bearer ez_<token>
+```
+
+### Get URL by Alias
+```bash
+GET /api/v1/urls/alias/{alias}
+
+Headers:
+Authorization: Bearer ez_<token>
+```
+
+### Update URL
+```bash
+PUT /api/v1/urls/{id}
+
+Headers:
+Authorization: Bearer ez_<token>
+Content-Type: application/json
+X-Timezone: UTC
+
+Body:
+{
+  "target_url": "https://example.com/new-landing",
+  "utm_campaign": "spring-2025-retarget"
+}
+```
+
+### Delete URL
+```bash
+DELETE /api/v1/urls/{id}
+
+Headers:
+Authorization: Bearer ez_<token>
+```
+
+### List URLs (paginated)
+```bash
+GET /api/v1/urls?page=1&limit=10
+
+Headers:
+Authorization: Bearer ez_<token>
+
+Query Params:
+page=1
+limit=10
+```
+
+### URL Analytics
+```bash
+GET /api/v1/urls/{id}/analytics
+
+Headers:
+Authorization: Bearer ez_<token>
+```

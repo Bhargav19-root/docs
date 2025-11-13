@@ -1,0 +1,67 @@
+---
+title: 'API Tokens'
+description: 'Create, list, revoke, and delete API tokens (session cookie required)'
+---
+
+# API Tokens
+
+Token endpoints under `/api-tokens` require an authenticated session via `Cookie` header.
+
+## Authentication
+
+- Include session cookie: `Cookie: <sessionCookie>`
+- The raw token value is returned only when creating a token.
+
+## HTTP Status Codes
+
+- 200: OK — Request succeeded
+- 400: Bad Request — Invalid request parameters
+- 401: Unauthorized — Missing or invalid session
+- 403: Forbidden — Insufficient permissions
+- 404: Not Found — Resource doesn’t exist
+- 429: Too Many Requests — Rate limit exceeded
+- 500: Internal Server Error — Something went wrong
+
+## Endpoints
+
+### List My Tokens
+```bash
+GET /api-tokens/find-all
+
+Headers:
+Cookie: <sessionCookie>
+```
+
+### Create Token
+```bash
+POST /api-tokens
+
+Headers:
+Cookie: <sessionCookie>
+Content-Type: application/json
+
+Body:
+{
+  "name": "CI integration",
+  "permissions": [
+    "read",
+    "write"
+  ]
+}
+```
+
+### Revoke Token
+```bash
+DELETE /api-tokens/{id}/revoke
+
+Headers:
+Cookie: <sessionCookie>
+```
+
+### Delete Token
+```bash
+DELETE /api-tokens/{id}
+
+Headers:
+Cookie: <sessionCookie>
+```
