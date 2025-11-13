@@ -4,8 +4,8 @@
 "name": "UTM Builder Docs",
 "colors": {
 "primary": "#ff6200",
-"light": "#07C983",
-"dark": "#15803D"
+"light": "#ff6200",
+"dark": "#ff6200"
 },
 "favicon": "/favicon.svg",
 "navigation": {
