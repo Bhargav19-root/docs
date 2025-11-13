@@ -3,7 +3,7 @@
 "theme": "mint",
 "name": "UTM Builder Docs",
 "colors": {
-"primary": "#16A34A",
+"primary": "#ff6200",
 "light": "#07C983",
 "dark": "#15803D"
 },
@@ -101,7 +101,6 @@
           "pages": [
             "api/introduction",
             "api/errors",
-            "api/rate-limits",
             "api/best-practices"
           ]
         },
