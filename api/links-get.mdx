@@ -1,0 +1,32 @@
+---
+title: 'Get Link'
+description: 'Retrieve a shortened URL by id or alias'
+---
+
+# Get Link
+
+Retrieve a shortened URL.
+
+## Get by ID
+
+```bash
+GET /api/v1/urls/{id}
+
+Headers:
+Authorization: Bearer ez_<token>
+```
+
+## Get by Alias
+
+```bash
+GET /api/v1/urls/alias/{alias}
+
+Headers:
+Authorization: Bearer ez_<token>
+```
+
+## Notes
+
+- `{id}` is the numeric or UUID identifier of the URL.
+- `{alias}` is the custom alias assigned at creation.
+

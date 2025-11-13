@@ -1,0 +1,38 @@
+---
+title: 'API Errors'
+description: 'Standard HTTP status codes and error handling for the LinkUTM API'
+---
+
+# API Errors
+
+Standard status codes used across the API.
+
+## HTTP Status Codes
+
+- 200: OK — Request succeeded
+- 400: Bad Request — Invalid request parameters
+- 401: Unauthorized — Missing or invalid API key
+- 402: Payment Required — Payment required
+- 403: Forbidden — API key doesn’t have required access
+- 404: Not Found — Resource doesn’t exist
+- 429: Too Many Requests — Rate limit exceeded
+- 500: Internal Server Error — Something went wrong on our end
+
+## Error Response Example
+
+```json
+{
+  "status": "error",
+  "error": {
+    "code": "invalid_request",
+    "message": "Invalid parameters"
+  }
+}
+```
+
+## Recommendations
+
+- Validate request bodies before sending
+- Handle `401` by rotating or reissuing tokens
+- Implement retries with jitter for transient `429` and `5xx`
+- Log request IDs and error messages for support

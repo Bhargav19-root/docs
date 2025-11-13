@@ -99,21 +99,30 @@
         {
           "group": "API Documentation",
           "pages": [
-            "api/index",
-            "api/authentication",
-            "api/url-management",
-            "api/api-tokens"
+            "api/introduction",
+            "api/errors",
+            "api/rate-limits",
+            "api/best-practices"
           ]
         },
-{
-"group": "Endpoint Examples",
-"pages": [
-"api/links",
-"api/analytics",
-"api/webhooks",
-"api/rate-limits"
-]
-}
+        {
+          "group": "Links",
+          "pages": [
+            "api/links-create",
+            "api/links-get",
+            "api/links-delete",
+            "api/links-parameters"
+          ]
+        },
+        {
+          "group": "Endpoint Examples",
+          "pages": [
+            "api/links",
+            "api/analytics",
+            "api/webhooks",
+            "api/rate-limits"
+          ]
+        }
 ]
 }
 ],"global": {
@@ -129,20 +138,20 @@
 "links": [
 {
 "label": "Support",
-"href": "mailto:support@yourdomain.com"
+"href": "mailto:support@linkutm.com"
 }
 ],
 "primary": {
 "type": "button",
 "label": "Dashboard",
-"href": "https://yourapp.com/dashboard"
+"href": "https://app.linkutm.com"
 }
 },
 "footer": {
 "socials": {
-"x": "https://x.com/yourcompany",
-"github": "https://github.com/yourrepo",
-"linkedin": "https://linkedin.com/company/yourcompany"
+"x": "https://x.com/linkutm10761",
+"facebook": "https://www.facebook.com/people/Linkutm/61583414725717/",
+"linkedin": "https://www.linkedin.com/company/linkutm"
 }
 }
 }

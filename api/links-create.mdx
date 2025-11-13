@@ -1,0 +1,43 @@
+---
+title: 'Create Link'
+description: 'Create a shortened URL with UTM parameters, alias, domain, expiry, and more'
+---
+
+# Create Link
+
+Create a shortened URL under `/api/v1/urls`.
+
+## Request
+
+```bash
+POST /api/v1/urls
+
+Headers:
+Authorization: Bearer ez_<token>
+Content-Type: application/json
+X-Timezone: {{xTimezone}}
+
+Body:
+{
+  "target_url": "https://example.com/landing",
+  "utm_source": "newsletter",
+  "utm_medium": "email",
+  "utm_campaign": "spring-2025",
+  "utm_term": "campaign-term",
+  "utm_content": "content-A",
+  "custom_alias": "spring-sale",
+  "custom_domain": "short.example.com",
+  "expiry_date": "2025-12-31T00:00:00Z",
+  "description": "Campaign link",
+  "click_limit": 1000,
+  "password": "optional-pass"
+}
+```
+
+## Notes
+
+- `Authorization` accepts `Bearer ez_<token>` or raw `ez_<token>`.
+- `expiry_date` is ISO 8601.
+- `click_limit` limits total clicks before the link is disabled.
+- `password` protects access if enabled.
+

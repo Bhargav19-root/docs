@@ -1,0 +1,46 @@
+---
+title: 'Link Parameters'
+description: 'Supported fields for link creation and updates'
+---
+
+# Link Parameters
+
+Fields accepted by link creation and update endpoints.
+
+## Core
+
+- `target_url` (string): Destination URL
+- `custom_alias` (string, optional): Human-friendly alias
+- `custom_domain` (string, optional): Domain to serve the short link
+- `description` (string, optional): Internal notes
+- `expiry_date` (string, optional): ISO 8601 expiry timestamp
+- `click_limit` (number, optional): Max allowed clicks
+- `password` (string, optional): Password protection
+
+## UTM
+
+- `utm_source` (string)
+- `utm_medium` (string)
+- `utm_campaign` (string)
+- `utm_term` (string, optional)
+- `utm_content` (string, optional)
+
+## Example
+
+```json
+{
+  "target_url": "https://example.com/landing",
+  "utm_source": "newsletter",
+  "utm_medium": "email",
+  "utm_campaign": "spring-2025",
+  "utm_term": "campaign-term",
+  "utm_content": "content-A",
+  "custom_alias": "spring-sale",
+  "custom_domain": "short.example.com",
+  "expiry_date": "2025-12-31T00:00:00Z",
+  "description": "Campaign link",
+  "click_limit": 1000,
+  "password": "optional-pass"
+}
+```
+

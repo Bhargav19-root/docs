@@ -1,0 +1,23 @@
+---
+title: 'Delete Link'
+description: 'Delete a shortened URL by id'
+---
+
+# Delete Link
+
+Delete a shortened URL.
+
+## Request
+
+```bash
+DELETE /api/v1/urls/{id}
+
+Headers:
+Authorization: Bearer ez_<token>
+```
+
+## Notes
+
+- Deleting a link is irreversible.
+- Use revoke or disable features if you need temporary suspension.
+

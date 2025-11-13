@@ -1,0 +1,35 @@
+---
+title: 'API Introduction'
+description: 'Overview, base URL, authentication, and variables for the LinkUTM API'
+---
+
+# API Introduction
+
+Welcome to the LinkUTM API. Use these endpoints to manage shortened URLs with UTM parameters, aliases, custom domains, and analytics.
+
+## Base URL
+
+- Set `{{baseUrl}}` for your environment, e.g., `https://api.linktutm.com` or `http://localhost:3000`.
+
+## Authentication
+
+- All endpoints under `/api/v1` require an API token.
+- `Authorization` header accepts `Bearer ez_<token>` or raw `ez_<token>`.
+
+```bash
+curl -H "Authorization: Bearer ez_your_api_token" \
+  "{{baseUrl}}/api/v1/urls"
+```
+
+## Variables
+
+- `{{baseUrl}}`: API server base URL
+- `{{apiToken}}`: API token value, prefixed with `ez_`
+- `{{xTimezone}}`: Optional timezone header, e.g., `UTC`
+- `{{sessionCookie}}`: Session cookie for token management endpoints under `/api-tokens`
+
+## Headers
+
+- `Authorization`: `Bearer ez_<token>`
+- `Content-Type`: `application/json` for POST/PUT
+- `X-Timezone`: Optional timezone context

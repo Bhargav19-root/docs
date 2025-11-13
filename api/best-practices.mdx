@@ -1,0 +1,32 @@
+---
+title: 'API Best Practices'
+description: 'Guidelines for authentication, retries, rate limits, and security'
+---
+
+# API Best Practices
+
+Recommendations for robust integrations.
+
+## Authentication
+
+- Use `Authorization: Bearer ez_<token>`
+- Store tokens securely and rotate regularly
+- Do not embed tokens in client-side code
+
+## Rate Limits
+
+- Respect `429 Too Many Requests` responses
+- Implement exponential backoff and retries for transient failures
+- Cache non-mutating responses where appropriate
+
+## Reliability
+
+- Use timeouts and circuit breakers
+- Retry `5xx` and network errors with jitter
+- Log requests and responses (excluding secrets)
+
+## Security
+
+- Use HTTPS only
+- Avoid logging raw tokens
+- Use per-environment tokens with least privilege
