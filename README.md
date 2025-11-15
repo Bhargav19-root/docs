@@ -1,6 +1,6 @@
-# LinkUTM Documentation
+# linkutm Documentation
 
-Welcome to the LinkUTM documentation repository. This documentation is built for [Mintlify](https://mintlify.com) and provides comprehensive guides for using LinkUTM's UTM link management platform.
+Welcome to the linkutm documentation repository. This documentation is built for [Mintlify](https://mintlify.com) and provides comprehensive guides for using linkutm's UTM link management platform.
 
 ## 📚 Documentation Structure
 
@@ -259,14 +259,14 @@ Edit the `navigation` section in `mint.json` to:
 
 ## 📄 License
 
-This documentation is proprietary to LinkUTM. All rights reserved.
+This documentation is proprietary to linkutm. All rights reserved.
 
 ## 🔗 Useful Links
 
 - **Mintlify Documentation:** https://mintlify.com/docs
 - **Markdown Guide:** https://www.markdownguide.org
-- **LinkUTM Website:** https://linkutm.com
-- **LinkUTM App:** https://app.linkutm.com
+- **linkutm Website:** https://linkutm.com
+- **linkutm App:** https://app.linkutm.com
 
 ---
 
@@ -274,4 +274,4 @@ This documentation is proprietary to LinkUTM. All rights reserved.
 
 **Documentation Version:** 1.0
 
-**Maintained By:** LinkUTM Documentation Team
+**Maintained By:** linkutm Documentation Team

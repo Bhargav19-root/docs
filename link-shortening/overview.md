@@ -1,10 +1,10 @@
 # Link Shortening Overview
 
-Learn how LinkUTM's link shortening feature helps you create clean, professional, trackable URLs.
+Learn how linkutm's link shortening feature helps you create clean, professional, trackable URLs.
 
 ## What is Link Shortening?
 
-Link shortening converts long URLs with UTM parameters into short, memorable links that are easier to share and track. LinkUTM provides built-in link shortening with support for custom branded domains.
+Link shortening converts long URLs with UTM parameters into short, memorable links that are easier to share and track. linkutm provides built-in link shortening with support for custom branded domains.
 
 ## Why Use Link Shortening?
 

@@ -1,6 +1,6 @@
 # UTM Templates Overview
 
-Learn how UTM templates help you create consistent, standardized links faster in LinkUTM.
+Learn how UTM templates help you create consistent, standardized links faster in linkutm.
 
 ## What are UTM Templates?
 

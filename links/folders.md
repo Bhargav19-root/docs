@@ -1,6 +1,6 @@
 # Folders
 
-Learn how to organize your links using folders in LinkUTM for better campaign management.
+Learn how to organize your links using folders in linkutm for better campaign management.
 
 ## Overview
 

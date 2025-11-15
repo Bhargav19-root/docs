@@ -1,10 +1,10 @@
 # Analytics Overview
 
-Learn how to track and analyze your link performance in LinkUTM.
+Learn how to track and analyze your link performance in linkutm.
 
 ## Overview
 
-LinkUTM provides comprehensive analytics to help you understand how your links perform, where your traffic comes from, and which campaigns drive the best results. Track every click, analyze user behavior, and make data-driven decisions.
+linkutm provides comprehensive analytics to help you understand how your links perform, where your traffic comes from, and which campaigns drive the best results. Track every click, analyze user behavior, and make data-driven decisions.
 
 ## Analytics Dashboard
 
@@ -204,11 +204,11 @@ View combined metrics for campaigns:
 
 ### Connect GA4
 
-LinkUTM integrates with Google Analytics 4:
+linkutm integrates with Google Analytics 4:
 
 1. **OAuth Connection:**
    - Click **Connect Google Analytics**
-   - Authorize LinkUTM
+   - Authorize linkutm
    - Grant necessary permissions
 
 2. **Select Account:**
@@ -221,9 +221,9 @@ LinkUTM integrates with Google Analytics 4:
    - Real-time or near-real-time updates
    - Historical data access
 
-4. **View in LinkUTM:**
-   - GA4 metrics in LinkUTM dashboard
-   - Combined view with LinkUTM analytics
+4. **View in linkutm:**
+   - GA4 metrics in linkutm dashboard
+   - Combined view with linkutm analytics
    - Unified reporting
 
 [Learn more about Google Analytics integration →](/analytics/google-analytics-integration)

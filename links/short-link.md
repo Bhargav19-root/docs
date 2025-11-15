@@ -1,6 +1,6 @@
 # Short Link
 
-Learn how to create shortened links using LinkUTM's link shortening feature.
+Learn how to create shortened links using linkutm's link shortening feature.
 
 ## Overview
 
@@ -146,7 +146,7 @@ Track performance of your short links:
 
 ### Automatic Generation
 
-By default, LinkUTM generates a random short code:
+By default, linkutm generates a random short code:
 - Example: `abc123`, `x7k9m2`, `qr4t8p`
 - Ensures uniqueness
 - Case-sensitive

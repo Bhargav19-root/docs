@@ -1,10 +1,10 @@
 # Organization, Workspaces & Projects Overview
 
-Learn how LinkUTM's organizational structure helps you manage campaigns, teams, and clients efficiently.
+Learn how linkutm's organizational structure helps you manage campaigns, teams, and clients efficiently.
 
 ## Understanding the Hierarchy
 
-LinkUTM uses a three-tier organizational structure to help you organize your work:
+linkutm uses a three-tier organizational structure to help you organize your work:
 
 ```
 Organization (Account Level)

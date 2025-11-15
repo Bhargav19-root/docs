@@ -1,10 +1,10 @@
 # Team Collaboration Overview
 
-Learn how to collaborate with your team effectively in LinkUTM.
+Learn how to collaborate with your team effectively in linkutm.
 
 ## Overview
 
-LinkUTM's team collaboration features allow you to work seamlessly with colleagues, manage permissions, track activity, and maintain organized workflows across your organization.
+linkutm's team collaboration features allow you to work seamlessly with colleagues, manage permissions, track activity, and maintain organized workflows across your organization.
 
 ## Team Features
 

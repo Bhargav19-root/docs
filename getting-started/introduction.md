@@ -1,12 +1,12 @@
-# Introduction to LinkUTM
+# Introduction to linkutm
 
-Welcome to LinkUTM! This guide will help you understand what LinkUTM is, what it can do, and how to get started.
+Welcome to linkutm! This guide will help you understand what linkutm is, what it can do, and how to get started.
 
-## What is LinkUTM?
+## What is linkutm?
 
-LinkUTM (branded as "ezUTM") is a comprehensive UTM link management and tracking platform designed to help marketing teams create, organize, track, and analyze campaign links with UTM parameters. It combines link creation, shortening, analytics, and team collaboration into one powerful platform.
+linkutm (branded as "ezUTM") is a comprehensive UTM link management and tracking platform designed to help marketing teams create, organize, track, and analyze campaign links with UTM parameters. It combines link creation, shortening, analytics, and team collaboration into one powerful platform.
 
-## What Can LinkUTM Do?
+## What Can linkutm Do?
 
 ### Core Features
 
@@ -68,7 +68,7 @@ LinkUTM (branded as "ezUTM") is a comprehensive UTM link management and tracking
 - Social media preview (Open Graph tags)
 - QR code generation
 
-## Who is LinkUTM For?
+## Who is linkutm For?
 
 ### Marketing Teams
 
@@ -149,7 +149,7 @@ LinkUTM (branded as "ezUTM") is a comprehensive UTM link management and tracking
 - Easy link creation
 - Share tracking
 
-## How LinkUTM Works
+## How linkutm Works
 
 ### The Workflow
 
@@ -251,7 +251,7 @@ Short URL: https://yourbrand.link/abc123
 ### Quick Start (5 Minutes)
 
 **Step 1: Sign Up**
-1. Go to LinkUTM website
+1. Go to linkutm website
 2. Click **Sign Up**
 3. Enter email and create password
 4. Verify email
@@ -363,7 +363,7 @@ Short URL: https://yourbrand.link/abc123
 
 ### Do I need technical knowledge?
 
-No! LinkUTM is designed for marketers, not developers. If you can create a social media post, you can use LinkUTM.
+No! linkutm is designed for marketers, not developers. If you can create a social media post, you can use linkutm.
 
 ### Will this work with my analytics tool?
 
@@ -375,7 +375,7 @@ Absolutely! Invite unlimited team members (depending on your plan), assign roles
 
 ### Do I need to own a domain for link shortening?
 
-No, you can use LinkUTM's default shortener. Custom branded domains are optional but recommended for customer-facing links.
+No, you can use linkutm's default shortener. Custom branded domains are optional but recommended for customer-facing links.
 
 ### What happens if I cancel?
 
@@ -426,4 +426,4 @@ Ready to dive in? Here's what to do next:
 4. ✅ **[Invite your team](/team-collaboration/overview)** - Collaborate effectively
 5. ✅ **[Set up custom domain](/link-shortening/custom-domains)** - Brand your short links (optional)
 
-**Welcome to LinkUTM! Let's make your marketing tracking effortless.** 🚀
+**Welcome to linkutm! Let's make your marketing tracking effortless.** 🚀

@@ -1,10 +1,10 @@
 # UTM Rules Overview
 
-Learn how to automate and enforce UTM parameter standards with LinkUTM's powerful rules engine.
+Learn how to automate and enforce UTM parameter standards with linkutm's powerful rules engine.
 
 ## What are UTM Rules?
 
-UTM Rules allow you to automatically standardize, validate, and enforce consistency across all your UTM parameters. Instead of manually checking every link for compliance, set up rules once and let LinkUTM ensure quality automatically.
+UTM Rules allow you to automatically standardize, validate, and enforce consistency across all your UTM parameters. Instead of manually checking every link for compliance, set up rules once and let linkutm ensure quality automatically.
 
 ## Why Use UTM Rules?
 

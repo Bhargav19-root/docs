@@ -29,7 +29,7 @@ Have ready:
 
 ### Step 1: Navigate to Templates
 
-1. Log into your LinkUTM dashboard
+1. Log into your linkutm dashboard
 2. Click **Templates** in the sidebar
 3. Click **Create Template** or **+ New Template** button
 

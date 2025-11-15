@@ -1,6 +1,6 @@
 # UTM Builder
 
-Learn how to use LinkUTM's UTM parameter builder to create perfectly tagged marketing links.
+Learn how to use linkutm's UTM parameter builder to create perfectly tagged marketing links.
 
 ## Overview
 

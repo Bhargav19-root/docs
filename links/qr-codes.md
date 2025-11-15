@@ -1,10 +1,10 @@
 # QR Codes
 
-Learn how to generate and customize QR codes for your links in LinkUTM.
+Learn how to generate and customize QR codes for your links in linkutm.
 
 ## Overview
 
-QR (Quick Response) codes bridge the gap between offline and online marketing. LinkUTM allows you to generate scannable QR codes for any link, making it easy to track offline campaigns and provide instant mobile access to your content.
+QR (Quick Response) codes bridge the gap between offline and online marketing. linkutm allows you to generate scannable QR codes for any link, making it easy to track offline campaigns and provide instant mobile access to your content.
 
 ## Why Use QR Codes?
 
@@ -317,7 +317,7 @@ Setup:
 Purpose: Supplemental content, videos, quizzes
 ```
 
-## QR Code + LinkUTM Features
+## QR Code + linkutm Features
 
 ### QR Codes + Short Links
 
@@ -571,7 +571,7 @@ Higher error correction = more data redundancy = more complex pattern
    - Solution: Verify tracking is active
 
 2. **Wrong Link Used**
-   - Solution: Ensure using LinkUTM generated link
+   - Solution: Ensure using linkutm generated link
 
 3. **Data Delay**
    - Solution: Wait 24 hours for data processing

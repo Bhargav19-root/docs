@@ -1,10 +1,10 @@
 # Managing Workspaces
 
-Learn how to create, configure, and manage workspaces in LinkUTM.
+Learn how to create, configure, and manage workspaces in linkutm.
 
 ## What is a Workspace?
 
-A workspace is the middle tier of LinkUTM's organizational structure. It represents your company, agency, or department and contains all your projects, team members, and shared resources.
+A workspace is the middle tier of linkutm's organizational structure. It represents your company, agency, or department and contains all your projects, team members, and shared resources.
 
 **Key Features:**
 - Contains multiple projects
@@ -233,7 +233,7 @@ Create custom roles with specific permissions:
 - Connect GA4 account
 - Select property and stream
 - Automatic data sync
-- View GA4 data in LinkUTM
+- View GA4 data in linkutm
 
 **Third-Party Tools:**
 - Zapier integration

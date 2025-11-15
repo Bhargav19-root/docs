@@ -137,7 +137,7 @@ Link previews work on:
 
 ### Using Unsplash Integration
 
-LinkUTM includes Unsplash integration for quick image selection:
+linkutm includes Unsplash integration for quick image selection:
 
 1. In the **OG Image** section
 2. Click **Search Unsplash** or **Browse Images**
@@ -235,7 +235,7 @@ Platforms: LinkedIn, Facebook, Twitter
 ### Preview Before Sharing
 
 **Built-in Preview:**
-- LinkUTM shows preview as you edit
+- linkutm shows preview as you edit
 - See how it will appear on social media
 - Adjust in real-time
 - No need to share publicly to test
@@ -278,7 +278,7 @@ Platforms: LinkedIn, Facebook, Twitter
 **Twitter Cards:**
 - Different format from Facebook/OG
 - Summary or Summary with Large Image
-- LinkUTM may support Twitter-specific tags
+- linkutm may support Twitter-specific tags
 
 **LinkedIn Rich Media:**
 - Optimized for professional context
@@ -384,7 +384,7 @@ Platforms: LinkedIn, Facebook, Twitter
    - Force re-scrape
 
 2. **Verify OG tags:**
-   - Check link settings in LinkUTM
+   - Check link settings in linkutm
    - Ensure custom preview is enabled
    - Confirm all fields are filled
 

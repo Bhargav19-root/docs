@@ -1,6 +1,6 @@
 # UTM Parameters Overview
 
-Learn how to manage and organize your UTM parameters in LinkUTM for consistent campaign tracking.
+Learn how to manage and organize your UTM parameters in linkutm for consistent campaign tracking.
 
 ## What are UTM Parameters?
 
@@ -71,11 +71,11 @@ UTM (Urchin Tracking Module) parameters are tags you add to URLs to track the ef
 
 **Best Use:** A/B testing and multiple CTAs in same campaign
 
-## Managing UTM Parameters in LinkUTM
+## Managing UTM Parameters in linkutm
 
 ### Parameter Library
 
-LinkUTM allows you to create and manage a library of UTM parameter values that can be reused across campaigns.
+linkutm allows you to create and manage a library of UTM parameter values that can be reused across campaigns.
 
 **Benefits:**
 - **Consistency:** Use same values across campaigns
@@ -128,7 +128,7 @@ utm_medium: email
 
 ### Parameter Suggestions
 
-As you create links, LinkUTM suggests previously used parameters:
+As you create links, linkutm suggests previously used parameters:
 
 - Type to search existing parameters
 - Click to auto-fill

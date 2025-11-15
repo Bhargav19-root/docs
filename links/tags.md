@@ -1,6 +1,6 @@
 # Tags
 
-Learn how to use color-coded tags to organize and categorize your links in LinkUTM.
+Learn how to use color-coded tags to organize and categorize your links in linkutm.
 
 ## Overview
 
@@ -8,7 +8,7 @@ Tags are color-coded labels that help you quickly categorize, identify, and filt
 
 ## Available Tag Colors
 
-LinkUTM offers six color-coded tag options:
+linkutm offers six color-coded tag options:
 
 - 🔴 **Red**
 - 🟡 **Yellow**

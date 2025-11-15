@@ -1,6 +1,6 @@
 # Link Expiration
 
-Learn how to set automatic expiration dates for your links in LinkUTM.
+Learn how to set automatic expiration dates for your links in linkutm.
 
 ## Overview
 

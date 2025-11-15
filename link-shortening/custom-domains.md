@@ -1,6 +1,6 @@
 # Custom Domains for Link Shortening
 
-Learn how to set up and manage custom branded domains for link shortening in LinkUTM.
+Learn how to set up and manage custom branded domains for link shortening in linkutm.
 
 ## Overview
 
@@ -102,7 +102,7 @@ Works with all major registrars:
 - Memorable
 - Professional
 
-### Step 2: Add Domain to LinkUTM
+### Step 2: Add Domain to linkutm
 
 1. **Navigate to Link Shortening Settings:**
    - Go to **Dashboard** → **Link Shortening**
@@ -126,7 +126,7 @@ Works with all major registrars:
 ```
 Type: CNAME
 Host/Name: go (or your chosen subdomain)
-Value/Points to: [LinkUTM provides this - e.g., links.linkutm.io]
+Value/Points to: [linkutm provides this - e.g., links.linkutm.io]
 TTL: 3600 (or automatic)
 ```
 
@@ -134,7 +134,7 @@ TTL: 3600 (or automatic)
 ```
 Type: A
 Host/Name: @ (or leave blank)
-Value/IP Address: [LinkUTM provides this - e.g., 192.0.2.1]
+Value/IP Address: [linkutm provides this - e.g., 192.0.2.1]
 TTL: 3600 (or automatic)
 ```
 
@@ -152,7 +152,7 @@ TTL: 3600 (or automatic)
 3. **Add New Record:**
    - Click "Add Record" or "Add DNS Record"
    - Select record type (CNAME or A)
-   - Fill in details from LinkUTM
+   - Fill in details from linkutm
 
 4. **Save DNS Record:**
    - Click "Save", "Add", or "Update"
@@ -160,7 +160,7 @@ TTL: 3600 (or automatic)
 
 ### Step 5: Verify Domain
 
-**Back in LinkUTM:**
+**Back in linkutm:**
 
 1. **Wait for DNS Propagation:**
    - Usually 5-15 minutes
@@ -198,7 +198,7 @@ Make this domain your default shortener:
 6. Click **Add** button
 7. Select **CNAME** type
 8. Enter **Host**: `go` (your subdomain)
-9. Enter **Points to**: (from LinkUTM)
+9. Enter **Points to**: (from linkutm)
 10. TTL: Default or 1 Hour
 11. Click **Save**
 
@@ -211,7 +211,7 @@ Make this domain your default shortener:
 5. Click **Add New Record**
 6. Type: **CNAME Record**
 7. Host: `go` (your subdomain)
-8. Value: (from LinkUTM)
+8. Value: (from linkutm)
 9. TTL: Automatic
 10. Click ✓ to save
 
@@ -223,7 +223,7 @@ Make this domain your default shortener:
 4. Click **Add record**
 5. Type: **CNAME**
 6. Name: `go` (your subdomain)
-7. Target: (from LinkUTM)
+7. Target: (from linkutm)
 8. Proxy status: DNS only (gray cloud) - Important!
 9. Click **Save**
 
@@ -238,7 +238,7 @@ Make this domain your default shortener:
 5. Name: `go` (your subdomain)
 6. Type: **CNAME**
 7. TTL: 1H
-8. Data: (from LinkUTM)
+8. Data: (from linkutm)
 9. Click **Add**
 
 ### AWS Route 53
@@ -249,7 +249,7 @@ Make this domain your default shortener:
 4. Click **Create record**
 5. Record name: `go` (your subdomain)
 6. Record type: **CNAME**
-7. Value: (from LinkUTM)
+7. Value: (from linkutm)
 8. TTL: 300
 9. Routing policy: Simple
 10. Click **Create records**
@@ -258,7 +258,7 @@ Make this domain your default shortener:
 
 ### Automatic SSL
 
-**LinkUTM handles SSL:**
+**linkutm handles SSL:**
 - Automatic SSL certificate generation
 - HTTPS enabled by default
 - No additional configuration needed
@@ -485,7 +485,7 @@ Tertiary: promo.company.com (special offers)
 1. Wait 24-48 hours after DNS verification
 2. Check domain DNS is correct
 3. Verify CNAME points to correct target
-4. Contact LinkUTM support for certificate issues
+4. Contact linkutm support for certificate issues
 5. Don't use Cloudflare proxy (causes cert issues)
 
 ## Advanced Configuration
@@ -495,8 +495,8 @@ Tertiary: promo.company.com (special offers)
 For advanced users:
 
 1. Create subdomain at registrar
-2. Delegate DNS to LinkUTM nameservers (if provided)
-3. Full control to LinkUTM for that subdomain
+2. Delegate DNS to linkutm nameservers (if provided)
+3. Full control to linkutm for that subdomain
 4. Easier management for multiple domains
 
 ### Custom SSL Certificates
@@ -504,9 +504,9 @@ For advanced users:
 If you want to use your own SSL certificate:
 
 1. Generate SSL certificate for your domain
-2. Contact LinkUTM support
+2. Contact linkutm support
 3. Provide certificate and private key
-4. LinkUTM configures on your behalf
+4. linkutm configures on your behalf
 
 **Note:** Usually not necessary; automatic SSL works great.
 

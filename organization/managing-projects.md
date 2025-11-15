@@ -1,10 +1,10 @@
 # Managing Projects
 
-Learn how to create, configure, and manage projects in LinkUTM.
+Learn how to create, configure, and manage projects in linkutm.
 
 ## What is a Project?
 
-A project is the lowest tier of LinkUTM's organizational structure. It represents a specific campaign, client, product line, or initiative and contains all related links, templates, and settings.
+A project is the lowest tier of linkutm's organizational structure. It represents a specific campaign, client, product line, or initiative and contains all related links, templates, and settings.
 
 **Key Features:**
 - Contains links and tracking codes

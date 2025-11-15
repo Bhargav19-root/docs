@@ -1,10 +1,10 @@
 # Create a Link
 
-Learn how to create UTM-tagged links in LinkUTM to track your marketing campaigns effectively.
+Learn how to create UTM-tagged links in linkutm to track your marketing campaigns effectively.
 
 ## Overview
 
-Creating a link in LinkUTM allows you to generate trackable URLs with UTM parameters for your marketing campaigns. You can customize every aspect of your link, from basic UTM parameters to advanced features like password protection and device targeting.
+Creating a link in linkutm allows you to generate trackable URLs with UTM parameters for your marketing campaigns. You can customize every aspect of your link, from basic UTM parameters to advanced features like password protection and device targeting.
 
 ## How to Create a Link
 

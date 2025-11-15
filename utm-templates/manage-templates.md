@@ -1,6 +1,6 @@
 # Manage UTM Templates
 
-Learn how to edit, organize, duplicate, and delete your UTM templates in LinkUTM.
+Learn how to edit, organize, duplicate, and delete your UTM templates in linkutm.
 
 ## Overview
 

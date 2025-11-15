@@ -1,6 +1,6 @@
 # Password Protected Links
 
-Learn how to secure your links with password protection in LinkUTM.
+Learn how to secure your links with password protection in linkutm.
 
 ## Overview
 
