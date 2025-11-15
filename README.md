@@ -1,6 +1,6 @@
 # linkutm Documentation
 
-Welcome to the linkutm documentation repository. This documentation is built for [Mintlify](https://mintlify.com) and provides comprehensive guides for using linkutm's UTM link management platform.
+Welcome to the linkutm documentation repository. This documentation provides comprehensive guides for using linkutm's UTM link management platform.
 
 ## 📚 Documentation Structure
 
@@ -46,7 +46,7 @@ docs/
 ├── team-collaboration/              # Team Features
 │   └── overview.md                 # Team collaboration overview
 │
-├── mint.json                        # Mintlify configuration
+├── docs.json                        # Documentation configuration
 └── README.md                        # This file
 ```
 
@@ -58,18 +58,9 @@ Visit the published documentation at: `https://docs.linkutm.com` (or your config
 
 ### For Documentation Contributors
 
-1. **Install Mintlify CLI:**
-   ```bash
-   npm i -g mintlify
-   ```
+Visit the published documentation at: `https://docs.linkutm.com`
 
-2. **Preview Documentation Locally:**
-   ```bash
-   cd docs
-   mintlify dev
-   ```
-
-3. **View at:** `http://localhost:3000`
+For local development and preview, refer to the documentation platform setup guide.
 
 ## 📖 Documentation Coverage
 
@@ -163,7 +154,7 @@ Visit the published documentation at: `https://docs.linkutm.com` (or your config
 
 ### Branding
 
-Update `mint.json` to customize:
+Update `docs.json` to customize:
 - Logo (light and dark versions)
 - Colors (primary, light, dark)
 - Favicon
@@ -171,7 +162,7 @@ Update `mint.json` to customize:
 
 ### Navigation
 
-Edit the `navigation` section in `mint.json` to:
+Edit the `navigation` section in `docs.json` to:
 - Add new pages
 - Reorganize sections
 - Create nested groups
@@ -179,12 +170,11 @@ Edit the `navigation` section in `mint.json` to:
 
 ## 📦 Deployment
 
-### Mintlify Hosting
+### Automatic Deployment
 
 1. **Connect Repository:**
-   - Go to [Mintlify Dashboard](https://dashboard.mintlify.com)
-   - Connect your GitHub repository
-   - Select the `docs` folder
+   - Connect your GitHub repository to the documentation platform
+   - Configure the `docs` folder as the source
 
 2. **Configure Domain:**
    - Set custom domain (e.g., `docs.linkutm.com`)
@@ -192,19 +182,7 @@ Edit the `navigation` section in `mint.json` to:
 
 3. **Deploy:**
    - Push changes to main branch
-   - Mintlify auto-deploys
-
-### Self-Hosting
-
-1. **Build Static Site:**
-   ```bash
-   mintlify build
-   ```
-
-2. **Deploy to Your Host:**
-   - Upload build output to server
-   - Configure web server (Nginx, Apache, etc.)
-   - Set up SSL certificate
+   - Changes auto-deploy to production
 
 ## 🤝 Contributing
 
@@ -215,18 +193,17 @@ Edit the `navigation` section in `mint.json` to:
    - Follow existing structure and formatting
 
 2. **Update Navigation:**
-   - Edit `mint.json`
+   - Edit `docs.json`
    - Add page to appropriate navigation group
 
-3. **Test Locally:**
-   ```bash
-   mintlify dev
-   ```
+3. **Test Changes:**
+   - Preview documentation locally (if platform supports it)
+   - Verify formatting and links
 
 4. **Submit Changes:**
    - Commit changes
    - Push to repository
-   - Auto-deploys (if connected)
+   - Auto-deploys to production
 
 ### Writing Guidelines
 
@@ -263,10 +240,11 @@ This documentation is proprietary to linkutm. All rights reserved.
 
 ## 🔗 Useful Links
 
-- **Mintlify Documentation:** https://mintlify.com/docs
-- **Markdown Guide:** https://www.markdownguide.org
 - **linkutm Website:** https://linkutm.com
 - **linkutm App:** https://app.linkutm.com
+- **linkutm Documentation:** https://docs.linkutm.com
+- **linkutm Support:** support@linkutm.com
+- **Markdown Guide:** https://www.markdownguide.org
 
 ---
 

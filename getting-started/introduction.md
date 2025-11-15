@@ -4,7 +4,7 @@ Welcome to linkutm! This guide will help you understand what linkutm is, what it
 
 ## What is linkutm?
 
-linkutm (branded as "ezUTM") is a comprehensive UTM link management and tracking platform designed to help marketing teams create, organize, track, and analyze campaign links with UTM parameters. It combines link creation, shortening, analytics, and team collaboration into one powerful platform.
+linkutm is a comprehensive UTM link management and tracking platform designed to help marketing teams create, organize, track, and analyze campaign links with UTM parameters. It combines link creation, shortening, analytics, and team collaboration into one powerful platform.
 
 ## What Can linkutm Do?
 
