@@ -1,7 +1,7 @@
 {
 "$schema": "https://mintlify.com/docs.json",
 "theme": "mint",
-"name": "UTM Builder Docs",
+"name": "linkutm",
 "colors": {
 "primary": "#ff6200",
 "light": "#ff6200",
@@ -14,73 +14,70 @@
 "tab": "Guides",
 "groups": [
 {
-"group": "Getting Started",
+"group": "Get Started",
 "pages": [
-"index"
+"getting-started/introduction"
 ]
 },
 {
 "group": "Link Management",
 "pages": [
-"link/create-link",
-"link-management/tags-folders",
-"link-management/deep-links",
-"link-management/link-cloaking",
-"link-management/password-protection",
-"link-management/link-expiry-targeting",
-"link-management/qr-codes"
+"links/create-link",
+"links/short-link",
+"links/utm-builder",
+"links/folders",
+"links/tags",
+"links/password-protected",
+"links/link-preview",
+"links/link-expiration",
+"links/qr-codes"
 ]
 },
 {
-"group": "UTM Tools",
+"group": "UTM Templates",
 "pages": [
-"utm-tools/utm-builder",
-"utm-tools/utm-templates",
-"utm-tools/utm-parameters",
-"utm-tools/utm-groupings"
+"utm-templates/overview",
+"utm-templates/create-template",
+"utm-templates/manage-templates"
 ]
 },
 {
-"group": "Workspaces & Projects",
+"group": "UTM Parameters",
 "pages": [
-"workspaces/manage-workspaces",
-"workspaces/user-roles",
-"workspaces/projects-notes"
+"utm-parameters/overview"
 ]
 },
 {
-"group": "Domains",
+"group": "Link Shortening",
 "pages": [
-"domains/our-domain",
-"domains/custom-domain",
-"domains/ssl-setup",
-"domains/dns-troubleshooting"
+"link-shortening/overview",
+"link-shortening/custom-domains"
 ]
 },
 {
-"group": "Analytics & Reporting",
+"group": "Analytics",
 "pages": [
-"analytics/overview",
-"analytics/ga4-integration",
-"analytics/reports",
-"analytics/data-retention"
+"analytics/overview"
 ]
 },
 {
-"group": "Integrations",
+"group": "UTM Rules",
 "pages": [
-"integrations/zapier",
-"integrations/bitly",
-"integrations/webhooks",
-"integrations/api-overview"
+"utm-rules/overview"
 ]
 },
 {
-"group": "Billing & Account",
+"group": "Organization & Workspaces",
 "pages": [
-"account/billing",
-"account/change-plan",
-"account/cancel"
+"organization/overview",
+"organization/managing-workspaces",
+"organization/managing-projects"
+]
+},
+{
+"group": "Team Collaboration",
+"pages": [
+"team-collaboration/overview"
 ]
 },
 {

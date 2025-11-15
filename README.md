@@ -1,1 +1,277 @@
-# UTM Builder Documentation
+# LinkUTM Documentation
+
+Welcome to the LinkUTM documentation repository. This documentation is built for [Mintlify](https://mintlify.com) and provides comprehensive guides for using LinkUTM's UTM link management platform.
+
+## 📚 Documentation Structure
+
+```
+docs/
+├── getting-started/
+│   └── introduction.md              # Getting started guide
+│
+├── links/                           # Link Management Features
+│   ├── create-link.md              # How to create links
+│   ├── short-link.md               # Link shortening
+│   ├── utm-builder.md              # UTM parameter builder
+│   ├── folders.md                  # Folder organization
+│   ├── tags.md                     # Tag system
+│   ├── password-protected.md       # Password protection
+│   ├── link-preview.md             # Social media previews (OG tags)
+│   ├── link-expiration.md          # Expiration settings
+│   └── qr-codes.md                 # QR code generation
+│
+├── utm-templates/                   # UTM Templates
+│   ├── overview.md                 # Templates overview
+│   ├── create-template.md          # Creating templates
+│   └── manage-templates.md         # Managing templates
+│
+├── utm-parameters/                  # UTM Parameters
+│   └── overview.md                 # Parameters overview & management
+│
+├── link-shortening/                 # Link Shortening
+│   ├── overview.md                 # Link shortening overview
+│   └── custom-domains.md           # Custom branded domains setup
+│
+├── analytics/                       # Analytics & Tracking
+│   └── overview.md                 # Analytics overview
+│
+├── utm-rules/                       # UTM Rules & Automation
+│   └── overview.md                 # UTM rules overview
+│
+├── organization/                    # Organization, Workspaces & Projects
+│   ├── overview.md                 # Organizational structure overview
+│   ├── managing-workspaces.md      # Workspace management
+│   └── managing-projects.md        # Project management
+│
+├── team-collaboration/              # Team Features
+│   └── overview.md                 # Team collaboration overview
+│
+├── mint.json                        # Mintlify configuration
+└── README.md                        # This file
+```
+
+## 🚀 Quick Start
+
+### For End Users
+
+Visit the published documentation at: `https://docs.linkutm.com` (or your configured domain)
+
+### For Documentation Contributors
+
+1. **Install Mintlify CLI:**
+   ```bash
+   npm i -g mintlify
+   ```
+
+2. **Preview Documentation Locally:**
+   ```bash
+   cd docs
+   mintlify dev
+   ```
+
+3. **View at:** `http://localhost:3000`
+
+## 📖 Documentation Coverage
+
+### ✅ Completed Documentation
+
+#### Link Management
+- ✅ Create Link - Complete guide to creating UTM-tagged links
+- ✅ Short Link - Link shortening feature
+- ✅ UTM Builder - Building UTM parameters
+- ✅ Folders - Organizing links in folders
+- ✅ Tags - Color-coded tagging system
+- ✅ Password Protected - Securing links with passwords
+- ✅ Link Preview - Social media Open Graph tags
+- ✅ Link Expiration - Time-limited links
+- ✅ QR Codes - Generating QR codes for links
+
+#### UTM Templates
+- ✅ Overview - Understanding UTM templates
+- ✅ Create Template - Step-by-step template creation
+- ✅ Manage Templates - Editing, organizing, duplicating
+
+#### UTM Parameters
+- ✅ Overview - Managing UTM parameter library
+
+#### Link Shortening
+- ✅ Overview - Link shortening fundamentals
+- ✅ Custom Domains - Setting up branded domains
+
+#### Analytics
+- ✅ Overview - Comprehensive analytics guide
+
+#### UTM Rules
+- ✅ Overview - Automating UTM standardization
+
+#### Organization & Workspaces
+- ✅ Overview - Understanding organizational structure
+- ✅ Managing Workspaces - Creating and configuring workspaces
+- ✅ Managing Projects - Creating and managing projects
+
+#### Team Collaboration
+- ✅ Overview - Team features and collaboration
+
+#### Getting Started
+- ✅ Introduction - Complete onboarding guide
+
+### 📝 Additional Documentation (Can Be Added)
+
+#### Links
+- Click Limits - Maximum click thresholds
+- Device Targeting - iOS/Android specific URLs
+- Geo Targeting - Location-based routing
+- Duplicate Link - Copying links
+- Bulk Import - CSV import functionality
+
+#### UTM Templates
+- Template Examples - Real-world template examples
+
+#### UTM Parameters
+- Create Parameter - Adding parameters
+- Import/Export - CSV import/export
+
+#### Link Shortening
+- DNS Configuration - Detailed DNS setup
+- Troubleshooting - Common domain issues
+
+#### Analytics
+- Link Analytics - Individual link metrics
+- Google Analytics Integration - GA4 connection
+- Campaign Reports - Campaign-level reporting
+- Custom Reports - Creating custom reports
+- Export Data - Exporting analytics
+
+#### UTM Rules
+- Project Rules - Global project settings
+- Standardization Rules - Auto-transformation
+- Required Fields - Validation rules
+
+#### Team Collaboration
+- Roles & Permissions - Access control
+- Invite Members - Adding team members
+- Activity Log - Tracking team actions
+- Workspaces - Multi-workspace management
+
+#### Settings
+- Account Settings - Profile and preferences
+- Project Settings - Project configuration
+- Integrations - Third-party integrations
+- Billing - Subscription management
+
+## 🎨 Customization
+
+### Branding
+
+Update `mint.json` to customize:
+- Logo (light and dark versions)
+- Colors (primary, light, dark)
+- Favicon
+- Social links
+
+### Navigation
+
+Edit the `navigation` section in `mint.json` to:
+- Add new pages
+- Reorganize sections
+- Create nested groups
+- Add external links
+
+## 📦 Deployment
+
+### Mintlify Hosting
+
+1. **Connect Repository:**
+   - Go to [Mintlify Dashboard](https://dashboard.mintlify.com)
+   - Connect your GitHub repository
+   - Select the `docs` folder
+
+2. **Configure Domain:**
+   - Set custom domain (e.g., `docs.linkutm.com`)
+   - Add CNAME record to your DNS
+
+3. **Deploy:**
+   - Push changes to main branch
+   - Mintlify auto-deploys
+
+### Self-Hosting
+
+1. **Build Static Site:**
+   ```bash
+   mintlify build
+   ```
+
+2. **Deploy to Your Host:**
+   - Upload build output to server
+   - Configure web server (Nginx, Apache, etc.)
+   - Set up SSL certificate
+
+## 🤝 Contributing
+
+### Adding New Documentation
+
+1. **Create Markdown File:**
+   - Create `.md` file in appropriate folder
+   - Follow existing structure and formatting
+
+2. **Update Navigation:**
+   - Edit `mint.json`
+   - Add page to appropriate navigation group
+
+3. **Test Locally:**
+   ```bash
+   mintlify dev
+   ```
+
+4. **Submit Changes:**
+   - Commit changes
+   - Push to repository
+   - Auto-deploys (if connected)
+
+### Writing Guidelines
+
+**Follow These Standards:**
+- ✅ Use clear, concise language
+- ✅ Include practical examples
+- ✅ Add screenshots (if possible)
+- ✅ Cross-link related documentation
+- ✅ Use consistent formatting
+- ✅ Include troubleshooting sections
+
+**Markdown Features:**
+- Code blocks with syntax highlighting
+- Info/warning/danger callouts
+- Tables for comparisons
+- Numbered and bulleted lists
+- Images and GIFs
+
+## 📞 Support
+
+### For Documentation Issues
+- Create GitHub issue in repository
+- Tag with `documentation` label
+- Provide page URL and description
+
+### For Product Support
+- Email: support@linkutm.com
+- In-app chat (if available)
+- Help center: https://help.linkutm.com
+
+## 📄 License
+
+This documentation is proprietary to LinkUTM. All rights reserved.
+
+## 🔗 Useful Links
+
+- **Mintlify Documentation:** https://mintlify.com/docs
+- **Markdown Guide:** https://www.markdownguide.org
+- **LinkUTM Website:** https://linkutm.com
+- **LinkUTM App:** https://app.linkutm.com
+
+---
+
+**Last Updated:** 2024
+
+**Documentation Version:** 1.0
+
+**Maintained By:** LinkUTM Documentation Team
