@@ -1,38 +1,100 @@
 ---
-title: 'API Errors'
-description: 'Standard HTTP status codes and error handling for the linkutm API'
+title: "Errors"
+description: "Status codes, error response shape, and how to recover."
 ---
 
-# API Errors
+## Error response shape
 
-Standard status codes used across the API.
-
-## HTTP Status Codes
-
-- 200: OK — Request succeeded
-- 400: Bad Request — Invalid request parameters
-- 401: Unauthorized — Missing or invalid API key
-- 402: Payment Required — Payment required
-- 403: Forbidden — API key doesn’t have required access
-- 404: Not Found — Resource doesn’t exist
-- 429: Too Many Requests — Rate limit exceeded
-- 500: Internal Server Error — Something went wrong on our end
-
-## Error Response Example
+NestJS standard error envelope:
 
 ```json
 {
-  "status": "error",
-  "error": {
-    "code": "invalid_request",
-    "message": "Invalid parameters"
-  }
+  "statusCode": 400,
+  "message": "Short code already exists",
+  "error": "Conflict"
 }
 ```
 
-## Recommendations
+Some endpoints return `message` as an array (validation errors with multiple fields):
 
-- Validate request bodies before sending
-- Handle `401` by rotating or reissuing tokens
-- Implement retries with jitter for transient `429` and `5xx`
-- Log request IDs and error messages for support
+```json
+{
+  "statusCode": 400,
+  "message": [
+    "url should not be empty",
+    "url must be a URL"
+  ],
+  "error": "Bad Request"
+}
+```
+
+## Status codes
+
+| Code | Meaning | When you'll see it |
+|---|---|---|
+| `200` | OK | Successful GET/PATCH/DELETE |
+| `201` | Created | Successful POST that creates a resource |
+| `400` | Bad request | Invalid payload, missing required fields, invalid domain, validation rule violation |
+| `401` | Unauthorized | Missing or invalid JWT |
+| `403` | Forbidden | Workspace usage limit reached, role lacks permission, owner-only action |
+| `404` | Not found | Resource doesn't exist or is in a different workspace |
+| `409` | Conflict | Duplicate slug, duplicate name, member already invited |
+| `410` | Gone | Short URL past `expiresAt` (redirect endpoint) |
+| `500` | Server error | Unexpected — open a support ticket with timestamp |
+
+## Common error patterns
+
+<AccordionGroup>
+  <Accordion title="403 Forbidden — usage limit reached">
+    ```json
+    {
+      "statusCode": 403,
+      "message": "Link limit reached. Workspace has used 100 of 100 links.",
+      "error": "Forbidden"
+    }
+    ```
+    The message includes the exact `used / limit` numbers — surface it to the user verbatim so they know how much headroom they need to free up.
+  </Accordion>
+
+  <Accordion title="400 Bad Request — UTM rule violation">
+    ```json
+    {
+      "statusCode": 400,
+      "message": "UTM parameter validation failed: campaign: campaign is required; source: Value contains prohibited term: \"test\"",
+      "error": "Bad Request"
+    }
+    ```
+    Multiple field errors are joined with `; ` in the message.
+  </Accordion>
+
+  <Accordion title="409 Conflict — short code taken">
+    ```json
+    { "statusCode": 409, "message": "Short code already exists", "error": "Conflict" }
+    ```
+    Slugs are globally unique. Pick a different one.
+  </Accordion>
+
+  <Accordion title="400 Bad Request — invalid domain">
+    Possible messages: `"Invalid domain for this workspace"`, `"Cannot use an unverified domain"`, `"This domain is deactivated. Reactivate it or choose another domain."`.
+  </Accordion>
+
+  <Accordion title="404 Not found — workspace lookup">
+    `"Workspace not found"`. Check that `x-workspace-id` is a UUID or slug you belong to.
+  </Accordion>
+
+  <Accordion title="400 Bad Request — folder validation">
+    Examples: `"Folder name already exists"`, `"Folder not found"`, `"Folder belongs to a different workspace"`.
+  </Accordion>
+</AccordionGroup>
+
+## Idempotency
+
+POST endpoints are not idempotent by default. Re-sending a `POST /links` creates a second record (with a different auto-slug). To make creation safe to retry, supply a `customSlug` — the second call returns `409 Conflict` if you already created one.
+
+## Retries
+
+Retry on `5xx` and network timeouts with exponential backoff. Don't retry `4xx` — those are caller errors and won't pass on retry.
+
+```
+Suggested: 3 retries, base 500ms, 2x backoff, max 8s
+```

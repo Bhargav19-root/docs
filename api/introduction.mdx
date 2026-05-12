@@ -1,35 +1,110 @@
 ---
-title: 'API Introduction'
-description: 'Overview, base URL, authentication, and variables for the linkutm API'
+title: "API introduction"
+description: "REST API for programmatic link creation, listing, updates, and analytics."
 ---
 
-# API Introduction
+## Overview
 
-Welcome to the linkutm API. Use these endpoints to manage shortened URLs with UTM parameters, aliases, custom domains, and analytics.
+The linkutm API is REST + JSON. All endpoints live under `/api/v1`. JSON in, JSON out. Standard HTTP status codes for errors.
 
 ## Base URL
 
-- Set `{{baseUrl}}` for your environment, e.g., `https://api.linktutm.com` or `http://localhost:3000`.
+```
+https://api.linkutm.com/api/v1
+```
+
+For self-hosted or staging environments, replace the host accordingly.
 
 ## Authentication
 
-- All endpoints under `/api/v1` require an API token.
-- `Authorization` header accepts `Bearer ez_<token>` or raw `ez_<token>`.
+All endpoints require a JWT bearer token. Tokens are issued by the auth flow (login response) and identify the user.
+
 
 ```bash
-curl -H "Authorization: Bearer ez_your_api_token" \
-  "{{baseUrl}}/api/v1/urls"
+curl https://api.linkutm.com/api/v1/links \
+  -H "Authorization: Bearer <jwt_token>" \
+  -H "x-workspace-id: <workspace_uuid_or_slug>"
 ```
 
-## Variables
+<Note>
+**Workspace context.** Most endpoints require an `x-workspace-id` header carrying a workspace UUID or slug. Without it, the call returns `404` or `400`.
+</Note>
 
-- `{{baseUrl}}`: API server base URL
-- `{{apiToken}}`: API token value, prefixed with `ez_`
-- `{{xTimezone}}`: Optional timezone header, e.g., `UTC`
-- `{{sessionCookie}}`: Session cookie for token management endpoints under `/api-tokens`
+### API keys
 
-## Headers
+Workspaces can also generate long-lived API keys (format `lk_live_<hex>`) for server-to-server usage. Manage them under **Settings → Developer → API keys** in the dashboard.
 
-- `Authorization`: `Bearer ez_<token>`
-- `Content-Type`: `application/json` for POST/PUT
-- `X-Timezone`: Optional timezone context
+<Warning>
+The current public surface authenticates via JWT bearer tokens. If you're integrating from a backend, exchange your credentials for a JWT via the auth endpoint. API keys exist for management but the auth strategy is JWT-bearer end-to-end.
+</Warning>
+
+## Required headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <token>` | Yes | JWT token |
+| `x-workspace-id: <uuid_or_slug>` | Yes for workspace-scoped endpoints | UUID or slug |
+| `Content-Type: application/json` | For POST/PATCH | |
+
+## Versioning
+
+The API is at `v1`. Breaking changes go behind a new version (`v2`). Within `v1`, only additive changes (new optional fields, new endpoints) are made.
+
+## Quick start
+
+<Steps>
+  <Step title="Get a token">
+    Log in via the auth endpoint or copy a JWT from your browser session.
+  </Step>
+  <Step title="Find your workspace">
+    `GET /workspaces` returns the workspaces you belong to. Note the `id` (UUID) or `slug`.
+  </Step>
+  <Step title="Create a link">
+    ```bash
+    curl -X POST https://api.linkutm.com/api/v1/links \
+      -H "Authorization: Bearer $TOKEN" \
+      -H "x-workspace-id: $WORKSPACE_SLUG" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "url": "https://example.com/landing",
+        "utmSource": "google",
+        "utmMedium": "cpc",
+        "utmCampaign": "q2_launch",
+        "customSlug": "q2-launch"
+      }'
+    ```
+
+    Response: `201 Created` with the full link object.
+  </Step>
+</Steps>
+
+## What's documented here
+
+<CardGroup cols={2}>
+  <Card title="Errors" icon="triangle-exclamation" href="/api/errors">
+    Status codes, error shape, common cases.
+  </Card>
+  <Card title="Best practices" icon="check" href="/api/best-practices">
+    Idempotency, rate limits, retries, secrets.
+  </Card>
+  <Card title="Create link" icon="link" href="/api/links-create">
+    `POST /links`
+  </Card>
+  <Card title="Get / list links" icon="list" href="/api/links-get">
+    `GET /links`, `GET /links/:id`
+  </Card>
+  <Card title="Delete link" icon="trash" href="/api/links-delete">
+    `DELETE /links/:id`, bulk delete
+  </Card>
+  <Card title="Link parameters reference" icon="sliders" href="/api/links-parameters">
+    All link fields with types and constraints.
+  </Card>
+</CardGroup>
+
+## Interactive Swagger
+
+Every deployment exposes Swagger UI at `/docs` with the full live schema. Useful for trying endpoints in dev:
+
+```
+http://localhost:8001/docs
+```

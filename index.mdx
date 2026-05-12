@@ -1,169 +1,82 @@
-<img
-className="block dark:hidden"
-src="/images/hero-light.png"
-alt="Hero Light"
-/> <img
-className="hidden dark:block"
-src="/images/hero-dark.png"
-alt="Hero Dark"
-/>
+---
+title: "linkutm"
+description: "Track every campaign link. Build, shorten, and measure UTMs from one workspace."
+mode: "wide"
+---
 
-## Welcome to linkutm Documentation
+<img className="block dark:hidden" src="/images/hero-light.png" alt="linkutm dashboard" />
+<img className="hidden dark:block" src="/images/hero-dark.png" alt="linkutm dashboard" />
 
-Your complete guide for managing, tracking, and analyzing campaign links with UTM parameters. linkutm is a comprehensive platform designed for marketers, agencies, and teams who need powerful link management and analytics.
-
-## What is linkutm?
-
-linkutm is a comprehensive UTM link management and tracking platform that combines link creation, shortening, analytics, and team collaboration into one powerful solution. Whether you're running social media campaigns, email marketing, or multi-channel promotions, linkutm helps you track performance and make data-driven decisions.
-
-## Quick Start
-
-Get up and running in minutes with these essential guides.
+## Start here
 
 <CardGroup cols={2}>
-  <Card
-    title="Introduction to linkutm"
-    icon="rocket"
-    href="/getting-started/introduction"
-  >
-    Learn what linkutm is and how it can transform your marketing tracking.
+  <Card title="Quickstart" icon="rocket" href="/getting-started/introduction">
+    Create your first tracked link in under 3 minutes.
   </Card>
-  <Card
-    title="Create Your First Link"
-    icon="link"
-    href="/links/create-link"
-  >
-    Start creating UTM-tagged links in seconds.
+  <Card title="Build a UTM" icon="link" href="/links/utm-builder">
+    Source, medium, campaign — done right, every time.
   </Card>
-  <Card
-    title="UTM Parameters Overview"
-    icon="tags"
-    href="/utm-parameters/overview"
-  >
-    Understand UTM parameters and how to use them effectively.
+  <Card title="Use a template" icon="copy" href="/utm-templates/overview">
+    Reusable UTM presets so the team stops guessing values.
   </Card>
-  <Card
-    title="Link Shortening"
-    icon="scissors"
-    href="/link-shortening/overview"
-  >
-    Create clean, professional short links with full tracking.
+  <Card title="Custom domain" icon="globe" href="/link-shortening/custom-domains">
+    Branded short links on your own domain (CNAME setup).
   </Card>
 </CardGroup>
 
-## Core Features
+## What linkutm does
 
-Discover what linkutm can do for your marketing campaigns.
+Three things, end to end:
+
+1. **Build** — create campaign URLs with consistent UTMs (templates + rules).
+2. **Shorten** — wrap them under a short code, optionally on your branded domain.
+3. **Measure** — every click captured with geo, device, referrer, and source.
+
+<Note>
+Already running ads? Skip to [Templates](/utm-templates/overview) and [UTM Rules](/utm-rules/overview) — those two together prevent 80% of dirty attribution data.
+</Note>
+
+## Common tasks
 
 <CardGroup cols={2}>
-  <Card
-    title="Link Management"
-    icon="folder-tree"
-    href="/links/folders"
-  >
-    Organize links with folders, tags, and smart filtering.
+  <Card title="Organize links" icon="folder-tree" href="/links/folders">
+    Folders, tags, and bulk operations for hundreds of links.
   </Card>
-  <Card
-    title="UTM Templates"
-    icon="template"
-    href="/utm-templates/overview"
-  >
-    Save time with reusable UTM parameter templates.
+  <Card title="Read analytics" icon="chart-line" href="/analytics/overview">
+    Clicks over time, top countries, devices, referrers.
   </Card>
-  <Card
-    title="Analytics & Tracking"
-    icon="chart-line"
-    href="/analytics/overview"
-  >
-    Track clicks, devices, locations, and campaign performance.
+  <Card title="Invite the team" icon="users" href="/team-collaboration/overview">
+    Workspace roles, invites, notification controls.
   </Card>
-  <Card
-    title="QR Codes"
-    icon="qrcode"
-    href="/links/qr-codes"
-  >
-    Generate QR codes for your tracked links instantly.
+  <Card title="API reference" icon="code" href="/api/introduction">
+    Programmatic link creation and management.
   </Card>
 </CardGroup>
 
-## Advanced Features
-
-Take your link tracking to the next level.
-
-<CardGroup cols={2}>
-  <Card
-    title="Custom Domains"
-    icon="globe"
-    href="/link-shortening/custom-domains"
-  >
-    Set up branded short links with your own domain.
-  </Card>
-  <Card
-    title="Password Protection"
-    icon="lock"
-    href="/links/password-protected"
-  >
-    Secure your links with password protection.
-  </Card>
-  <Card
-    title="Link Expiration"
-    icon="clock"
-    href="/links/link-expiration"
-  >
-    Set expiry dates and click limits for time-sensitive campaigns.
-  </Card>
-  <Card
-    title="UTM Rules"
-    icon="gavel"
-    href="/utm-rules/overview"
-  >
-    Enforce naming conventions and ensure data quality.
-  </Card>
-</CardGroup>
-
-## Team Collaboration
-
-Work seamlessly with your marketing team.
-
-<CardGroup cols={2}>
-  <Card
-    title="Organization & Workspaces"
-    icon="building"
-    href="/organization/overview"
-  >
-    Manage multiple workspaces and projects efficiently.
-  </Card>
-  <Card
-    title="Team Collaboration"
-    icon="users"
-    href="/team-collaboration/overview"
-  >
-    Invite team members, assign roles, and collaborate.
-  </Card>
-</CardGroup>
-
-## Need Help?
+## Advanced
 
 <CardGroup cols={3}>
-  <Card
-    title="Common Issues"
-    icon="circle-question"
-    href="/help/common-issues"
-  >
-    Find solutions to frequently encountered problems.
+  <Card title="Password protect" icon="lock" href="/links/password-protected">
+    Gate access to sensitive previews.
   </Card>
-  <Card
-    title="Feature Requests"
-    icon="lightbulb"
-    href="/help/feature-requests"
-  >
-    Suggest new features and improvements.
+  <Card title="Expiration & limits" icon="clock" href="/links/link-expiration">
+    Auto-disable after a date or click count.
   </Card>
-  <Card
-    title="Contact Support"
-    icon="headset"
-    href="/help/contact-support"
-  >
-    Get help from our support team.
+  <Card title="QR codes" icon="qrcode" href="/links/qr-codes">
+    Print-ready codes for offline campaigns.
+  </Card>
+</CardGroup>
+
+## Troubleshoot
+
+<CardGroup cols={3}>
+  <Card title="Common issues" icon="circle-question" href="/help/common-issues">
+    Domain stuck pending, UTMs not appearing, etc.
+  </Card>
+  <Card title="Request a feature" icon="lightbulb" href="/help/feature-requests">
+    Tell us what to build next.
+  </Card>
+  <Card title="Contact support" icon="headset" href="/help/contact-support">
+    Direct line to the team.
   </Card>
 </CardGroup>

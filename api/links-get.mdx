@@ -1,32 +1,120 @@
 ---
-title: 'Get Link'
-description: 'Retrieve a shortened URL by id or alias'
+title: "List & get links"
+description: "GET /links and GET /links/:id"
 ---
 
-# Get Link
+## List links in a workspace
 
-Retrieve a shortened URL.
-
-## Get by ID
-
-```bash
-GET /api/v1/urls/{id}
-
-Headers:
-Authorization: Bearer ez_<token>
+```
+GET /api/v1/links
 ```
 
-## Get by Alias
+### Headers
+
+| Header | Required |
+|---|---|
+| `Authorization: Bearer <jwt>` | Yes |
+| `x-workspace-id: <uuid_or_slug>` | Yes |
+
+### Query parameters
+
+<ParamField query="page" type="integer" default="1">1-indexed.</ParamField>
+<ParamField query="limit" type="integer" default="20">Page size.</ParamField>
+<ParamField query="search" type="string">Substring match on title, URL, short code, description (case-insensitive).</ParamField>
+<ParamField query="utmSource" type="string">Exact match.</ParamField>
+<ParamField query="utmMedium" type="string">Exact match.</ParamField>
+<ParamField query="archived" type="boolean" default="false">Set `true` to fetch archived links.</ParamField>
+<ParamField query="folderId" type="string">UUID, or the literal `unsorted` for links with no folder.</ParamField>
+<ParamField query="tagIds" type="string">Comma-separated tag UUIDs. Returns links matching any of the tags.</ParamField>
+
+### Example
 
 ```bash
-GET /api/v1/urls/alias/{alias}
-
-Headers:
-Authorization: Bearer ez_<token>
+curl "https://api.linkutm.com/api/v1/links?page=1&limit=50&utmSource=google&tagIds=tag-uuid-1,tag-uuid-2" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex"
 ```
 
-## Notes
+### Response
 
-- `{id}` is the numeric or UUID identifier of the URL.
-- `{alias}` is the custom alias assigned at creation.
+```json
+{
+  "links": [
+    {
+      "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+      "url": "https://example.com/landing",
+      "shortCode": "q2-launch",
+      "title": "Q2 Launch — Google",
+      "favicon": "https://www.google.com/s2/favicons?domain=example.com&sz=64",
+      "clicks": 8302,
+      "utmSource": "google",
+      "utmMedium": "cpc",
+      "utmCampaign": "q2_launch",
+      "archived": false,
+      "folder": { "id": "abc12345-...", "name": "Q2 Launch", "color": "#f97316" },
+      "domain": { "id": "def67890-...", "domain": "go.acme.com" },
+      "tags": [
+        { "id": "lt-uuid-...", "tag": { "id": "tag-uuid-...", "name": "paid-search", "color": "#3b82f6" } }
+      ],
+      "createdAt": "2026-05-01T10:00:00.000Z",
+      "updatedAt": "2026-05-01T10:00:00.000Z"
+    }
+  ],
+  "pagination": { "page": 1, "limit": 50, "total": 273, "pages": 6 }
+}
+```
 
+### Notes
+
+- Sorted by `createdAt DESC` — newest first.
+- Server caches headers explicitly disabled (`Cache-Control: no-cache`).
+- Includes folder, domain, and tags in one query (single round trip via SQL `json_agg`).
+
+---
+
+## Get a link by ID
+
+```
+GET /api/v1/links/:id
+```
+
+### Headers
+
+| Header | Required |
+|---|---|
+| `Authorization: Bearer <jwt>` | Yes |
+
+### Example
+
+```bash
+curl https://api.linkutm.com/api/v1/links/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Response
+
+Full link object. Note: this endpoint returns `tags` as a lightweight `[{ tagId }]` shape (not the nested `{ tag: {...} }` shape returned by list/create).
+
+### Errors
+
+| Code | When |
+|---|---|
+| `404` | Link not found |
+
+---
+
+## Get workspace stats
+
+```
+GET /api/v1/links/stats
+```
+
+Returns a summary for the workspace identified by `x-workspace-id`:
+
+```json
+{
+  "totalLinks": 273,
+  "totalClicks": 18420,
+  "recentLinks": [ /* 5 most-recent links */ ]
+}
+```

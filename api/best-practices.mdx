@@ -1,32 +1,84 @@
 ---
-title: 'API Best Practices'
-description: 'Guidelines for authentication, retries, rate limits, and security'
+title: "Best practices"
+description: "Auth, retries, idempotency, secrets, rate limits."
 ---
-
-# API Best Practices
-
-Recommendations for robust integrations.
 
 ## Authentication
 
-- Use `Authorization: Bearer ez_<token>`
-- Store tokens securely and rotate regularly
-- Do not embed tokens in client-side code
+- **Use JWT bearer** for end-user-acting calls.
+- **Store tokens server-side**, never in client bundles, browser localStorage on untrusted pages, or repo files.
+- **Rotate** tokens periodically. Revocation = removing the user's session via auth endpoint.
+- **Workspace header** is required on workspace-scoped endpoints (`x-workspace-id: <uuid_or_slug>`). Get used to including it.
 
-## Rate Limits
+## Idempotency
 
-- Respect `429 Too Many Requests` responses
-- Implement exponential backoff and retries for transient failures
-- Cache non-mutating responses where appropriate
+Creation endpoints (`POST /links`) are not idempotent unless you provide a `customSlug`. Pattern for safe retries:
 
-## Reliability
+```typescript
+const slug = `q2-launch-${nanoid(6)}`; // generate once, retry safely
+await fetch('/api/v1/links', {
+  method: 'POST',
+  headers: { /* ... */ },
+  body: JSON.stringify({ url, customSlug: slug, /* ... */ }),
+});
+```
 
-- Use timeouts and circuit breakers
-- Retry `5xx` and network errors with jitter
-- Log requests and responses (excluding secrets)
+If the call fails midway and you retry with the same `customSlug`, the second call returns `409 Conflict` — you know it succeeded the first time.
 
-## Security
+## Pagination
 
-- Use HTTPS only
-- Avoid logging raw tokens
-- Use per-environment tokens with least privilege
+List endpoints accept:
+
+| Param | Default | Notes |
+|---|---|---|
+| `page` | 1 | 1-indexed |
+| `limit` | 20 | Max varies; expect ≤100 |
+
+Response shape:
+
+```json
+{
+  "links": [ /* ... */ ],
+  "pagination": { "page": 1, "limit": 20, "total": 273, "pages": 14 }
+}
+```
+
+Iterate by incrementing `page` until `pagination.page === pagination.pages`. Don't rely on a "next cursor" — these endpoints are page-based.
+
+## Usage limits
+
+There's no published global request-rate limit at the API edge today. Workspaces have per-resource maximums:
+
+- **Total links** in a workspace.
+- **Total clicks tracked** in the current period.
+- **API call volume** in the current period.
+
+Hitting a maximum returns `403` with a message naming the exact `used / limit`. Don't retry — free up headroom (delete unused records, wait for the next period) before retrying.
+
+For sustained high-volume access, contact support.
+
+## Retries
+
+- **Retry**: `5xx`, network timeouts, `429` if you ever see it.
+- **Don't retry**: `4xx` (except `429`) — caller error, won't pass on retry.
+- **Backoff**: exponential with jitter. Suggested: `min(500ms × 2^attempt + jitter, 8s)`, max 3 retries.
+
+## Secrets and PII
+
+- **Never** put secrets (API tokens, passwords, customer IDs) in UTM values. They land in destination URLs and analytics.
+- **Never** put PII (emails, names, phone) in UTMs.
+- **Custom slugs** are visible in URL bars — don't encode anything sensitive in them.
+
+## Webhooks
+
+Webhooks are not currently implemented. Poll the relevant list endpoints for state changes, or open a feature request if you need event-driven integration.
+
+## Performance tips
+
+- **Batch where possible.** Bulk endpoints exist for delete (`POST /links/bulk-delete`), archive (`/bulk-archive`), move (`/bulk-move`), tag (`/bulk-tag`).
+- **Use `archived=true` filter** to exclude archived links from list queries — they're excluded by default but you can also explicitly query them.
+- **Workspace-level analytics** is one query for the workspace, not N queries per link. Use it for dashboards.
+
+## Library and SDK
+
+No official SDK ships today. The API is small enough that direct `fetch`/`axios` usage is fine. If you want a typed client, generate one from the Swagger spec at `/docs`.

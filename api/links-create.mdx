@@ -1,43 +1,159 @@
 ---
-title: 'Create Link'
-description: 'Create a shortened URL with UTM parameters, alias, domain, expiry, and more'
+title: "Create link"
+description: "POST /links — create a tracked short URL."
 ---
 
-# Create Link
+## Endpoint
 
-Create a shortened URL under `/api/v1/urls`.
+```
+POST /api/v1/links
+```
 
-## Request
+## Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+## Body
+
+<ParamField body="url" type="string" required>
+  Destination URL. Must include `https://` or `http://`.
+</ParamField>
+
+<ParamField body="title" type="string">
+  Internal label. Not visible to visitors.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Internal context.
+</ParamField>
+
+<ParamField body="customSlug" type="string">
+  Custom short code. Recommended character set: lowercase letters, digits, hyphens (no server-side regex enforcement, but stick to this for portability and readability). If omitted, a 7-char nanoid is generated.
+</ParamField>
+
+<ParamField body="utmSource" type="string">UTM source, e.g., `google`.</ParamField>
+<ParamField body="utmMedium" type="string">UTM medium, e.g., `cpc`.</ParamField>
+<ParamField body="utmCampaign" type="string">UTM campaign, e.g., `q2_launch`.</ParamField>
+<ParamField body="utmTerm" type="string">UTM term (paid search keyword).</ParamField>
+<ParamField body="utmContent" type="string">UTM content (creative differentiator).</ParamField>
+
+<ParamField body="customUtmParams" type="object">
+  Arbitrary custom UTM keys. `{"audience": "lookalike_3"}` becomes `&utm_audience=lookalike_3` on redirect.
+</ParamField>
+
+<ParamField body="domainId" type="string">
+  UUID of the workspace's domain to use. Defaults to the workspace's default domain. Must be verified and enabled.
+</ParamField>
+
+<ParamField body="folderId" type="string">
+  UUID of the folder to place the link in. Pass `null` for unfiled.
+</ParamField>
+
+<ParamField body="tagIds" type="string[]">
+  Array of tag UUIDs to attach.
+</ParamField>
+
+<ParamField body="password" type="string">
+  Stored on the link record. Counts against the workspace's password-protected link maximum. The public redirect does not currently gate on this — see [Password-protected links](/links/password-protected).
+</ParamField>
+
+<ParamField body="expiresAt" type="string">
+  ISO 8601 timestamp. After this, redirect returns `410 Gone`.
+</ParamField>
+
+<ParamField body="clickLimit" type="integer">
+  Max clicks. Recorded for reporting; the public redirect does not currently stop on it. Pair with `expiresAt` for a guaranteed cutoff.
+</ParamField>
+
+<ParamField body="iosUrl" type="string">
+  Stored as the intended destination for iOS clicks. The public redirect does not currently route based on user-agent — verify behavior before relying on this.
+</ParamField>
+
+<ParamField body="androidUrl" type="string">
+  Same caveat as `iosUrl`.
+</ParamField>
+
+<ParamField body="geoTargets" type="object">
+  Stored as a country-code → URL map. The public redirect does not currently route based on country.
+</ParamField>
+
+<ParamField body="ogTitle" type="string">Override OG title for social previews.</ParamField>
+<ParamField body="ogDescription" type="string">Override OG description.</ParamField>
+<ParamField body="ogImage" type="string">Override OG image URL (public, HTTPS).</ParamField>
+<ParamField body="favicon" type="string">Override favicon URL.</ParamField>
+
+<ParamField body="fallbackUrl" type="string">
+  Stored on the record as a planned fallback destination. The public redirect does not currently route to it.
+</ParamField>
+
+## Example request
 
 ```bash
-POST /api/v1/urls
+curl -X POST https://api.linkutm.com/api/v1/links \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://example.com/q2-launch",
+    "title": "Q2 Launch — Google Search — Brand",
+    "customSlug": "q2-launch",
+    "utmSource": "google",
+    "utmMedium": "cpc",
+    "utmCampaign": "q2_launch",
+    "utmContent": "headline_a",
+    "tagIds": ["tag-uuid-1", "tag-uuid-2"]
+  }'
+```
 
-Headers:
-Authorization: Bearer ez_<token>
-Content-Type: application/json
-X-Timezone: {{xTimezone}}
+## Example response
 
-Body:
+All `id` fields are UUIDs.
+
+```json
 {
-  "target_url": "https://example.com/landing",
-  "utm_source": "newsletter",
-  "utm_medium": "email",
-  "utm_campaign": "spring-2025",
-  "utm_term": "campaign-term",
-  "utm_content": "content-A",
-  "custom_alias": "spring-sale",
-  "custom_domain": "short.example.com",
-  "expiry_date": "2025-12-31T00:00:00Z",
-  "description": "Campaign link",
-  "click_limit": 1000,
-  "password": "optional-pass"
+  "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "url": "https://example.com/q2-launch",
+  "shortCode": "q2-launch",
+  "title": "Q2 Launch — Google Search — Brand",
+  "description": null,
+  "utmSource": "google",
+  "utmMedium": "cpc",
+  "utmCampaign": "q2_launch",
+  "utmTerm": null,
+  "utmContent": "headline_a",
+  "password": null,
+  "expiresAt": null,
+  "archived": false,
+  "clicks": 0,
+  "createdAt": "2026-05-07T10:00:00.000Z",
+  "updatedAt": "2026-05-07T10:00:00.000Z",
+  "workspaceId": "8a7b6c5d-...",
+  "creatorId": "1a2b3c4d-...",
+  "domainId": "9e8d7c6b-...",
+  "folder": null,
+  "domain": { "id": "9e8d7c6b-...", "domain": "go.acme.com" },
+  "tags": [],
+  "creator": { "id": "1a2b3c4d-...", "name": "Jane", "email": "jane@example.com" }
 }
 ```
 
-## Notes
+## Errors
 
-- `Authorization` accepts `Bearer ez_<token>` or raw `ez_<token>`.
-- `expiry_date` is ISO 8601.
-- `click_limit` limits total clicks before the link is disabled.
-- `password` protects access if enabled.
+| Code | When |
+|---|---|
+| `400` | UTM rule violation, invalid domain, validation failure |
+| `403` | Workspace link maximum reached, or password-protected link maximum reached |
+| `404` | Workspace not found |
+| `409` | `customSlug` already exists globally |
 
+## Behavior notes
+
+- UTMs are processed by [workspace UTM rules](/utm-rules/overview) before save (lowercase, space replacement, conditional logic). The stored values may differ from what you sent.
+- If `domainId` is omitted, the workspace's default domain is used.
+- `tagIds` are attached **after** the link is created, in a separate join-table insert. If any tag UUID doesn't exist or belongs to a different workspace, the join insert fails with a foreign-key error — but the link is already saved at that point. Validate `tagIds` before posting (e.g., `GET /tags`) to avoid orphaned links with no tags.
+- Link usage counter is incremented async — your response returns immediately.
+- At 80% of the workspace's link maximum, the owner gets a warning email.

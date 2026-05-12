@@ -1,64 +1,74 @@
 ---
-title: 'Contact Support'
-description: 'Get help from our support team'
+title: "Contact support"
+description: "How to reach us and what to include for fastest resolution."
 ---
 
-# Contact Support
+## Email
 
-Learn how to get help from our support team when you need assistance.
+[support@linkutm.com](mailto:support@linkutm.com)
 
-## Support Channels
+## What to include
 
-### Email Support
-- 24/7 availability
-- Ticket system
-- Response times
-- Priority levels
+Skip the back-and-forth — include up front:
 
-### Live Chat
-- Business hours
-- Instant help
-- Technical support
-- General inquiries
+<Steps>
+  <Step title="Workspace slug">
+    Visible in your URL: `app.linkutm.com/{slug}/...`. Include this so we can find your data fast.
+  </Step>
+  <Step title="What you tried">
+    The action you took (clicked X, opened Y page, called API endpoint Z).
+  </Step>
+  <Step title="What you expected">
+    One sentence is enough.
+  </Step>
+  <Step title="What actually happened">
+    Exact error message in quotes. Screenshot if UI. cURL response if API.
+  </Step>
+  <Step title="When (with timezone)">
+    Approximate timestamp + your timezone. Helps us correlate logs.
+  </Step>
+  <Step title="Browser / device (if UI bug)">
+    Chrome 120 on macOS, etc.
+  </Step>
+</Steps>
 
-## Creating Tickets
+## Example: a good support email
 
-### Ticket Process
-1. Describe issue
-2. Add details
-3. Submit ticket
-4. Track progress
+```
+Subject: Cannot create link — "Short code already exists" but slug looks unused
 
-### Required Information
-- Account details
-- Issue description
-- Steps to reproduce
-- Error messages
+Workspace: client-globex
+Time: 2025-05-07 ~14:30 UTC
+Browser: Chrome 124, macOS
 
-## Support Resources
+Steps:
+1. Navigated to /client-globex/links
+2. Clicked New Link
+3. Filled destination + UTMs, set custom slug "q2-launch"
+4. Clicked Create
 
-### Self-Help
-- Documentation
-- FAQ section
-- Video tutorials
-- Knowledge base
+Expected: link created
+Actual: "Short code already exists" error toast
 
-### Community Help
-- User forums
-- Community posts
-- Feature requests
-- Bug reports
+I checked our workspace — no link with slug q2-launch exists.
+Is it taken in another workspace? Can I see who has it?
+```
 
-## Best Practices
+## Response times
 
-### Effective Communication
-- Clear description
-- Relevant details
-- Quick responses
-- Follow-up process
+- **Standard support**: business-day reply.
+- **Critical (tracking down or system error)**: best-effort same-day.
 
-### Issue Resolution
-- Track tickets
-- Save responses
-- Document solutions
-- Share feedback
+## Other channels
+
+<CardGroup cols={3}>
+  <Card title="X / Twitter" icon="twitter" href="https://x.com/linkutm10761">
+    Public-friendly questions and updates.
+  </Card>
+  <Card title="LinkedIn" icon="linkedin" href="https://www.linkedin.com/company/linkutm">
+    Product news and case studies.
+  </Card>
+  <Card title="Facebook" icon="facebook" href="https://www.facebook.com/people/Linkutm/61583414725717/">
+    Community page.
+  </Card>
+</CardGroup>

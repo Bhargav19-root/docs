@@ -1,567 +1,116 @@
-# Team Collaboration Overview
+---
+title: "Team collaboration"
+description: "Invite members, assign roles, configure notifications."
+---
 
-Learn how to collaborate with your team effectively in linkutm.
+## What it is
 
-## Overview
+Workspace members are users attached to a workspace with a role. Each gets per-workspace notification preferences, can create/edit links subject to role permissions, and can be removed by the owner.
 
-linkutm's team collaboration features allow you to work seamlessly with colleagues, manage permissions, track activity, and maintain organized workflows across your organization.
+## Roles
 
-## Team Features
+| Role         | Default permissions                                                                                  |
+| ------------ | ---------------------------------------------------------------------------------------------------- |
+| `owner`      | Everything. Created automatically for the workspace creator. Cannot be removed or have role changed. |
+| `member`     | Default invite role. Create/edit links, manage folders/tags/templates within RBAC permissions.       |
+| Custom roles | Defined via the RBAC system (admin, viewer, etc.) — workspace-level configurable.                    |
 
-### Team Members
+The exact action-level permissions are tied to the RBAC permission table — each role has a list of allowed `(method, path)` tuples.
 
-**Add and Manage Team Members:**
-- Invite colleagues via email
-- Assign roles and permissions
-- Track member activity
-- Manage member status
-- Remove members when needed
+## How to invite
 
-**Member Information:**
-- Name and email
-- Profile picture
-- Role and permissions
-- Join date
-- Last active
-- Links created count
+<Steps>
+  <Step title="Open Members">
+    Sidebar → **Settings** → **Members** (or **Team**).
+  </Step>
+  <Step title="Send invite">
+    Email + role. The system:
+    - Checks the workspace's team-member maximum.
+    - Rejects if the email is already a member or has a pending invite.
+    - Sends an email with the accept link.
+  </Step>
+  <Step title="Manage pending invites">
+    Resend (resets 7-day expiry) or cancel.
+  </Step>
+</Steps>
 
-### Inviting Team Members
+## How to accept an invite
 
-**How to Invite:**
+The invitee clicks the link in the email. They sign in (or create an account with the same email) and confirm.
 
-1. **Navigate to Team Settings:**
-   - Go to **Dashboard** → **Team**
-   - Or **Settings** → **Team Members**
+<Warning>
+The invite is bound to the email it was sent to. If the invitee signs in with a different email, acceptance fails with `403 "This invite was sent to a different email address"`.
+</Warning>
 
-2. **Click Invite:**
-   - Click **Invite Member** or **+ Add Member**
-   - Enter email address
-   - Assign role
-   - Set permissions
-   - Send invitation
+## Removing members
 
-3. **Member Receives Invitation:**
-   - Email invitation sent
-   - Click link to accept
-   - Create account or log in
-   - Join workspace
+<Steps>
+  <Step title="Open Members → row actions">
+    The owner can remove any member except themselves.
+  </Step>
+  <Step title="Confirm">
+    Member loses access immediately. Their created links remain in the workspace (creator user reference is retained, but they no longer see anything).
+  </Step>
+</Steps>
 
-4. **Track Invitation Status:**
-   - Pending: Invitation sent, not accepted
-   - Active: Member joined and active
-   - Declined: Member declined invitation
-   - Inactive: Member deactivated
+The system can't remove the owner via this flow. Transfer ownership or delete the workspace.
 
-### Member Status
+## Per-member notifications
 
-**Status Types:**
+Each member controls what triggers an email to them:
 
-**Pending**
-- Invitation sent but not accepted
-- Cannot access workspace yet
-- Resend invitation if needed
-- Cancel invitation if needed
+| Setting              | Trigger                                                       |
+| -------------------- | ------------------------------------------------------------- |
+| `notifyNewLinks`     | A teammate creates a link in this workspace                   |
+| `notifyLinkClicks`   | Click milestones (100, 500, 1k, 5k, 10k, 50k, 100k, 500k, 1M) |
+| `notifyTeamChanges`  | Member joins/leaves, role changes                             |
+| `notifyWeeklyReport` | Weekly digest of workspace activity                           |
 
-**Active**
-- Full access to workspace
-- Creating and managing links
-- Contributing to campaigns
-- Full collaboration
+## Account-level notifications
 
-**Inactive**
-- Temporarily disabled access
-- Preserves historical data
-- Can be reactivated
-- No workspace access
+Separately, each user has account-level toggles (under **Account → Notifications**) that override workspace-level for system events: domain updates, link expiry, billing alerts, security alerts, etc.
 
-**Declined**
-- Member declined invitation
-- Can be re-invited
-- No access granted
+## Real-world example
 
-## Roles and Permissions
+Agency client team:
 
-### Role Types
-
-**Admin**
-- Full access to all features
-- Manage team members
-- Configure workspace settings
-- Manage billing
-- Delete links and campaigns
-- Access all projects
-
-**Manager**
-- Create and manage links
-- View all team links
-- Manage templates and parameters
-- View analytics
-- Cannot manage team members
-- Cannot access billing
-
-**Member**
-- Create and manage own links
-- View shared links (based on settings)
-- Use templates
-- View own analytics
-- Limited administrative access
-
-**Viewer**
-- View-only access
-- See links and analytics
-- Cannot create or edit links
-- Cannot change settings
-- Good for stakeholders and clients
-
-### Custom Roles
-
-Create custom roles with specific permissions:
-
-**Permission Categories:**
-
-**Link Management:**
-- Create links
-- Edit own links
-- Edit any link
-- Delete own links
-- Delete any link
-- View all links
-
-**Template & Parameter Management:**
-- Create templates
-- Edit templates
-- Delete templates
-- Manage parameters
-
-**Analytics:**
-- View own link analytics
-- View all link analytics
-- Export data
-- View real-time data
-
-**Settings:**
-- Manage workspace settings
-- Manage integrations
-- Configure UTM rules
-- Manage link shorteners
-
-**Team:**
-- Invite members
-- Edit member roles
-- Remove members
-- View activity log
-
-**Example Custom Role:**
 ```
-Role: Content Creator
-Permissions:
-- ✅ Create links
-- ✅ Edit own links
-- ✅ Use templates
-- ✅ View own analytics
-- ❌ Delete links
-- ❌ Manage team
-- ❌ Access settings
+Workspace: Client: Globex
+Members:
+├── jane@acme-agency.com  — owner   (account manager)
+├── kim@acme-agency.com   — member  (campaign analyst)
+└── nick@acme-agency.com  — member  (designer, view-only role would fit better)
 ```
 
-## Workspaces and Projects
-
-### Workspaces
-
-**What is a Workspace?**
-- Top-level organization
-- Contains multiple projects
-- Team members belong to workspace
-- Shared settings and billing
-
-**Use Cases:**
-- Company workspace
-- Agency workspace (one per agency)
-- Department workspace
-
-**Workspace Features:**
-- Multiple projects
-- Team member management
-- Centralized billing
-- Shared resources
-
-### Projects
-
-**What is a Project?**
-- Sub-level within workspace
-- Campaign or client grouping
-- Project-specific settings
-- Links belong to projects
-
-**Use Cases:**
-- Client projects (for agencies)
-- Campaign projects
-- Product line projects
-- Regional projects
-
-**Project Features:**
-- Project-specific links
-- Custom UTM rules
-- Default link shortener
-- Folder organization
-- Team member assignment
-
-**Example Structure:**
-```
-Workspace: Acme Marketing Agency
-├── Project: Client A - Fashion Brand
-│   ├── Team: Designer, Content Manager
-│   └── Links: Social media campaigns
-├── Project: Client B - Tech Startup
-│   ├── Team: Marketing Manager, Analyst
-│   └── Links: Product launch campaigns
-└── Project: Internal Marketing
-    ├── Team: Full team
-    └── Links: Agency promotion
-```
-
-### Switching Workspaces and Projects
-
-**Workspace Switcher:**
-- Located in sidebar or header
-- Click to see available workspaces
-- Select to switch
-- View member count
-
-**Project Switcher:**
-- Dropdown in header or sidebar
-- Shows all projects you have access to
-- Switch between projects
-- View project stats
-
-## Team Activity Tracking
-
-### Activity Log
-
-**What's Tracked:**
-- Link created
-- Link edited
-- Link deleted
-- Template created/edited
-- Parameter added
-- Member invited
-- Settings changed
-- Integrations configured
-
-**Activity Details:**
-- Who performed the action
-- What action was taken
-- When it occurred
-- Which link/resource affected
-- Previous vs. new values (for edits)
-
-**Viewing Activity:**
-
-1. Navigate to **Team** → **Activity** or **Activity Log**
-2. See chronological list of actions
-3. Filter by:
-   - Team member
-   - Action type
-   - Date range
-   - Project
-   - Resource type
-
-**Use Cases:**
-- Audit team actions
-- Track changes to links
-- Identify who created what
-- Troubleshoot issues
-- Compliance and accountability
-
-### Member Performance
-
-**Track Individual Contributions:**
-- Links created by member
-- Templates created
-- Links edited
-- Click performance of member's links
-- Activity level
-
-**Use For:**
-- Performance reviews
-- Workload balancing
-- Recognizing top performers
-- Training opportunities
-
-## Team Best Practices
-
-### Onboarding New Members
-
-**Onboarding Checklist:**
-1. ✅ Send invitation with welcome message
-2. ✅ Assign appropriate role
-3. ✅ Share team documentation and standards
-4. ✅ Provide access to relevant projects
-5. ✅ Introduce UTM naming conventions
-6. ✅ Share templates library
-7. ✅ Schedule training session
-8. ✅ Assign onboarding buddy
-
-### Communication
-
-**Document Standards:**
-- UTM naming conventions
-- Folder organization strategy
-- Tag usage guidelines
-- Template usage guide
-- Link creation workflow
-
-**Regular Check-ins:**
-- Weekly team syncs
-- Monthly performance reviews
-- Quarterly planning sessions
-- Ad-hoc troubleshooting
-
-### Organization
-
-**Folder Strategy:**
-- Clear folder hierarchy
-- Consistent naming
-- Archive old campaigns
-- Document folder purposes
-
-**Tag System:**
-- Define tag meanings
-- Consistent application
-- Color code standards
-- Team training
-
-**Template Library:**
-- Maintain template quality
-- Regular template audits
-- Document template usage
-- Retire obsolete templates
-
-### Access Control
-
-**Principle of Least Privilege:**
-- Grant minimum necessary permissions
-- Use custom roles effectively
-- Regular permission audits
-- Remove access when no longer needed
-
-**Security:**
-- Strong password requirements
-- Enable 2FA (if available)
-- Regular security training
-- Monitor suspicious activity
-
-## Collaboration Workflows
-
-### Campaign Creation Workflow
-
-**Example Process:**
-
-1. **Planning (Manager):**
-   - Create project or folder
-   - Define campaign goals
-   - Set up UTM template
-
-2. **Execution (Members):**
-   - Create links using template
-   - Add to designated folder
-   - Tag appropriately
-   - Add notes for context
-
-3. **Review (Manager):**
-   - Check link consistency
-   - Verify UTM parameters
-   - Approve links
-
-4. **Launch (Members):**
-   - Distribute links
-   - Monitor performance
-   - Report issues
-
-5. **Analysis (Analyst/Manager):**
-   - Review analytics
-   - Generate reports
-   - Share insights
-   - Optimize
-
-### Agency Client Management
-
-**Per-Client Setup:**
-
-1. **Create Client Project:**
-   - New project per client
-   - Client name in project name
-   - Client-specific settings
-
-2. **Assign Team:**
-   - Account manager
-   - Specialist (PPC, Social, etc.)
-   - Analyst
-   - Set permissions
-
-3. **Organize Resources:**
-   - Client-specific templates
-   - Folder structure
-   - UTM rules
-   - Link shortener (client domain)
-
-4. **Reporting:**
-   - Scheduled reports
-   - Client dashboard access (viewer role)
-   - Regular check-ins
-
-## Team Analytics
-
-### Team Performance Metrics
-
-**Collective Metrics:**
-- Total links created by team
-- Total clicks across team
-- Conversion performance
-- Team velocity (links/week)
-
-**Individual Metrics:**
-- Links created per member
-- Click performance
-- Template usage
-- Activity level
-
-**Project Metrics:**
-- Performance by project
-- Team efficiency by project
-- Project ROI
-- Resource allocation
-
-### Leaderboards (If Available)
-
-**Motivate and Recognize:**
-- Top link creators
-- Most clicks generated
-- Best conversion rates
-- Most active members
-
-**Use For:**
-- Friendly competition
-- Recognition
-- Identifying best practices
-- Training opportunities
-
-## Managing Team Size
-
-### Small Teams (2-5 members)
-
-**Structure:**
-- Flat hierarchy
-- Everyone has similar permissions
-- Shared responsibility
-- Informal communication
-
-**Best Practices:**
-- Simple folder structure
-- Fewer templates
-- Open collaboration
-- Regular check-ins
-
-### Medium Teams (6-20 members)
-
-**Structure:**
-- Defined roles (Admin, Managers, Members)
-- Project-based organization
-- Specialized responsibilities
-- Structured communication
-
-**Best Practices:**
-- Clear folder hierarchy
-- Well-maintained templates
-- Regular team meetings
-- Documentation important
-
-### Large Teams (20+ members)
-
-**Structure:**
-- Multiple workspaces or projects
-- Hierarchical roles
-- Department-based organization
-- Formal processes
-
-**Best Practices:**
-- Comprehensive documentation
-- Extensive template library
-- Strict UTM rules
-- Regular training
-- Dedicated administrators
-
-## Removing Team Members
-
-### Offboarding Process
-
-**Steps:**
-
-1. **Prepare for Removal:**
-   - Identify links/resources owned by member
-   - Reassign ownership if needed
-   - Document their work
-   - Export any necessary data
-
-2. **Remove Access:**
-   - Go to **Team** settings
-   - Find team member
-   - Click **Remove** or **Deactivate**
-   - Confirm removal
-
-3. **Options:**
-   - **Delete:** Completely remove (not recommended)
-   - **Deactivate:** Preserve data, remove access (recommended)
-
-4. **After Removal:**
-   - Links created remain (attributed to member)
-   - Analytics data preserved
-   - Activity log maintains history
-   - Can reactivate if needed
-
-**What Happens to Their Links:**
-- Links remain active
-- Analytics continue tracking
-- Ownership can be transferred
-- Historical data preserved
-
-## Security and Privacy
-
-### Data Access
-
-**What Team Members Can See:**
-- Links they have permission to view
-- Project analytics (based on role)
-- Team member info (limited)
-- Activity relevant to them
-
-**What They Cannot See (by default):**
-- Billing information (unless admin)
-- Other projects without access
-- Personal data of other members
-- Sensitive settings (unless admin)
-
-### Audit Trail
-
-**Comprehensive Logging:**
-- All team actions logged
-- Immutable activity history
-- Compliance support
-- Security monitoring
-
-**Retention:**
-- Activity log retention (varies by plan)
-- Export logs for long-term storage
-- Audit support
-
-## Related Documentation
-
-- [Roles and Permissions](/team-collaboration/roles-permissions)
-- [Inviting Team Members](/team-collaboration/invite-members)
-- [Activity Tracking](/team-collaboration/activity-log)
-- [Workspaces and Projects](/team-collaboration/workspaces)
-- [Team Settings](/settings/team-settings)
-
-## Need Help?
-
-For questions about team collaboration or member management, contact our support team or explore our comprehensive guides.
+Jane gets all notifications. Kim gets click milestones + weekly report. Nick disables everything except weekly report.
+
+## Common mistakes
+
+<AccordionGroup>
+  <Accordion title="Inviting beyond the team-member maximum">
+    Each workspace has a team-member maximum. The invite endpoint rejects new invites once the workspace is at capacity, with a message naming the current count and limit.
+  </Accordion>
+  <Accordion title="Re-inviting an existing member">
+    Returns `409 Conflict` — *"User is already a member of this workspace"*.
+  </Accordion>
+  <Accordion title="Changing the owner's role">
+    Blocked by `403 "Cannot change owner role"`. Transfer ownership separately.
+  </Accordion>
+  <Accordion title="Removing the owner">
+    Blocked. The owner can leave by deleting the workspace.
+  </Accordion>
+</AccordionGroup>
+
+## Edge cases
+
+<Note>
+**Invite expiry.** 7 days. After expiry the link returns `403 "Invite has expired"`. Resend to issue a new token.
+</Note>
+
+<Note>
+**Email normalization.** Invites match against lowercase-trimmed email. `Jane@Acme.com` and `jane@acme.com` are the same invite.
+</Note>
+
+<Note>
+**Lowering the team-member maximum.** If a workspace's team-member maximum drops below the current count, current members keep access. The new maximum only blocks new invites until the count comes down through manual removal.
+</Note>

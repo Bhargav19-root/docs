@@ -1,153 +1,135 @@
 {
-"$schema": "https://mintlify.com/docs.json",
-"theme": "mint",
-"name": "linkutm",
-"colors": {
-"primary": "#ff6200",
-"light": "#ff6200",
-"dark": "#ff6200"
-},
-"favicon": "/favicon.svg",
-"navigation": {
-"tabs": [
-{
-"tab": "Guides",
-"groups": [
-{
-"group": "Get Started",
-"pages": [
-"getting-started/introduction"
-]
-},
-{
-"group": "Link Management",
-"pages": [
-"links/create-link",
-"links/short-link",
-"links/utm-builder",
-"links/folders",
-"links/tags",
-"links/password-protected",
-"links/link-preview",
-"links/link-expiration",
-"links/qr-codes"
-]
-},
-{
-"group": "UTM Templates",
-"pages": [
-"utm-templates/overview",
-"utm-templates/create-template",
-"utm-templates/manage-templates"
-]
-},
-{
-"group": "UTM Parameters",
-"pages": [
-"utm-parameters/overview"
-]
-},
-{
-"group": "Link Shortening",
-"pages": [
-"link-shortening/overview",
-"link-shortening/custom-domains"
-]
-},
-{
-"group": "Analytics",
-"pages": [
-"analytics/overview"
-]
-},
-{
-"group": "UTM Rules",
-"pages": [
-"utm-rules/overview"
-]
-},
-{
-"group": "Organization & Workspaces",
-"pages": [
-"organization/overview",
-"organization/managing-workspaces",
-"organization/managing-projects"
-]
-},
-{
-"group": "Team Collaboration",
-"pages": [
-"team-collaboration/overview"
-]
-},
-{
-"group": "Troubleshooting & FAQs",
-"pages": [
-"help/common-issues",
-"help/feature-requests",
-"help/contact-support"
-]
-}
-]
-},
-{
-"tab": "API Reference",
-"groups": [
-        {
-          "group": "API Documentation",
-          "pages": [
-            "api/introduction",
-            "api/errors",
-            "api/best-practices"
-          ]
-        },
-        {
-          "group": "Links",
-          "pages": [
-            "api/links-create",
-            "api/links-get",
-            "api/links-delete",
-            "api/links-parameters"
-          ]
-        },
-        {
-          "group": "Endpoint Examples",
-          "pages": [
-            "api/links",
-            "api/analytics",
-            "api/webhooks",
-            "api/rate-limits"
-          ]
-        }
-]
-}
-],"global": {
-"anchors": [
-]
-}
-},
-"logo": {
-"light": "/logo/light.svg",
-"dark": "/logo/dark.svg"
-},
-"navbar": {
-"links": [
-{
-"label": "Support",
-"href": "mailto:support@linkutm.com"
-}
-],
-"primary": {
-"type": "button",
-"label": "Dashboard",
-"href": "https://app.linkutm.com"
-}
-},
-"footer": {
-"socials": {
-"x": "https://x.com/linkutm10761",
-"facebook": "https://www.facebook.com/people/Linkutm/61583414725717/",
-"linkedin": "https://www.linkedin.com/company/linkutm"
-}
-}
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "linkutm",
+  "colors": {
+    "primary": "#ff6200",
+    "light": "#ff6200",
+    "dark": "#ff6200"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "getting-started/introduction"
+            ]
+          },
+          {
+            "group": "Links",
+            "pages": [
+              "links/create-link",
+              "links/utm-builder",
+              "links/short-link",
+              "links/folders",
+              "links/tags",
+              "links/qr-codes",
+              "links/password-protected",
+              "links/link-expiration",
+              "links/link-preview"
+            ]
+          },
+          {
+            "group": "UTM Standards",
+            "pages": [
+              "utm-templates/overview",
+              "utm-templates/create-template",
+              "utm-templates/manage-templates",
+              "utm-parameters/overview",
+              "utm-rules/overview"
+            ]
+          },
+          {
+            "group": "Domains",
+            "pages": [
+              "link-shortening/overview",
+              "link-shortening/custom-domains"
+            ]
+          },
+          {
+            "group": "Analytics",
+            "pages": [
+              "analytics/overview"
+            ]
+          },
+          {
+            "group": "Workspaces & Team",
+            "pages": [
+              "organization/overview",
+              "organization/managing-workspaces",
+              "organization/managing-projects",
+              "team-collaboration/overview"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "integrations/pixel-tracking"
+            ]
+          },
+          {
+            "group": "Help",
+            "pages": [
+              "help/common-issues",
+              "help/feature-requests",
+              "help/contact-support"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api/introduction",
+              "api/errors",
+              "api/best-practices"
+            ]
+          },
+          {
+            "group": "Links",
+            "pages": [
+              "api/links-create",
+              "api/links-get",
+              "api/links-delete",
+              "api/links-parameters"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": []
+    }
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Support",
+        "href": "mailto:support@linkutm.com"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Dashboard",
+      "href": "https://app.linkutm.com"
+    }
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/linkutm10761",
+      "facebook": "https://www.facebook.com/people/Linkutm/61583414725717/",
+      "linkedin": "https://www.linkedin.com/company/linkutm"
+    }
+  }
 }

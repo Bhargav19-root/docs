@@ -1,23 +1,123 @@
 ---
-title: 'Delete Link'
-description: 'Delete a shortened URL by id'
+title: "Delete & bulk operations"
+description: "DELETE /links/:id, plus bulk delete / archive / move / tag."
 ---
 
-# Delete Link
+## Delete a single link
 
-Delete a shortened URL.
-
-## Request
-
-```bash
-DELETE /api/v1/urls/{id}
-
-Headers:
-Authorization: Bearer ez_<token>
+```
+DELETE /api/v1/links/:id
 ```
 
-## Notes
+### Headers
 
-- Deleting a link is irreversible.
-- Use revoke or disable features if you need temporary suspension.
+| Header | Required |
+|---|---|
+| `Authorization: Bearer <jwt>` | Yes |
 
+### Example
+
+```bash
+curl -X DELETE https://api.linkutm.com/api/v1/links/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Behavior
+
+- Cascades click history (`link_clicks` rows are deleted with the link).
+- Decrements workspace link usage (only if the link wasn't already archived — archived links are excluded from active count).
+- Sends a notification email to workspace members who have `link_deleted` notifications enabled. Async.
+
+### Errors
+
+| Code | When |
+|---|---|
+| `404` | Link not found |
+
+---
+
+## Bulk delete
+
+```
+POST /api/v1/links/bulk-delete
+```
+
+### Body
+
+```json
+{
+  "ids": [
+    "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+    "6a4c3b2d-5e7f-5b9c-ad1e-2f3a4b5c6d7e"
+  ]
+}
+```
+
+### Response
+
+```json
+{ "count": 3 }
+```
+
+Same cascade semantics as single delete. One consolidated email per workspace.
+
+---
+
+## Bulk archive / unarchive
+
+```
+POST /api/v1/links/bulk-archive
+```
+
+### Body
+
+```json
+{ "ids": ["uuid-1", "uuid-2"], "archived": true }
+```
+
+Setting `archived: true` removes the links from default list views and stops them from resolving (returns `404` on visit). Set `archived: false` to restore.
+
+Only links whose state actually changes contribute to the usage delta — re-archiving an already-archived link is a no-op for the usage counter.
+
+---
+
+## Bulk move to folder
+
+```
+POST /api/v1/links/bulk-move
+```
+
+### Body
+
+```json
+{ "ids": ["uuid-1", "uuid-2"], "folderId": "folder-uuid" }
+```
+
+Pass `"folderId": null` to unfile.
+
+---
+
+## Bulk tag
+
+```
+POST /api/v1/links/bulk-tag
+```
+
+### Body
+
+```json
+{
+  "ids": ["link-uuid-1", "link-uuid-2"],
+  "tagIds": ["tag-uuid-1", "tag-uuid-2"],
+  "mode": "add"
+}
+```
+
+| `mode` | Behavior |
+|---|---|
+| `add` (default) | Append the tags without removing existing ones. Duplicates skipped. |
+| `set` | Replace the entire tag set on each link with the provided list. |
+
+<Warning>
+`mode: "set"` deletes all existing tags on the listed links before adding the new set. Destructive — use `add` unless replacement is intended.
+</Warning>

@@ -1,64 +1,97 @@
 ---
-title: 'Common Issues'
-description: 'Solutions to common UTM builder issues'
+title: "Common issues"
+description: "Quick fixes for the things that break most often."
 ---
 
-# Common Issues
+<AccordionGroup>
+  <Accordion title="My short link returns 404">
+    Possible causes:
+    - **Slug typo.** Compare what you typed vs the saved short code.
+    - **Link archived.** Archived links 404. Unarchive from the link list.
+    - **Wrong domain.** Visiting `go.example.com/abc` when the link was created on `link.example.com`. Check the domain on the link.
+    - **System path collision.** Slugs that collide with system paths (`api`, `health`, `docs`, `favicon.ico`) won't resolve. Rename the slug.
+  </Accordion>
 
-Find solutions to common issues you might encounter while using the UTM builder.
+<Accordion title="My short link returns 410 Gone">
+    The link has expired. Edit the link → clear or extend `expires_at`.
+</Accordion>
 
-## Link Issues
+<Accordion title="Custom domain stuck on 'pending'">
+    - **CNAME not pointing.** Run `dig CNAME yourdomain.com` and confirm it
+    matches the target shown in linkutm. - **Cloudflare proxied.** Set the
+    record to **DNS only** (gray cloud), not proxied. - **DNS propagation lag.**
+    Wait 5–30 min after changing DNS, then click **Verify** again. - **TTL too
+    high.** Drop TTL to 300 before re-verifying.
+</Accordion>
 
-### Creation Problems
-- Invalid URLs
-- Parameter errors
-- Encoding issues
-- Permission denied
+  <Accordion title="UTM values get changed on save">
+    Workspace UTM Rules are running. Default behavior:
+    - `Force lowercase` lowercases everything.
+    - `Space character` replaces spaces with `_` (or your configured char).
+    - Conditional rules can auto-set fields based on others (e.g., `source=google` → `medium=cpc`).
 
-### Tracking Issues
-- Missing data
-- Incorrect parameters
-- Analytics gaps
-- Integration errors
+    Conditional rule overrides happen silently — open the saved link to see the final stored values. To change behavior, edit [UTM Rules].
 
-## Account Issues
+  </Accordion>
 
-### Access Problems
-- Login issues
-- Permission errors
-- Account limits
-- Team access
+<Accordion title="Validation error: 'Value contains prohibited term'">
+    A workspace UTM rule has a banned substring (e.g., `test`, `draft`). Either
+    rename the value or remove the prohibited term from rules.
+</Accordion>
 
-### Integration Issues
-- API connection
-- Webhook delivery
-- Third-party sync
-- Authentication
+<Accordion title="Validation error: 'campaign is required'">
+    A required-field rule says `utm_campaign` can't be empty. Fill it, or relax
+    the rule.
+</Accordion>
 
-## Troubleshooting Steps
+<Accordion title="403: 'Link limit reached'">
+    Your workspace is at its maximum link count. Either delete or archive unused
+    links to free up headroom. The workspace owner gets a warning email when
+    they are near the link limit.
+</Accordion>
 
-### General Process
-1. Check status
-2. Review logs
-3. Verify settings
-4. Contact support
+<Accordion title="403: 'Domain / Template limit reached'">
+    Same pattern as the link limit. Each resource type has its own maximum per
+    workspace. Remove unused records before adding new ones.
+</Accordion>
 
-### Common Solutions
-- Clear cache
-- Update settings
-- Verify permissions
-- Check documentation
+<Accordion title="409: 'Short code already exists'">
+    Short codes are globally unique. Pick another slug or let the system
+    auto-generate.
+</Accordion>
 
-## Prevention Tips
+<Accordion title="Click count is zero after testing">
+    - Did the click actually resolve? Open the short URL in a private window. -
+    Are you within the workspace's retention window? - Did you reset analytics
+    on this link? That wipes both the counter and click history. - Was the link
+    archived/expired at click time? Those don't count clicks.
+</Accordion>
 
-### Best Practices
-- Regular backups
-- Update checks
-- Testing process
-- Documentation
+<Accordion title="Analytics show fewer clicks than expected">
+    - **Bots.** Slack/LinkedIn/X fetch your URL once when you paste it for the
+    OG preview. These show as referrers like `Slack`, `LinkedIn`, etc. -
+    **Retention window.** Each workspace has a retention window for click data;
+    queries beyond it are silently clipped. - **In-app browsers.** iOS in-app
+    browsers (Instagram, TikTok) sometimes don't pass referrer; clicks count,
+    attribution doesn't.
+</Accordion>
 
-### Maintenance
-- Regular review
-- System updates
-- Security checks
-- Performance monitoring
+<Accordion title="Imported links from Bitly / Rebrandly / Short.io are missing">
+    Importer skips conflicts. Check the import result for `errors` — each
+    conflict says which slug already exists. Rename the slug at source, then
+    re-import.
+</Accordion>
+
+<Accordion title="Invite link says 'expired'">
+    Invites expire 7 days after sending. Resend from the Members page
+    (regenerates the token).
+</Accordion>
+
+  <Accordion title="Can't accept an invite — 'sent to a different email'">
+    Sign in (or create the account) with the exact email the invite was addressed to. Email match is case-insensitive but must be the same address.
+  </Accordion>
+</AccordionGroup>
+
+## Still stuck?
+
+[Contact support](/help/contact-support) with: workspace slug, link short code (if relevant), the exact error message, and the time the issue happened.

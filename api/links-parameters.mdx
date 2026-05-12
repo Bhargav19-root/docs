@@ -1,46 +1,82 @@
 ---
-title: 'Link Parameters'
-description: 'Supported fields for link creation and updates'
+title: "Link fields reference"
+description: "Every field on a link, with type, default, and constraints."
 ---
 
-# Link Parameters
+Full reference for the `Link` resource. Use this when implementing a typed client.
 
-Fields accepted by link creation and update endpoints.
+## Identifiers
 
-## Core
+| Field | Type | Notes |
+|---|---|---|
+| `id` | string (UUID) | Server-generated. Stable. |
+| `shortCode` | string | Unique globally. 3–15 chars typical, max DB column size 255. |
+| `workspaceId` | string (UUID) | Set on creation; immutable. |
+| `creatorId` | string (UUID) | The user who created the link. Set on creation. |
+| `domainId` | string (UUID) \| null | Which short domain the link uses. |
+| `folderId` | string (UUID) \| null | Containing folder, or `null` for unfiled. |
 
-- `target_url` (string): Destination URL
-- `custom_alias` (string, optional): Human-friendly alias
-- `custom_domain` (string, optional): Domain to serve the short link
-- `description` (string, optional): Internal notes
-- `expiry_date` (string, optional): ISO 8601 expiry timestamp
-- `click_limit` (number, optional): Max allowed clicks
-- `password` (string, optional): Password protection
+## Destination + UTMs
 
-## UTM
+| Field | Type | Notes |
+|---|---|---|
+| `url` | string (URL) | Required. Destination. |
+| `utmSource` | string \| null | After UTM-rule processing. |
+| `utmMedium` | string \| null | |
+| `utmCampaign` | string \| null | |
+| `utmTerm` | string \| null | |
+| `utmContent` | string \| null | |
+| `customUtmParams` | object \| null | Arbitrary `utm_*` extras. Appended on redirect. |
 
-- `utm_source` (string)
-- `utm_medium` (string)
-- `utm_campaign` (string)
-- `utm_term` (string, optional)
-- `utm_content` (string, optional)
+## Display + metadata
 
-## Example
+| Field | Type | Notes |
+|---|---|---|
+| `title` | string \| null | Internal label. |
+| `description` | string \| null | Internal context. |
+| `comments` | string \| null | Free-form notes. |
+| `favicon` | string \| null | URL. Defaults to Google's favicon service for the destination. |
+| `ogTitle` | string \| null | OG override. |
+| `ogDescription` | string \| null | |
+| `ogImage` | string \| null | |
 
-```json
-{
-  "target_url": "https://example.com/landing",
-  "utm_source": "newsletter",
-  "utm_medium": "email",
-  "utm_campaign": "spring-2025",
-  "utm_term": "campaign-term",
-  "utm_content": "content-A",
-  "custom_alias": "spring-sale",
-  "custom_domain": "short.example.com",
-  "expiry_date": "2025-12-31T00:00:00Z",
-  "description": "Campaign link",
-  "click_limit": 1000,
-  "password": "optional-pass"
-}
-```
+## Behavior controls
 
+| Field | Type | Enforced at redirect? | Notes |
+|---|---|---|---|
+| `expiresAt` | timestamp \| null | Yes | UTC. Past it → `410 Gone`. |
+| `archived` | boolean | Yes | `true` → `404`, hidden from default list views. |
+| `password` | string \| null | No | Stored on record; not currently gated by the redirect. |
+| `clickLimit` | integer \| null | No | Recorded; not a hard-stop. |
+| `fallbackUrl` | string \| null | No | Stored only. |
+| `iosUrl` | string \| null | No | Stored only. |
+| `androidUrl` | string \| null | No | Stored only. |
+| `geoTargets` | object \| null | No | Stored only. |
+
+## Counters + timestamps
+
+| Field | Type | Notes |
+|---|---|---|
+| `clicks` | integer | Server-incremented on each redirect. |
+| `lastClickAt` | timestamp \| null | Updated on each redirect. |
+| `createdAt` | timestamp | UTC. |
+| `updatedAt` | timestamp | UTC. Auto-updated on patch. |
+
+## Relationships
+
+| Field | Type | Notes |
+|---|---|---|
+| `tags` | `LinkTag[]` | Join records to `Tag` resources. |
+| `pixels` | `LinkPixel[]` | Tracking pixels attached to this link. |
+| `analytics` | `LinkClick[]` | Click history (only via analytics endpoints, not on the link object). |
+
+## Constraints
+
+- `shortCode`: globally unique. System paths (`api`, `health`, `docs`, `favicon.ico`) won't resolve through the redirect — avoid these as slugs.
+- `domain`: must be `verified=true` and `enabled=true` and belong to the same workspace.
+- `password`: counts against the workspace's password-protected link maximum (independent of total link maximum).
+- All UTM string fields are subject to workspace [UTM Rules](/utm-rules/overview) on save.
+
+## Indexes (informational)
+
+The Postgres table is indexed on `workspaceId`, `shortCode`, `createdAt`, `folderId`. Filter on these for efficient queries.
