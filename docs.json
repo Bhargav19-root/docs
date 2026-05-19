@@ -20,6 +20,12 @@
             ]
           },
           {
+            "group": "Playbooks",
+            "pages": [
+              "playbooks/utm-naming-convention"
+            ]
+          },
+          {
             "group": "Links",
             "pages": [
               "links/create-link",
