@@ -1,6 +1,6 @@
 ---
 title: "UTM naming convention"
-description: "An opinionated, copy-paste-ready standard for utm_source, utm_medium, utm_campaign, utm_content, and utm_term — so every link in GA4 lands in the right row."
+description: "An opinionated, copy-paste-ready standard for utm_source, utm_medium, utm_campaign, utm_content, and utm_term so every link in GA4 lands in the right row."
 ---
 
 ## Why this matters
@@ -26,17 +26,17 @@ utm_term     = {paid-keyword}          ← paid search only
 ```
 
 **Rules that apply everywhere:**
-- Lowercase only — `google` not `Google`
-- Hyphens between words — `q2-launch` not `q2_launch` not `Q2 Launch`
+- Lowercase only: `google` not `Google`
+- Hyphens between words: `q2-launch` not `q2_launch` not `Q2 Launch`
 - No spaces, no slashes, no special characters
 - No dates inside `utm_campaign` (the date is in your analytics tool, not your UTM)
-- No PII — no email addresses, user IDs, or names
+- No PII: no email addresses, user IDs, or names
 
 ---
 
 ## Parameter guide
 
-### utm_source — where the traffic came from
+### utm_source: where the traffic came from
 
 Use the **platform name**, lowercase, hyphen-separated. Lock this to a fixed vocab list.
 
@@ -51,19 +51,19 @@ Use the **platform name**, lowercase, hyphen-separated. Lock this to a fixed voc
 | `youtube` | YouTube Ads or organic video |
 | `podcast` | Podcast sponsorships |
 | `affiliate` | Affiliate/referral partners |
-| `partner-{name}` | Named partnerships — e.g. `partner-hubspot` |
+| `partner-{name}` | Named partnerships, e.g. `partner-hubspot` |
 | `direct` | QR codes, offline, vanity URLs |
 | `organic-social` | Non-paid social posts (Instagram, LinkedIn, X) |
 
 <Warning>
-Don't use `email` as a source. It's ambiguous — is it your newsletter, a cold outreach sequence, or a transactional send? Use `newsletter`, `outbound`, or `transactional` instead.
+Don't use `email` as a source. It's ambiguous. Is it your newsletter, a cold outreach sequence, or a transactional send? Use `newsletter`, `outbound`, or `transactional` instead.
 </Warning>
 
-**Enforce it:** Add an `allowed_values` rule on `utm_source` in [UTM Rules](/utm-rules/overview). Anyone using an off-list value gets a rejection on save — not a messy row in GA4 three weeks later.
+**Enforce it:** Add an `allowed_values` rule on `utm_source` in [UTM Rules](/utm-rules/overview). Anyone using an off-list value gets a rejection on save, not a messy row in GA4 three weeks later.
 
 ---
 
-### utm_medium — what kind of traffic
+### utm_medium: what kind of traffic
 
 Medium = the marketing mechanism, not the platform.
 
@@ -71,7 +71,7 @@ Medium = the marketing mechanism, not the platform.
 |---|---|
 | `cpc` | Cost-per-click paid search (Google, Bing) |
 | `paid-social` | Any paid social placement |
-| `email` | All email — newsletter, nurture, outbound |
+| `email` | All email: newsletter, nurture, outbound |
 | `display` | Banner/programmatic display |
 | `video` | Pre-roll, connected TV, YouTube TrueView |
 | `affiliate` | Revenue-share or performance partner links |
@@ -86,7 +86,7 @@ GA4 uses `medium` to populate the **Default channel grouping** report. Stick to 
 
 ---
 
-### utm_campaign — what campaign this link belongs to
+### utm_campaign: what campaign this link belongs to
 
 Pattern: **`{quarter}-{theme}`**
 
@@ -99,9 +99,9 @@ evergreen-free-trial
 ```
 
 Rules:
-- Always start with the quarter (`q1` / `q2` / `q3` / `q4`) — or `evergreen` for always-on
-- Theme is 1–3 words, hyphen-separated, describing the campaign's purpose
-- No year in the value — your analytics date filter handles that
+- Always start with the quarter (`q1` / `q2` / `q3` / `q4`) or `evergreen` for always-on
+- Theme is 1-3 words, hyphen-separated, describing the campaign's purpose
+- No year in the value; your analytics date filter handles that
 - Same campaign name across all channels that belong to one campaign
 
 <Tip>
@@ -110,7 +110,7 @@ If your Google Ads and your newsletter and your LinkedIn post are all promoting 
 
 ---
 
-### utm_content — which creative or placement
+### utm_content: which creative or placement
 
 Use `utm_content` to tell variants apart within a campaign + channel combo.
 
@@ -124,11 +124,11 @@ Common patterns:
 | `{cta-copy}` | `start-free-trial` `see-pricing` | CTA copy variants |
 | `{format}` | `video` `static` `carousel` | Ad format |
 
-Leave `utm_content` **blank in templates** — fill it per link. If you bake it into a template, every link inherits the same content value and the variant data is useless.
+Leave `utm_content` **blank in templates**; fill it per link. If you bake it into a template, every link inherits the same content value and the variant data is useless.
 
 ---
 
-### utm_term — paid search keywords only
+### utm_term: paid search keywords only
 
 `utm_term` = the keyword that triggered the ad. Used almost exclusively for paid search.
 
@@ -138,7 +138,7 @@ utm_term=link+shortener+for+marketing
 utm_term=bitly+alternative
 ```
 
-If you're not running paid search: leave it empty. Don't repurpose `utm_term` for audience segments or targeting notes — that data belongs in your ad platform, not your UTM.
+If you're not running paid search: leave it empty. Don't repurpose `utm_term` for audience segments or targeting notes; that data belongs in your ad platform, not your UTM.
 
 ---
 
@@ -155,7 +155,7 @@ Copy-paste starting points per channel. Fill `utm_campaign` and `utm_content` pe
     utm_content=headline-a
     utm_term={keyword}
     ```
-    Use `{keyword}` as a literal ValueTrack parameter in Google Ads — it auto-populates the triggering keyword.
+    Use `{keyword}` as a literal ValueTrack parameter in Google Ads; it auto-populates the triggering keyword.
   </Tab>
   <Tab title="Meta Ads">
     ```
@@ -164,7 +164,7 @@ Copy-paste starting points per channel. Fill `utm_campaign` and `utm_content` pe
     utm_campaign=q2-retargeting
     utm_content=carousel-pricing
     ```
-    Meta auto-populates `utm_content` if you use `{{ad.name}}` in the URL parameter field — but stick to your own naming pattern for consistency across platforms.
+    Meta auto-populates `utm_content` if you use `{{ad.name}}` in the URL parameter field, but stick to your own naming pattern for consistency across platforms.
   </Tab>
   <Tab title="LinkedIn Ads">
     ```
@@ -191,7 +191,7 @@ Copy-paste starting points per channel. Fill `utm_campaign` and `utm_content` pe
     utm_campaign=evergreen-product-awareness
     utm_content=linkedin-post-may-19
     ```
-    Source and medium are the same here — that's intentional and how GA4 groups organic social correctly. Use `utm_content` to identify the specific post.
+    Source and medium are the same here; that's intentional and how GA4 groups organic social correctly. Use `utm_content` to identify the specific post.
   </Tab>
   <Tab title="Affiliate / Partner">
     ```
@@ -215,18 +215,18 @@ Copy-paste starting points per channel. Fill `utm_campaign` and `utm_content` pe
 
 ---
 
-## Bad → good examples
+## Bad to good examples
 
 | Before | Problem | After |
 |---|---|---|
 | `utm_source=Email` | Caps → splits from `email` in GA4 | `utm_source=newsletter` |
-| `utm_source=email` | Ambiguous — which email type? | `utm_source=newsletter` |
+| `utm_source=email` | Ambiguous. Which email type? | `utm_source=newsletter` |
 | `utm_medium=Social Media` | Spaces + caps | `utm_medium=paid-social` |
 | `utm_campaign=Q2 2025 Campaign` | Spaces, caps, year | `utm_campaign=q2-brand-awareness` |
 | `utm_campaign=newsletter_may_19_2025` | Date baked in, will duplicate each week | `utm_campaign=q2-weekly-digest` |
 | `utm_content=` *(empty)* | No way to tell creative variants apart | `utm_content=hero-cta` |
-| `utm_term=linkedin` | Term field used for channel | Delete — that's what source/medium is for |
-| `utm_source=FB` | Abbreviation — won't match `meta` filter | `utm_source=meta` |
+| `utm_term=linkedin` | Term field used for channel | Delete; that's what source/medium is for |
+| `utm_source=FB` | Abbreviation, won't match `meta` filter | `utm_source=meta` |
 | `utm_campaign=test` | Will pollute prod data, no meaning | Block with UTM Rules prohibited values |
 
 ---
@@ -301,6 +301,6 @@ Don't let individuals add new values ad hoc. One rogue `utm_source=IG` takes one
     Filter GA4 → Source/Medium report → look for rows with caps, spaces, or off-list values. Those are your cleanup targets.
   </Step>
   <Step title="Share this page with the team">
-    Bookmark it. Link to it in your team wiki. This is the source of truth — not a Notion doc only you can find.
+    Bookmark it. Link to it in your team wiki. This is the source of truth, not a Notion doc only you can find.
   </Step>
 </Steps>
