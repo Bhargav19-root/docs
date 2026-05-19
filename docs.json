@@ -74,7 +74,8 @@
           {
             "group": "Integrations",
             "pages": [
-              "integrations/pixel-tracking"
+              "integrations/pixel-tracking",
+              "integrations/ga4"
             ]
           },
           {
