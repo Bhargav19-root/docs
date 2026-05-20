@@ -3,6 +3,10 @@ title: "Templates overview"
 description: "Save UTM presets so the team stops re-typing source/medium for every link."
 ---
 
+<Tip>
+Before creating templates, agree on your team's naming convention. The [UTM naming convention](/playbooks/utm-naming-convention) playbook defines the approved source, medium, and campaign values your templates should use.
+</Tip>
+
 ## What it is
 
 A UTM template is a saved set of UTM values (source, medium, campaign, term, content) you can apply with one click in the link builder. Workspace-scoped. Track how often each is used.
@@ -27,10 +31,10 @@ A SaaS company runs:
 
 | Template            | source       | medium        | campaign         |
 | ------------------- | ------------ | ------------- | ---------------- |
-| Newsletter Weekly   | `newsletter` | `email`       | `weekly_digest`  |
-| Google Brand Search | `google`     | `cpc`         | `brand_search`   |
-| Meta Retargeting    | `facebook`   | `paid_social` | `retargeting_v2` |
-| LinkedIn Webinar    | `linkedin`   | `paid_social` | `webinar_q2`     |
+| Newsletter Weekly   | `newsletter` | `email`       | `weekly-digest`  |
+| Google Brand Search | `google`     | `cpc`         | `brand-search`   |
+| Meta Retargeting    | `facebook`   | `paid-social` | `retargeting-v2` |
+| LinkedIn Webinar    | `linkedin`   | `paid-social` | `webinar-q2`     |
 
 Marketer building this week's newsletter link: pick **Newsletter Weekly** template → fill destination URL + content (`hero_cta`) → done in 5 seconds.
 

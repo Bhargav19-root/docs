@@ -40,9 +40,9 @@ description: "Sign up, create a workspace, ship your first tracked link in under
     |---|---|---|
     | `utm_source` | `google` | typically yes |
     | `utm_medium` | `cpc` | typically yes |
-    | `utm_campaign` | `q2_launch` | typically yes |
-    | `utm_term` | `running_shoes` | optional |
-    | `utm_content` | `headline_a` | optional |
+    | `utm_campaign` | `q2-launch` | typically yes |
+    | `utm_term` | `running-shoes` | optional |
+    | `utm_content` | `headline-a` | optional |
 
     <Tip>Apply a [template](/utm-templates/overview) instead of typing — saves time and prevents typos.</Tip>
 
@@ -62,7 +62,7 @@ Open the short link in a private window. You'll be redirected to your destinatio
 ```
 https://yourshort.link/q2-launch
 ↓
-https://example.com/pricing?utm_source=google&utm_medium=cpc&utm_campaign=q2_launch
+https://example.com/pricing?utm_source=google&utm_medium=cpc&utm_campaign=q2-launch
 ```
 
 The click is recorded. Open the link's analytics tab — country, device, browser, referrer all populate within seconds.
@@ -70,8 +70,8 @@ The click is recorded. Open the link's analytics tab — country, device, browse
 ## 4. Next steps
 
 <CardGroup cols={2}>
-  <Card title="Set UTM standards" icon="gavel" href="/utm-rules/overview">
-    Force lowercase, ban spaces, require campaign — workspace-wide.
+  <Card title="Set UTM standards" icon="gavel" href="/playbooks/utm-naming-convention">
+    Approved source, medium, and campaign values — the convention your team follows.
   </Card>
   <Card title="Save a template" icon="copy" href="/utm-templates/create-template">
     Lock in source/medium for a channel so the team can't drift.

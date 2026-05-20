@@ -22,7 +22,9 @@
           {
             "group": "Playbooks",
             "pages": [
-              "playbooks/utm-naming-convention"
+              "playbooks/utm-naming-convention",
+              "playbooks/pre-launch-audit",
+              "playbooks/agency-onboarding"
             ]
           },
           {

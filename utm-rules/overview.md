@@ -3,6 +3,10 @@ title: "UTM rules"
 description: "Workspace-wide validation and standardization that runs on every link save."
 ---
 
+<Tip>
+Setting up UTM Rules for the first time? Start with the [UTM naming convention](/playbooks/utm-naming-convention) playbook to define your approved source, medium, and campaign values before configuring the rules engine.
+</Tip>
+
 ## What it is
 
 UTM Rules is the validation engine that runs whenever a link is created or updated. One rule set per workspace. It applies in this order:

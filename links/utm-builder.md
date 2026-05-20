@@ -15,12 +15,12 @@ Every link. UTMs are how Google Analytics, Mixpanel, Amplitude, and most attribu
 
 <ParamField path="utm_campaign" type="string">
   Which initiative this belongs to.
-  Examples: `q2_launch`, `black_friday_2025`, `weekly_digest`.
+  Examples: `q2-launch`, `black-friday-2025`, `weekly-digest`.
 </ParamField>
 
 <ParamField path="utm_source" type="string">
   Where the click came from. Treat as a "platform name."
-  Examples: `google`, `facebook`, `newsletter`, `partner_blog`.
+  Examples: `google`, `facebook`, `newsletter`, `partner-blog`.
 </ParamField>
 
 <ParamField path="utm_medium" type="string">
@@ -30,12 +30,12 @@ Every link. UTMs are how Google Analytics, Mixpanel, Amplitude, and most attribu
 
 <ParamField path="utm_term" type="string">
   Optional. Paid search keyword or audience segment.
-  Examples: `running_shoes`, `lookalike_us`.
+  Examples: `running-shoes`, `lookalike-us`.
 </ParamField>
 
 <ParamField path="utm_content" type="string">
   Optional. Differentiator for A/B variants or creative pieces.
-  Examples: `headline_a`, `carousel_3`, `cta_orange`.
+  Examples: `headline-a`, `carousel-3`, `cta-orange`.
 </ParamField>
 
 ## How it works under the hood
@@ -43,8 +43,8 @@ Every link. UTMs are how Google Analytics, Mixpanel, Amplitude, and most attribu
 When you save a link, the entered values pass through your workspace's UTM Rules in this order:
 
 <Steps>
-  <Step title="Force lowercase">`Summer_Sale` → `summer_sale` (default ON).</Step>
-  <Step title="Space replacement">`summer sale` → `summer_sale` using your configured space character (default `_`).</Step>
+  <Step title="Force lowercase">`Summer-Sale` → `summer-sale` (default ON).</Step>
+  <Step title="Space replacement">`summer sale` → `summer-sale` using your configured space character (default `_`).</Step>
   <Step title="Max length">Truncated/rejected if over the workspace limit (default 100).</Step>
   <Step title="Prohibited terms">Hard fail if value contains any banned term you set ("test", "draft", etc).</Step>
   <Step title="Allowed characters regex">Hard fail if value doesn't match your allowed-character pattern.</Step>
@@ -62,15 +62,15 @@ Beyond the five standards, you can attach arbitrary `utm_*` keys. Stored under `
 {
     "utm_source": "facebook",
     "utm_medium": "social",
-    "utm_campaign": "q2_launch",
+    "utm_campaign": "q2-launch",
     "customUtmParams": {
-        "audience": "lookalike_3",
-        "creative": "video_15s"
+        "audience": "lookalike-3",
+        "creative": "video-15s"
     }
 }
 ```
 
-Final URL appends `&utm_audience=lookalike_3&utm_creative=video_15s`.
+Final URL appends `&utm_audience=lookalike-3&utm_creative=video-15s`.
 
 ## Real-world examples
 
@@ -79,32 +79,32 @@ Final URL appends `&utm_audience=lookalike_3&utm_creative=video_15s`.
     ```
     utm_source=google
     utm_medium=cpc
-    utm_campaign=q2_launch
+    utm_campaign=q2-launch
     utm_term={keyword}        ← Google Ads dynamic insertion
-    utm_content=headline_a
+    utm_content=headline-a
     ```
   </Tab>
   <Tab title="Meta Ads">
     ```
     utm_source=facebook
-    utm_medium=paid_social
-    utm_campaign=q2_launch
-    utm_content=video_carousel_v2
+    utm_medium=paid-social
+    utm_campaign=q2-launch
+    utm_content=video-carousel-v2
     ```
   </Tab>
   <Tab title="Email">
     ```
     utm_source=newsletter
     utm_medium=email
-    utm_campaign=weekly_digest_2025_w19
-    utm_content=hero_cta
+    utm_campaign=weekly-digest-2025-w19
+    utm_content=hero-cta
     ```
   </Tab>
   <Tab title="Influencer / partner">
     ```
-    utm_source=partner_jane_doe
+    utm_source=partner-jane-doe
     utm_medium=affiliate
-    utm_campaign=q2_launch
+    utm_campaign=q2-launch
     ```
   </Tab>
 </Tabs>
