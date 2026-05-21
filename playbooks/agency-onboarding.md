@@ -160,14 +160,14 @@ Don't leave the client to figure it out alone. Walk them through creating one re
 
 Before you consider onboarding complete:
 
-- [ ] Workspace created and named correctly
-- [ ] Custom domain active (or documented as deferred with a reason)
-- [ ] UTM Rules configured and tested: try creating a link with a bad source value and confirm it rejects
-- [ ] Templates created for all active channels
-- [ ] Client team invited with correct roles
-- [ ] Client's MOPs lead can log in and create a link independently
-- [ ] GA4 attribution verified on at least one live link
-- [ ] UTM naming convention page shared with the client team
+- Workspace created and named correctly
+- Custom domain active (or documented as deferred with a reason)
+- UTM Rules configured and tested: try creating a link with a bad source value and confirm it rejects
+- Templates created for all active channels
+- Client team invited with correct roles
+- Client's MOPs lead can log in and create a link independently
+- GA4 attribution verified on at least one live link
+- UTM naming convention page shared with the client team
 
 ---
 

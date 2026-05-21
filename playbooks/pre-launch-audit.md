@@ -27,14 +27,14 @@ Run this for every campaign. The cost of finding a bad UTM before launch is 2 mi
 
 For every link in the campaign:
 
-- [ ] Links were built from workspace [UTM templates](/utm-templates/overview) where available - reduces manual entry and prevents drift
-- [ ] `utm_source` is set and on the approved list (check [UTM naming convention](/playbooks/utm-naming-convention))
-- [ ] `utm_medium` is set and maps to a valid GA4 channel group
-- [ ] `utm_campaign` is set and matches the campaign name used across all channels
-- [ ] `utm_content` is set if you're running more than one creative or placement variant
-- [ ] `utm_term` is set for paid search links; empty for everything else
-- [ ] No spaces, caps, or special characters in any value (linkutm Rules catch this on save, but verify)
-- [ ] No PII in any UTM field
+- Links were built from workspace [UTM templates](/utm-templates/overview) where available - reduces manual entry and prevents drift
+- `utm_source` is set and on the approved list (check [UTM naming convention](/playbooks/utm-naming-convention))
+- `utm_medium` is set and maps to a valid GA4 channel group
+- `utm_campaign` is set and matches the campaign name used across all channels
+- `utm_content` is set if you're running more than one creative or placement variant
+- `utm_term` is set for paid search links; empty for everything else
+- No spaces, caps, or special characters in any value (linkutm Rules catch this on save, but verify)
+- No PII in any UTM field
 
 <Tip>
 In linkutm, open the link detail page. The UTM values are displayed in the Parameters panel. Check each one before copying the link.
@@ -42,9 +42,9 @@ In linkutm, open the link detail page. The UTM values are displayed in the Param
 
 ### Campaign name consistency
 
-- [ ] All links for this campaign share exactly the same `utm_campaign` value
-- [ ] The campaign name matches what's in your campaign tracker or project management tool
-- [ ] Google Ads, Meta, LinkedIn, email, and any other channels all use the same campaign slug
+- All links for this campaign share exactly the same `utm_campaign` value
+- The campaign name matches what's in your campaign tracker or project management tool
+- Google Ads, Meta, LinkedIn, email, and any other channels all use the same campaign slug
 
 If a Google Ads link says `q2-pricing-launch` and the newsletter link says `q2-pricing`, you'll have a split campaign in GA4 and no single view of campaign performance.
 
@@ -52,10 +52,10 @@ If a Google Ads link says `q2-pricing-launch` and the newsletter link says `q2-p
 
 For every link:
 
-- [ ] Click the link manually in an incognito window and confirm it lands on the right page
-- [ ] The destination page loads without errors (no 404, no redirect loop)
-- [ ] The UTM parameters are visible in the browser address bar on the destination page
-- [ ] If the destination page has a cookie consent banner, click through it and confirm GA4 still fires
+- Click the link manually in an incognito window and confirm it lands on the right page
+- The destination page loads without errors (no 404, no redirect loop)
+- The UTM parameters are visible in the browser address bar on the destination page
+- If the destination page has a cookie consent banner, click through it and confirm GA4 still fires
 
 <Warning>
 If your destination URL uses a redirect (e.g. a landing page platform that rewrites the URL), confirm the UTM parameters survive the redirect. Some platforms strip query strings. Test in an incognito window and check the final URL in the browser bar.
@@ -63,15 +63,15 @@ If your destination URL uses a redirect (e.g. a landing page platform that rewri
 
 ### Short link and expiry check
 
-- [ ] Short link is active in linkutm (status shown on link detail page)
-- [ ] If you set an expiry date, confirm it is after the campaign end date
-- [ ] If the link is password-protected, confirm the password is what you intend and is documented
+- Short link is active in linkutm (status shown on link detail page)
+- If you set an expiry date, confirm it is after the campaign end date
+- If the link is password-protected, confirm the password is what you intend and is documented
 
 ### QR code check (if applicable)
 
-- [ ] Scan the QR code with a phone (not the phone's camera preview, actually follow through to the page)
-- [ ] Confirm it resolves to the right destination with UTMs intact
-- [ ] If the QR code is going to print, test the printed version at print size (small QR codes at low DPI often fail to scan)
+- Scan the QR code with a phone (not the phone's camera preview, actually follow through to the page)
+- Confirm it resolves to the right destination with UTMs intact
+- If the QR code is going to print, test the printed version at print size (small QR codes at low DPI often fail to scan)
 
 ---
 
