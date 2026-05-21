@@ -97,7 +97,6 @@
             "group": "Overview",
             "pages": [
               "api/introduction",
-              "api/postman-guide",
               "api/errors",
               "api/best-practices"
             ]
