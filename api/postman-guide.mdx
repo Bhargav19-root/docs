@@ -1,0 +1,193 @@
+---
+title: "Test with Postman"
+description: "Send and receive API requests using Postman — step by step for first-time users."
+---
+
+## What's happening
+
+Every request you send = you → `https://api.linkutm.com/api/v1` → server returns JSON.
+Two things required on every call: proof of who you are (auth header) + which workspace (workspace header).
+
+---
+
+## Step 1 — Install Postman
+
+Download from [postman.com](https://www.postman.com/downloads/) → install → open. No account needed, skip login prompt.
+
+---
+
+## Step 2 — Get your API token
+
+The easiest option is an API key (long-lived, no expiry):
+
+1. Open the linkutm dashboard
+2. Go to **Settings → Developer → API keys**
+3. Create a key → copy it
+
+Format looks like: `lk_live_abc123...`
+
+<Note>
+Alternative: grab a JWT from your browser session. Open linkutm, press F12 → Application tab → Local Storage → find a `token` or `access_token` key → copy the value. Works but expires.
+</Note>
+
+---
+
+## Step 3 — Get your workspace ID
+
+Look at your dashboard URL: `linkutm.com/workspace/my-workspace` — the slug is `my-workspace`.
+Or check Settings — the workspace slug is shown there.
+
+---
+
+## Step 4 — Create a Postman environment (do once, reuse everywhere)
+
+1. Click **Environments** in the left sidebar → click **+**
+2. Name it `linkutm`
+3. Add these two variables:
+
+| Variable | Value |
+|---|---|
+| `token` | Your API key or JWT |
+| `workspace` | Your workspace slug or UUID |
+
+4. Click **Save** → select `linkutm` from the environment dropdown (top-right of Postman)
+
+Now write `{{token}}` and `{{workspace}}` in every request — Postman fills them in automatically.
+
+---
+
+## Step 5 — Test each endpoint
+
+<Steps>
+
+<Step title="List all links — GET /links">
+
+1. Click **+** for a new request tab
+2. Set method to `GET`
+3. URL: `https://api.linkutm.com/api/v1/links`
+4. Click the **Headers** tab → add:
+
+| Key | Value |
+|---|---|
+| `Authorization` | `Bearer {{token}}` |
+| `x-workspace-id` | `{{workspace}}` |
+
+5. Click **Send**
+
+**Expected response:** `200 OK` with a JSON body like:
+
+```json
+{
+  "links": [...],
+  "pagination": { "page": 1, "limit": 20, "total": 12, "pages": 1 }
+}
+```
+
+</Step>
+
+<Step title="Create a link — POST /links">
+
+1. New request → method: `POST`
+2. URL: `https://api.linkutm.com/api/v1/links`
+3. **Headers** tab:
+
+| Key | Value |
+|---|---|
+| `Authorization` | `Bearer {{token}}` |
+| `x-workspace-id` | `{{workspace}}` |
+| `Content-Type` | `application/json` |
+
+4. **Body** tab → select **raw** → select **JSON** from the dropdown → paste:
+
+```json
+{
+  "url": "https://example.com/test-page",
+  "title": "My test link",
+  "customSlug": "my-test-link",
+  "utmSource": "google",
+  "utmMedium": "cpc",
+  "utmCampaign": "test_campaign"
+}
+```
+
+5. Click **Send**
+
+**Expected response:** `201 Created` — full link object returned. Copy the `id` field from the response, you'll need it for the next two tests.
+
+</Step>
+
+<Step title="Get a single link — GET /links/:id">
+
+1. New request → `GET`
+2. URL: `https://api.linkutm.com/api/v1/links/PASTE-LINK-ID-HERE`
+3. Header: `Authorization: Bearer {{token}}`
+4. Click **Send**
+
+**Expected:** `200 OK`, single link object.
+
+</Step>
+
+<Step title="Get workspace stats — GET /links/stats">
+
+1. `GET` → `https://api.linkutm.com/api/v1/links/stats`
+2. Add both headers (auth + workspace-id)
+3. Click **Send**
+
+**Expected:**
+
+```json
+{
+  "totalLinks": 12,
+  "totalClicks": 450,
+  "recentLinks": [...]
+}
+```
+
+</Step>
+
+<Step title="Delete a link — DELETE /links/:id">
+
+1. New request → `DELETE`
+2. URL: `https://api.linkutm.com/api/v1/links/PASTE-LINK-ID-HERE`
+3. Header: `Authorization: Bearer {{token}}`
+4. Click **Send**
+
+**Expected:** `200 OK`. Link deleted — click history gone too.
+
+</Step>
+
+</Steps>
+
+---
+
+## Reading the response
+
+Status code shows top-right of the Postman response pane:
+
+| Code | Meaning | What to do |
+|---|---|---|
+| `200` | OK | It worked |
+| `201` | Created | Resource was made |
+| `400` | Bad request | Read the `message` field — it says exactly what's wrong |
+| `401` | Unauthorized | Token missing or wrong — re-check `Authorization` header |
+| `403` | Forbidden | Workspace link limit hit, or your role can't do this |
+| `404` | Not found | Wrong ID, or wrong workspace slug |
+| `409` | Conflict | `customSlug` already taken — change it |
+| `500` | Server error | Not your fault — try again or contact support |
+
+Error responses always look like:
+
+```json
+{
+  "statusCode": 400,
+  "message": "what went wrong",
+  "error": "Bad Request"
+}
+```
+
+---
+
+## Quickest full test
+
+Create link → copy `id` from response → GET by ID → DELETE by ID.
+Three requests, confirms the full lifecycle works.
