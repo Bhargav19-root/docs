@@ -9,9 +9,9 @@ The short code is the path after your short domain: `go.acme.com/{shortCode}`. l
 
 ## When to use it
 
-- Always — every link gets a short code, auto-generated or custom.
+- Always - every link gets a short code, auto-generated or custom.
 - When the slug appears in print, on a podcast read, or anywhere a human reads it aloud.
-- Skip customization for ads — auto-generated codes are fine and prevent typos.
+- Skip customization for ads - auto-generated codes are fine and prevent typos.
 
 ## How to set one
 
@@ -20,9 +20,13 @@ The short code is the path after your short domain: `go.acme.com/{shortCode}`. l
     Leave the **Custom slug** field empty when creating a link. linkutm generates a 7-character alphanumeric code.
   </Tab>
   <Tab title="Custom slug">
-    Type your slug in the **Custom slug** field. Allowed: lowercase letters, numbers, hyphens. Keep it short — 3–15 chars reads best.
+    Type your slug in the **Custom slug** field. Allowed: lowercase letters, numbers, hyphens. Keep it short - 3–15 chars reads best.
   </Tab>
 </Tabs>
+
+<Frame>
+  <img src="/images/addlinkpanel.png" alt="Create Link modal - Short Link field showing auto-generated slug and custom slug input" />
+</Frame>
 
 ## Real-world example
 
@@ -37,7 +41,7 @@ The short code is the path after your short domain: `go.acme.com/{shortCode}`. l
 
 <AccordionGroup>
   <Accordion title="Reusing a slug">
-    Short codes are globally unique across linkutm. If the system says *"already exists"*, pick another — even if no one in your workspace uses it.
+    Short codes are globally unique across linkutm. If the system says *"already exists"*, pick another - even if no one in your workspace uses it.
   </Accordion>
   <Accordion title="Long descriptive slugs">
     `q2-2025-product-launch-google-ads` defeats the purpose. Aim for ≤15 characters.

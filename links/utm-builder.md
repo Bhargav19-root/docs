@@ -38,6 +38,10 @@ Every link. UTMs are how Google Analytics, Mixpanel, Amplitude, and most attribu
   Examples: `headline-a`, `carousel-3`, `cta-orange`.
 </ParamField>
 
+<Frame>
+  <img src="/images/linkcreationutmparam.png" alt="UTM Parameters modal - Quick Apply Template dropdown with Source, Medium, Campaign, Term, Content fields and live preview of the final UTM string" />
+</Frame>
+
 ## How it works under the hood
 
 When you save a link, the entered values pass through your workspace's UTM Rules in this order:
@@ -133,5 +137,5 @@ Final URL appends `&utm_audience=lookalike-3&utm_creative=video-15s`.
 </Note>
 
 <Note>
-**Conditional rules override silently.** If you typed `utm_medium=organic` but a rule says *"if source=google then medium=cpc"*, the rule wins and the saved record reflects `cpc` — no warning surfaces.
+**Conditional rules override silently.** If you typed `utm_medium=organic` but a rule says *"if source=google then medium=cpc"*, the rule wins and the saved record reflects `cpc` - no warning surfaces.
 </Note>

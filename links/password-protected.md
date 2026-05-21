@@ -34,6 +34,10 @@ A link with a password set has its password stored on the record. The password i
   </Step>
 </Steps>
 
+<Frame>
+  <img src="/images/addlineadvancedsettings.png" alt="Advanced settings panel - Password, Click Limit, Expiration date, and iOS/Android redirect fields" />
+</Frame>
+
 ## Real-world example
 
 PR team annotating an embargoed share so the recipient knows the embargo password to use on the destination's gated landing page:
@@ -51,7 +55,7 @@ The destination page enforces the password; linkutm tracks the click and passes 
 
 <AccordionGroup>
   <Accordion title="Assuming it gates the redirect">
-    The current public redirect does not block visitors based on the link's password — your destination page must enforce access.
+    The current public redirect does not block visitors based on the link's password - your destination page must enforce access.
   </Accordion>
   <Accordion title="Treating it as security at all">
     Even if redirect-time gating ships later, a password on a link is shareable. Use real authentication for sensitive content.

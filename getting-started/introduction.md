@@ -44,7 +44,7 @@ description: "Sign up, create a workspace, ship your first tracked link in under
     | `utm_term` | `running-shoes` | optional |
     | `utm_content` | `headline-a` | optional |
 
-    <Tip>Apply a [template](/utm-templates/overview) instead of typing — saves time and prevents typos.</Tip>
+    <Tip>Apply a [template](/utm-templates/overview) instead of typing - saves time and prevents typos.</Tip>
 
   </Step>
   <Step title="(Optional) custom slug">
@@ -54,6 +54,10 @@ description: "Sign up, create a workspace, ship your first tracked link in under
     Click **Create**. The link is live immediately.
   </Step>
 </Steps>
+
+<Frame>
+  <img src="/images/addlinkpanel.png" alt="Create Link modal - Destination URL, Short Link, Title, Tags, Folder, UTM parameters tab, QR preview, and OG card preview" />
+</Frame>
 
 ## 3. Test the redirect
 
@@ -65,13 +69,17 @@ https://yourshort.link/q2-launch
 https://example.com/pricing?utm_source=google&utm_medium=cpc&utm_campaign=q2-launch
 ```
 
-The click is recorded. Open the link's analytics tab — country, device, browser, referrer all populate within seconds.
+<Frame>
+  <img src="/images/linkdashboardlineview.png" alt="Links dashboard - list view showing Link title, short URL, destination, tags, click count, and created date" />
+</Frame>
+
+The click is recorded. Open the link's analytics tab - country, device, browser, referrer all populate within seconds.
 
 ## 4. Next steps
 
 <CardGroup cols={2}>
   <Card title="Set UTM standards" icon="gavel" href="/playbooks/utm-naming-convention">
-    Approved source, medium, and campaign values — the convention your team follows.
+    Approved source, medium, and campaign values - the convention your team follows.
   </Card>
   <Card title="Save a template" icon="copy" href="/utm-templates/create-template">
     Lock in source/medium for a channel so the team can't drift.
@@ -88,7 +96,7 @@ The click is recorded. Open the link's analytics tab — country, device, browse
 
 <AccordionGroup>
   <Accordion title="Workspaces are the unit of isolation">
-    Links, folders, tags, templates, UTM rules, custom domains, pixels, API keys, analytics — all scoped per workspace. Members of one workspace can't see another. Useful for agency-style multi-client setups.
+    Links, folders, tags, templates, UTM rules, custom domains, pixels, API keys, analytics - all scoped per workspace. Members of one workspace can't see another. Useful for agency-style multi-client setups.
   </Accordion>
   <Accordion title="Short codes are globally unique">
     Even though links are workspace-scoped, the short code (the part after `yourshort.link/`) is unique across the system. If you try to use a slug another workspace already grabbed, creation fails with a conflict error.
@@ -97,6 +105,6 @@ The click is recorded. Open the link's analytics tab — country, device, browse
     Before a link saves, your workspace's UTM Rules are applied: lowercase, space replacement, max length, prohibited terms, conditional logic. The cleaned values are what gets stored. See [UTM Rules](/utm-rules/overview).
   </Accordion>
   <Accordion title="Analytics has a retention window">
-    Each workspace has a retention window for click data. Queries beyond that window are clipped to it. Older clicks are not deleted from the database — they're just outside the queryable range.
+    Each workspace has a retention window for click data. Queries beyond that window are clipped to it. Older clicks are not deleted from the database - they're just outside the queryable range.
   </Accordion>
 </AccordionGroup>

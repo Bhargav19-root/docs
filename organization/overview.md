@@ -7,10 +7,10 @@ description: "How linkutm structures multi-team, multi-client setups."
 
 The mental model:
 
-- **Account** — your user. Can belong to many workspaces.
-- **Workspace** — the unit of isolation. All links, folders, tags, templates, UTM rules, custom domains, pixels, API keys, analytics, billing, and members live here.
-- **Member** — a user attached to a workspace with a role (`owner`, `member`, custom).
-- **Folders** — sub-organization _within_ a workspace.
+- **Account** - your user. Can belong to many workspaces.
+- **Workspace** - the unit of isolation. All links, folders, tags, templates, UTM rules, custom domains, pixels, API keys, analytics, billing, and members live here.
+- **Member** - a user attached to a workspace with a role (`owner`, `member`, custom).
+- **Folders** - sub-organization _within_ a workspace.
 
 There's no concept of "organization" above workspace. Run multiple workspaces (e.g., per client, per brand) on one account.
 
@@ -38,10 +38,10 @@ Acme Marketing Agency:
 ```
 Account: jane@acme-agency.com
 Workspaces:
-├── Acme Internal       (slug: acme-internal)        — owner: jane
-├── Client: Globex      (slug: client-globex)        — owner: jane
-├── Client: Initech     (slug: client-initech)       — owner: jane
-└── Client: Soylent     (slug: client-soylent)       — owner: jane
+├── Acme Internal       (slug: acme-internal)        - owner: jane
+├── Client: Globex      (slug: client-globex)        - owner: jane
+├── Client: Initech     (slug: client-initech)       - owner: jane
+└── Client: Soylent     (slug: client-soylent)       - owner: jane
 
 Each workspace:
 ├── Members (with per-client account managers)

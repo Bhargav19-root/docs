@@ -27,7 +27,7 @@ This playbook covers one client onboarding end to end.
   <Step title="Create a new workspace">
     Go to **Workspaces** in the sidebar → **New Workspace**. Name it after the client: `Acme Corp` not `Client 3`.
 
-    One workspace per client. Never share a workspace across clients — links, analytics, domains, and rules are all workspace-scoped.
+    One workspace per client. Never share a workspace across clients - links, analytics, domains, and rules are all workspace-scoped.
   </Step>
   <Step title="Set workspace defaults">
     Inside the new workspace, go to **Settings → General**:

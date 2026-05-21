@@ -1,6 +1,6 @@
 ---
 title: "Create link"
-description: "POST /links — create a tracked short URL."
+description: "POST /links - create a tracked short URL."
 ---
 
 ## Endpoint
@@ -58,7 +58,7 @@ POST /api/v1/links
 </ParamField>
 
 <ParamField body="password" type="string">
-  Stored on the link record. Counts against the workspace's password-protected link maximum. The public redirect does not currently gate on this — see [Password-protected links](/links/password-protected).
+  Stored on the link record. Counts against the workspace's password-protected link maximum. The public redirect does not currently gate on this - see [Password-protected links](/links/password-protected).
 </ParamField>
 
 <ParamField body="expiresAt" type="string">
@@ -70,7 +70,7 @@ POST /api/v1/links
 </ParamField>
 
 <ParamField body="iosUrl" type="string">
-  Stored as the intended destination for iOS clicks. The public redirect does not currently route based on user-agent — verify behavior before relying on this.
+  Stored as the intended destination for iOS clicks. The public redirect does not currently route based on user-agent - verify behavior before relying on this.
 </ParamField>
 
 <ParamField body="androidUrl" type="string">
@@ -99,7 +99,7 @@ curl -X POST https://api.linkutm.com/api/v1/links \
   -H "Content-Type: application/json" \
   -d '{
     "url": "https://example.com/q2-launch",
-    "title": "Q2 Launch — Google Search — Brand",
+    "title": "Q2 Launch - Google Search - Brand",
     "customSlug": "q2-launch",
     "utmSource": "google",
     "utmMedium": "cpc",
@@ -118,7 +118,7 @@ All `id` fields are UUIDs.
   "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
   "url": "https://example.com/q2-launch",
   "shortCode": "q2-launch",
-  "title": "Q2 Launch — Google Search — Brand",
+  "title": "Q2 Launch - Google Search - Brand",
   "description": null,
   "utmSource": "google",
   "utmMedium": "cpc",
@@ -154,6 +154,6 @@ All `id` fields are UUIDs.
 
 - UTMs are processed by [workspace UTM rules](/utm-rules/overview) before save (lowercase, space replacement, conditional logic). The stored values may differ from what you sent.
 - If `domainId` is omitted, the workspace's default domain is used.
-- `tagIds` are attached **after** the link is created, in a separate join-table insert. If any tag UUID doesn't exist or belongs to a different workspace, the join insert fails with a foreign-key error — but the link is already saved at that point. Validate `tagIds` before posting (e.g., `GET /tags`) to avoid orphaned links with no tags.
-- Link usage counter is incremented async — your response returns immediately.
+- `tagIds` are attached **after** the link is created, in a separate join-table insert. If any tag UUID doesn't exist or belongs to a different workspace, the join insert fails with a foreign-key error - but the link is already saved at that point. Validate `tagIds` before posting (e.g., `GET /tags`) to avoid orphaned links with no tags.
+- Link usage counter is incremented async - your response returns immediately.
 - At 80% of the workspace's link maximum, the owner gets a warning email.

@@ -72,7 +72,7 @@ Full reference for the `Link` resource. Use this when implementing a typed clien
 
 ## Constraints
 
-- `shortCode`: globally unique. System paths (`api`, `health`, `docs`, `favicon.ico`) won't resolve through the redirect — avoid these as slugs.
+- `shortCode`: globally unique. System paths (`api`, `health`, `docs`, `favicon.ico`) won't resolve through the redirect - avoid these as slugs.
 - `domain`: must be `verified=true` and `enabled=true` and belong to the same workspace.
 - `password`: counts against the workspace's password-protected link maximum (independent of total link maximum).
 - All UTM string fields are subject to workspace [UTM Rules](/utm-rules/overview) on save.

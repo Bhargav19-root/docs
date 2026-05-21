@@ -20,10 +20,10 @@ The Templates page shows all workspace templates with usage counts, status, and 
     Sidebar → **UTM Templates**. Default sort: active templates first, then most-recently-created.
   </Step>
   <Step title="Search">
-    Search matches name, description, source, medium, campaign — useful when you have 50+ templates.
+    Search matches name, description, source, medium, campaign - useful when you have 50+ templates.
   </Step>
   <Step title="See usage">
-    Each template shows the usage count — how many times it's been applied to a link. Templates with 0 uses after a month are candidates for cleanup.
+    Each template shows the usage count - how many times it's been applied to a link. Templates with 0 uses after a month are candidates for cleanup.
   </Step>
   <Step title="Edit">
     Click any template → **Edit**. Update name, description, or any UTM field. Past links unaffected.
@@ -33,6 +33,10 @@ The Templates page shows all workspace templates with usage counts, status, and 
   </Step>
 </Steps>
 
+<Frame>
+  <img src="/images/templateeditdeleteandduplicate.png" alt="UTM Templates - template row with Edit, Duplicate, and Delete action buttons visible" />
+</Frame>
+
 ## Real-world example
 
 Quarterly audit of an agency workspace:
@@ -40,8 +44,8 @@ Quarterly audit of an agency workspace:
 | Template             | Uses | Action                    |
 | -------------------- | ---- | ------------------------- |
 | Google Brand Search  | 412  | Keep                      |
-| Newsletter — generic | 287  | Keep                      |
-| Test — Don't Use     | 0    | Delete                    |
+| Newsletter - generic | 287  | Keep                      |
+| Test - Don't Use     | 0    | Delete                    |
 | Old Logo Refresh     | 6    | Delete (retired strategy) |
 
 ## Common mistakes

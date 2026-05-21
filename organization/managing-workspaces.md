@@ -21,6 +21,10 @@ Operations on a workspace: create, update name/slug/logo, switch between workspa
   </Step>
 </Steps>
 
+<Frame>
+  <img src="/images/createnewworkspace.png" alt="Create new workspace modal - workspace name and slug fields" />
+</Frame>
+
 ## How to update
 
 <Steps>
@@ -49,7 +53,7 @@ Two-stage delete process for safety:
     Settings (or trash view) → **Restore**. Owner only. Workspace becomes active again, members regain access.
   </Step>
   <Step title="Permanent delete">
-    After 7 days, the workspace is purged automatically. Or owner can hard-delete immediately by confirming again — owner email gets a final confirmation.
+    After 7 days, the workspace is purged automatically. Or owner can hard-delete immediately by confirming again - owner email gets a final confirmation.
 
     All data is gone: links, click history, templates, domains, members. Cannot be recovered.
 
@@ -57,7 +61,7 @@ Two-stage delete process for safety:
 </Steps>
 
 <Warning>
-Permanent delete is irreversible. Click history, custom domains (DNS records remain — you must reassign), member access, and billing history are removed. Export anything you need first.
+Permanent delete is irreversible. Click history, custom domains (DNS records remain - you must reassign), member access, and billing history are removed. Export anything you need first.
 </Warning>
 
 ## Real-world example
@@ -66,7 +70,7 @@ Closing out an agency client:
 
 ```
 Day 0:    Soft-delete "Client: Soylent". Members get email.
-Day 1-6:  Client requests final reports — restore, export, soft-delete again.
+Day 1-6:  Client requests final reports - restore, export, soft-delete again.
 Day 7+:   Auto-purged. Custom domain (soy.link) becomes orphan; client takes it back via DNS.
 ```
 

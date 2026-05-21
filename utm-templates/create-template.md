@@ -18,7 +18,7 @@ You're about to type the same `utm_source` / `utm_medium` combination for the th
     Sidebar → **UTM Templates** → **Create Template**.
   </Step>
   <Step title="Name and Description(optional) ">
-    Name shows in the template picker. Description is internal context — when to use this template.
+    Name shows in the template picker. Description is internal context - when to use this template.
   </Step>
   <Step title="Fill the UTM fields">
     Set the fields you want pre-filled. Leave any field blank if it's not common to the use case.
@@ -37,18 +37,22 @@ You're about to type the same `utm_source` / `utm_medium` combination for the th
   </Step>
 </Steps>
 
+<Frame>
+  <img src="/images/createutmtemplate.png" alt="Create Template modal - Template Name, Campaign, Description, Source, Medium, Term, Content fields" />
+</Frame>
+
 ## Real-world example
 
-Newsletter template — kept loose so one template covers all newsletters:
+Newsletter template - kept loose so one template covers all newsletters:
 
 ```
-Name:         Newsletter — generic
+Name:         Newsletter - generic
 Description:  Default for any weekly/monthly newsletter send
 utm_source:   newsletter
 utm_medium:   email
-utm_campaign: (blank — set per send)
+utm_campaign: (blank - set per send)
 utm_term:     (blank)
-utm_content:  (blank — set per CTA)
+utm_content:  (blank - set per CTA)
 ```
 
 Per-link, the marketer fills `utm_campaign=weekly_digest_2025_w19` and `utm_content=hero_cta`.
@@ -57,13 +61,13 @@ Per-link, the marketer fills `utm_campaign=weekly_digest_2025_w19` and `utm_cont
 
 <AccordionGroup>
   <Accordion title="Over-specific templates">
-    `Newsletter — Week 19 — Hero CTA` becomes a single-use template. Make it generic; vary at link time.
+    `Newsletter - Week 19 - Hero CTA` becomes a single-use template. Make it generic; vary at link time.
   </Accordion>
   <Accordion title="Inconsistent naming">
     `News - Email`, `Email/Newsletter`, `newsletter_email` all describe the same thing. Settle on a convention before the team builds 30 templates.
   </Accordion>
   <Accordion title="Skipping the description field">
-    Six months in, "Q2 Launch — paid" is ambiguous. Describe **when** to use this template, not just what it sets.
+    Six months in, "Q2 Launch - paid" is ambiguous. Describe **when** to use this template, not just what it sets.
   </Accordion>
 </AccordionGroup>
 

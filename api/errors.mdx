@@ -40,12 +40,12 @@ Some endpoints return `message` as an array (validation errors with multiple fie
 | `404` | Not found | Resource doesn't exist or is in a different workspace |
 | `409` | Conflict | Duplicate slug, duplicate name, member already invited |
 | `410` | Gone | Short URL past `expiresAt` (redirect endpoint) |
-| `500` | Server error | Unexpected — open a support ticket with timestamp |
+| `500` | Server error | Unexpected - open a support ticket with timestamp |
 
 ## Common error patterns
 
 <AccordionGroup>
-  <Accordion title="403 Forbidden — usage limit reached">
+  <Accordion title="403 Forbidden - usage limit reached">
     ```json
     {
       "statusCode": 403,
@@ -53,10 +53,10 @@ Some endpoints return `message` as an array (validation errors with multiple fie
       "error": "Forbidden"
     }
     ```
-    The message includes the exact `used / limit` numbers — surface it to the user verbatim so they know how much headroom they need to free up.
+    The message includes the exact `used / limit` numbers - surface it to the user verbatim so they know how much headroom they need to free up.
   </Accordion>
 
-  <Accordion title="400 Bad Request — UTM rule violation">
+  <Accordion title="400 Bad Request - UTM rule violation">
     ```json
     {
       "statusCode": 400,
@@ -67,33 +67,33 @@ Some endpoints return `message` as an array (validation errors with multiple fie
     Multiple field errors are joined with `; ` in the message.
   </Accordion>
 
-  <Accordion title="409 Conflict — short code taken">
+  <Accordion title="409 Conflict - short code taken">
     ```json
     { "statusCode": 409, "message": "Short code already exists", "error": "Conflict" }
     ```
     Slugs are globally unique. Pick a different one.
   </Accordion>
 
-  <Accordion title="400 Bad Request — invalid domain">
+  <Accordion title="400 Bad Request - invalid domain">
     Possible messages: `"Invalid domain for this workspace"`, `"Cannot use an unverified domain"`, `"This domain is deactivated. Reactivate it or choose another domain."`.
   </Accordion>
 
-  <Accordion title="404 Not found — workspace lookup">
+  <Accordion title="404 Not found - workspace lookup">
     `"Workspace not found"`. Check that `x-workspace-id` is a UUID or slug you belong to.
   </Accordion>
 
-  <Accordion title="400 Bad Request — folder validation">
+  <Accordion title="400 Bad Request - folder validation">
     Examples: `"Folder name already exists"`, `"Folder not found"`, `"Folder belongs to a different workspace"`.
   </Accordion>
 </AccordionGroup>
 
 ## Idempotency
 
-POST endpoints are not idempotent by default. Re-sending a `POST /links` creates a second record (with a different auto-slug). To make creation safe to retry, supply a `customSlug` — the second call returns `409 Conflict` if you already created one.
+POST endpoints are not idempotent by default. Re-sending a `POST /links` creates a second record (with a different auto-slug). To make creation safe to retry, supply a `customSlug` - the second call returns `409 Conflict` if you already created one.
 
 ## Retries
 
-Retry on `5xx` and network timeouts with exponential backoff. Don't retry `4xx` — those are caller errors and won't pass on retry.
+Retry on `5xx` and network timeouts with exponential backoff. Don't retry `4xx` - those are caller errors and won't pass on retry.
 
 ```
 Suggested: 3 retries, base 500ms, 2x backoff, max 8s

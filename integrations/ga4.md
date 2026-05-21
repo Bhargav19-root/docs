@@ -13,6 +13,24 @@ No special setup is required for basic source/medium/campaign attribution. Custo
 linkutm's [Pixel Tracking](/integrations/pixel-tracking) integration fires a GA4 PageView event on the short link click itself (at the redirect page). UTM attribution covers the destination page session. These are complementary, not the same thing.
 </Note>
 
+<Frame>
+  <img src="/images/GA4-events-connected.png" alt="GA4 Events dashboard - connected state showing Page Views, Link Clicks, Conversions, and Sign Ups stat cards with link performance table" />
+</Frame>
+
+---
+
+## Per-link GA4 analytics
+
+Click any link in the GA4 Events dashboard to see its individual event breakdown, views, clicks, conversions, and event timeline.
+
+<Frame>
+  <img src="/images/ga4-link-detail.png" alt="GA4 per-link detail view - metric cards for page views, link clicks, conversions and conversion rate, GA4 events over time chart with Views/Clicks/Conversions tabs" />
+</Frame>
+
+<Frame>
+  <img src="/images/ga4-link-detail-bottom.png" alt="GA4 per-link detail - browsers, devices, screen dimensions, countries, regions, cities, referrers, channels, custom events, age groups, domains and languages breakdown tables" />
+</Frame>
+
 ---
 
 ## How GA4 reads UTMs

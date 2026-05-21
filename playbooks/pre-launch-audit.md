@@ -27,7 +27,7 @@ Run this for every campaign. The cost of finding a bad UTM before launch is 2 mi
 
 For every link in the campaign:
 
-- [ ] Links were built from workspace [UTM templates](/utm-templates/overview) where available — reduces manual entry and prevents drift
+- [ ] Links were built from workspace [UTM templates](/utm-templates/overview) where available - reduces manual entry and prevents drift
 - [ ] `utm_source` is set and on the approved list (check [UTM naming convention](/playbooks/utm-naming-convention))
 - [ ] `utm_medium` is set and maps to a valid GA4 channel group
 - [ ] `utm_campaign` is set and matches the campaign name used across all channels

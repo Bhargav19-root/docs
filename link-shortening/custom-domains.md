@@ -13,7 +13,7 @@ Use a domain you own as the short-URL host. `go.acme.com/q2-launch` instead of t
 - Anywhere the URL is read by a human and brand trust matters.
 - Multi-brand agencies running per-client domains.
 
-Skip it for ads-only links — auto-generated codes on the system domain are fine and the URL isn't visible.
+Skip it for ads-only links - auto-generated codes on the system domain are fine and the URL isn't visible.
 
 ## How to set one up
 
@@ -43,9 +43,17 @@ Skip it for ads-only links — auto-generated codes on the system domain are fin
     Mark the domain as **Default** so new links use it without picking. Only one default per workspace.
   </Step>
   <Step title="(Optional) Default redirect">
-    You can set a `defaultRedirect` URL on the domain record. Whether bare-domain hits forward to it depends on your deployment's edge configuration — verify by visiting `https://go.acme.com/` after saving.
+    You can set a `defaultRedirect` URL on the domain record. Whether bare-domain hits forward to it depends on your deployment's edge configuration - verify by visiting `https://go.acme.com/` after saving.
   </Step>
 </Steps>
+
+<Frame>
+  <img src="/images/domainsscreen.png" alt="Domains page - list of custom and system domains with Verified status badges" />
+</Frame>
+
+<Frame>
+  <img src="/images/addcustomdomain.png" alt="Add Custom Domain modal - domain field, optional default redirect, and DNS setup note" />
+</Frame>
 
 ## Real-world example
 
@@ -68,7 +76,7 @@ Marketers in Acme Main create links on `go.acme.com`; Pro team on `pro.acme.link
     Orange-cloud (proxied) breaks the CNAME lookup and SSL handshake. Set to gray-cloud (DNS only).
   </Accordion>
   <Accordion title="Apex domain (no subdomain)">
-    `acme.com` directly is rarely a good idea — most DNS providers won't allow CNAME at apex, and it conflicts with your main site. Use a subdomain.
+    `acme.com` directly is rarely a good idea - most DNS providers won't allow CNAME at apex, and it conflicts with your main site. Use a subdomain.
   </Accordion>
   <Accordion title="Verifying before DNS propagates">
     DNS changes can take minutes to hours. If verification fails, re-check with `dig CNAME go.acme.com` and retry.

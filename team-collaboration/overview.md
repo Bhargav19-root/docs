@@ -13,9 +13,9 @@ Workspace members are users attached to a workspace with a role. Each gets per-w
 | ------------ | ---------------------------------------------------------------------------------------------------- |
 | `owner`      | Everything. Created automatically for the workspace creator. Cannot be removed or have role changed. |
 | `member`     | Default invite role. Create/edit links, manage folders/tags/templates within RBAC permissions.       |
-| Custom roles | Defined via the RBAC system (admin, viewer, etc.) — workspace-level configurable.                    |
+| Custom roles | Defined via the RBAC system (admin, viewer, etc.) - workspace-level configurable.                    |
 
-The exact action-level permissions are tied to the RBAC permission table — each role has a list of allowed `(method, path)` tuples.
+The exact action-level permissions are tied to the RBAC permission table - each role has a list of allowed `(method, path)` tuples.
 
 ## How to invite
 
@@ -33,6 +33,10 @@ The exact action-level permissions are tied to the RBAC permission table — eac
     Resend (resets 7-day expiry) or cancel.
   </Step>
 </Steps>
+
+<Frame>
+  <img src="/images/teammanagement.png" alt="Team Members page - invite form, member list with roles (Admin/Member/Owner), and Roles and Permissions table" />
+</Frame>
 
 ## How to accept an invite
 
@@ -66,6 +70,10 @@ Each member controls what triggers an email to them:
 | `notifyTeamChanges`  | Member joins/leaves, role changes                             |
 | `notifyWeeklyReport` | Weekly digest of workspace activity                           |
 
+<Frame>
+  <img src="/images/notificationsettings.png" alt="Notification settings - Short links, Link alerts, and Team members sections each with ON/OFF toggles per event type" />
+</Frame>
+
 ## Account-level notifications
 
 Separately, each user has account-level toggles (under **Account → Notifications**) that override workspace-level for system events: domain updates, link expiry, billing alerts, security alerts, etc.
@@ -77,9 +85,9 @@ Agency client team:
 ```
 Workspace: Client: Globex
 Members:
-├── jane@acme-agency.com  — owner   (account manager)
-├── kim@acme-agency.com   — member  (campaign analyst)
-└── nick@acme-agency.com  — member  (designer, view-only role would fit better)
+├── jane@acme-agency.com  - owner   (account manager)
+├── kim@acme-agency.com   - member  (campaign analyst)
+└── nick@acme-agency.com  - member  (designer, view-only role would fit better)
 ```
 
 Jane gets all notifications. Kim gets click milestones + weekly report. Nick disables everything except weekly report.
@@ -91,7 +99,7 @@ Jane gets all notifications. Kim gets click milestones + weekly report. Nick dis
     Each workspace has a team-member maximum. The invite endpoint rejects new invites once the workspace is at capacity, with a message naming the current count and limit.
   </Accordion>
   <Accordion title="Re-inviting an existing member">
-    Returns `409 Conflict` — *"User is already a member of this workspace"*.
+    Returns `409 Conflict` - *"User is already a member of this workspace"*.
   </Accordion>
   <Accordion title="Changing the owner's role">
     Blocked by `403 "Cannot change owner role"`. Transfer ownership separately.

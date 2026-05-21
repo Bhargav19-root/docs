@@ -25,7 +25,7 @@ curl -X DELETE https://api.linkutm.com/api/v1/links/5f3b2a1c-4d6e-4a8b-9c0d-1e2f
 ### Behavior
 
 - Cascades click history (`link_clicks` rows are deleted with the link).
-- Decrements workspace link usage (only if the link wasn't already archived — archived links are excluded from active count).
+- Decrements workspace link usage (only if the link wasn't already archived - archived links are excluded from active count).
 - Sends a notification email to workspace members who have `link_deleted` notifications enabled. Async.
 
 ### Errors
@@ -77,7 +77,7 @@ POST /api/v1/links/bulk-archive
 
 Setting `archived: true` removes the links from default list views and stops them from resolving (returns `404` on visit). Set `archived: false` to restore.
 
-Only links whose state actually changes contribute to the usage delta — re-archiving an already-archived link is a no-op for the usage counter.
+Only links whose state actually changes contribute to the usage delta - re-archiving an already-archived link is a no-op for the usage counter.
 
 ---
 
@@ -119,5 +119,5 @@ POST /api/v1/links/bulk-tag
 | `set` | Replace the entire tag set on each link with the provided list. |
 
 <Warning>
-`mode: "set"` deletes all existing tags on the listed links before adding the new set. Destructive — use `add` unless replacement is intended.
+`mode: "set"` deletes all existing tags on the listed links before adding the new set. Destructive - use `add` unless replacement is intended.
 </Warning>

@@ -23,7 +23,7 @@ await fetch('/api/v1/links', {
 });
 ```
 
-If the call fails midway and you retry with the same `customSlug`, the second call returns `409 Conflict` — you know it succeeded the first time.
+If the call fails midway and you retry with the same `customSlug`, the second call returns `409 Conflict` - you know it succeeded the first time.
 
 ## Pagination
 
@@ -43,7 +43,7 @@ Response shape:
 }
 ```
 
-Iterate by incrementing `page` until `pagination.page === pagination.pages`. Don't rely on a "next cursor" — these endpoints are page-based.
+Iterate by incrementing `page` until `pagination.page === pagination.pages`. Don't rely on a "next cursor" - these endpoints are page-based.
 
 ## Usage limits
 
@@ -53,21 +53,21 @@ There's no published global request-rate limit at the API edge today. Workspaces
 - **Total clicks tracked** in the current period.
 - **API call volume** in the current period.
 
-Hitting a maximum returns `403` with a message naming the exact `used / limit`. Don't retry — free up headroom (delete unused records, wait for the next period) before retrying.
+Hitting a maximum returns `403` with a message naming the exact `used / limit`. Don't retry - free up headroom (delete unused records, wait for the next period) before retrying.
 
 For sustained high-volume access, contact support.
 
 ## Retries
 
 - **Retry**: `5xx`, network timeouts, `429` if you ever see it.
-- **Don't retry**: `4xx` (except `429`) — caller error, won't pass on retry.
+- **Don't retry**: `4xx` (except `429`) - caller error, won't pass on retry.
 - **Backoff**: exponential with jitter. Suggested: `min(500ms × 2^attempt + jitter, 8s)`, max 3 retries.
 
 ## Secrets and PII
 
 - **Never** put secrets (API tokens, passwords, customer IDs) in UTM values. They land in destination URLs and analytics.
 - **Never** put PII (emails, names, phone) in UTMs.
-- **Custom slugs** are visible in URL bars — don't encode anything sensitive in them.
+- **Custom slugs** are visible in URL bars - don't encode anything sensitive in them.
 
 ## Webhooks
 
@@ -76,7 +76,7 @@ Webhooks are not currently implemented. Poll the relevant list endpoints for sta
 ## Performance tips
 
 - **Batch where possible.** Bulk endpoints exist for delete (`POST /links/bulk-delete`), archive (`/bulk-archive`), move (`/bulk-move`), tag (`/bulk-tag`).
-- **Use `archived=true` filter** to exclude archived links from list queries — they're excluded by default but you can also explicitly query them.
+- **Use `archived=true` filter** to exclude archived links from list queries - they're excluded by default but you can also explicitly query them.
 - **Workspace-level analytics** is one query for the workspace, not N queries per link. Use it for dashboards.
 
 ## Library and SDK

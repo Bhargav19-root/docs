@@ -7,6 +7,10 @@ description: "Organize links into separate folders; set a default folder for new
 
 Folders are flat containers for organizing links inside a workspace. Each folder is separate; folders don't support nesting, parent/child relationships, or linked folder structures. Each link belongs to zero or one folder. Unfiled links live in **Unsorted**.
 
+<Frame>
+  <img src="/images/fodler&tags.png" alt="Folders and Tags page - folder list with color indicators and tags panel" />
+</Frame>
+
 ## When to use it
 
 - 30+ links per workspace.
@@ -28,6 +32,10 @@ If you only need light grouping, [tags](/links/tags) are cheaper - links can hav
     From the link list: select links -> **Move to folder**.
   </Step>
 </Steps>
+
+<Frame>
+  <img src="/images/foldercreation.png" alt="Create Folder modal - name field and 8-color picker" />
+</Frame>
 
 ## Real-world example
 

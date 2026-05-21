@@ -29,6 +29,10 @@ Tags are color-coded labels on links. Each link can have many tags. Each tag bel
   </Step>
 </Steps>
 
+<Frame>
+  <img src="/images/createtag.png" alt="Create Tag modal - name field and color picker" />
+</Frame>
+
 ## Real-world example
 
 Content team running a quarterly content audit:

@@ -9,7 +9,7 @@ Every link in linkutm gets a short URL: `{domain}/{shortCode}`. Visiting it trig
 
 ## When to use it
 
-Always — there's no "long-URL only" mode. Pick which short domain to use per link.
+Always - there's no "long-URL only" mode. Pick which short domain to use per link.
 
 ## Domain options
 
@@ -63,10 +63,10 @@ What happens:
 
 <AccordionGroup>
   <Accordion title="Sharing the destination URL with UTMs hard-coded">
-    Defeats tracking — no centralized click count, no per-channel attribution, no easy edit. Always share the short URL.
+    Defeats tracking - no centralized click count, no per-channel attribution, no easy edit. Always share the short URL.
   </Accordion>
   <Accordion title="Using HTTP for the short domain">
-    Browsers block mixed-content; some platforms (LinkedIn, Slack) refuse HTTP previews. Always HTTPS — automated certs are issued for verified custom domains.
+    Browsers block mixed-content; some platforms (LinkedIn, Slack) refuse HTTP previews. Always HTTPS - automated certs are issued for verified custom domains.
   </Accordion>
   <Accordion title="Pointing a domain that's already in production">
     If `go.acme.com` is already serving a real site, the CNAME swap will break that site. Use a fresh subdomain.
@@ -88,5 +88,5 @@ What happens:
 </Note>
 
 <Note>
-**Device, geo, click-limit, and password fields.** These are stored on a link's record but the public redirect does not currently route or block based on them — visitors get the main destination URL with UTMs appended. Use the destination page to handle device or country routing if you need it today.
+**Device, geo, click-limit, and password fields.** These are stored on a link's record but the public redirect does not currently route or block based on them - visitors get the main destination URL with UTMs appended. Use the destination page to handle device or country routing if you need it today.
 </Note>

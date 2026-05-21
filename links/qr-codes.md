@@ -5,14 +5,14 @@ description: "Generate a QR for any link to use on print, packaging, or events."
 
 ## What it is
 
-Any short link in linkutm can be rendered as a QR code. The QR encodes the short URL — scanning it triggers the same redirect (and the same UTM tracking) as a click.
+Any short link in linkutm can be rendered as a QR code. The QR encodes the short URL - scanning it triggers the same redirect (and the same UTM tracking) as a click.
 
 ## When to use it
 
 - Print: flyers, business cards, packaging.
 - Events: trade-show booths, conference signage.
 - TV / video overlays.
-- Restaurants, retail — anywhere the audience holds a phone but can't type.
+- Restaurants, retail - anywhere the audience holds a phone but can't type.
 
 ## How to use it
 
@@ -27,6 +27,10 @@ Any short link in linkutm can be rendered as a QR code. The QR encodes the short
     Download the high-res QR.
   </Step>
 </Steps>
+
+<Frame>
+  <img src="/images/addlinkqrcode.png" alt="QR code generator - size slider, color pickers, format selector, and Download PNG button" />
+</Frame>
 
 ## Real-world example
 
@@ -46,7 +50,7 @@ Print QR for `go.acme-cafe.com/cafe-loyalty` on every receipt. Analytics shows s
 
 <AccordionGroup>
   <Accordion title="QR encoding the destination directly">
-    Bypasses linkutm — no click tracking, no UTM consistency. Always encode the **short URL**, not the long destination.
+    Bypasses linkutm - no click tracking, no UTM consistency. Always encode the **short URL**, not the long destination.
   </Accordion>
   <Accordion title="Editing the link after print">
     Changing the slug breaks every printed QR. Lock the slug before you commit to print.

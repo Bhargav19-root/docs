@@ -11,19 +11,19 @@ Setting up UTM Rules for the first time? Start with the [UTM naming convention](
 
 UTM Rules is the validation engine that runs whenever a link is created or updated. One rule set per workspace. It applies in this order:
 
-1. **Force lowercase** (default ON) — `Summer_Sale` → `summer_sale`
-2. **Space replacement** (default `_`) — `summer sale` → `summer_sale`
-3. **Max length** (default 100) — reject values longer than this
-4. **Prohibited values** — fail if value contains any banned term
-5. **Allowed characters regex** — fail if value doesn't match
-6. **Required field rules** — fail if a required field is empty/short/wrong-format/not-in-list
-7. **Conditional logic rules** — auto-set fields based on other fields
+1. **Force lowercase** (default ON) - `Summer_Sale` → `summer_sale`
+2. **Space replacement** (default `_`) - `summer sale` → `summer_sale`
+3. **Max length** (default 100) - reject values longer than this
+4. **Prohibited values** - fail if value contains any banned term
+5. **Allowed characters regex** - fail if value doesn't match
+6. **Required field rules** - fail if a required field is empty/short/wrong-format/not-in-list
+7. **Conditional logic rules** - auto-set fields based on other fields
 
 If `isActive = false`, validation is skipped entirely; rules are still saved.
 
 ## When to use it
 
-- Marketing team of more than one person — drift is guaranteed without rules.
+- Marketing team of more than one person - drift is guaranteed without rules.
 - Anyone publishing UTMs to a shared analytics tool (GA, Mixpanel) where casing/typos create duplicate rows.
 - Agencies enforcing client-specific naming conventions.
 
@@ -36,9 +36,14 @@ If `isActive = false`, validation is skipped entirely; rules are still saved.
   <Step title="Set the basics">
     <ParamField path="forceLowercase" type="boolean" default="true">Lowercase all values on save.</ParamField>
     <ParamField path="spaceCharacter" type="string" default="_">Replace runs of whitespace with this. Common values: `_`, `-`, `+`.</ParamField>
+
+    <Frame>
+      <img src="/images/utmrulesspacecharacter.png" alt="Space Character dropdown - Underscore selected, with Hyphen, Plus, URL Encoded, and Remove spaces options each showing a live preview" />
+    </Frame>
     <ParamField path="maxParameterLength" type="integer" default="100">Per-field char limit. Stripe/GA tolerate ~2k; 100 is sane for human-readable UTMs.</ParamField>
     <ParamField path="prohibitedValues" type="string[]">Substrings that fail validation. Case-insensitive contains-match.</ParamField>
     <ParamField path="allowedCharactersRegex" type="string">Optional. Values that don't match this regex are rejected. Example: `^[a-z0-9_-]+$`.</ParamField>
+
   </Step>
   <Step title="Add required-field rules">
     Each rule pins a validation type to one or more parameters:
@@ -66,6 +71,10 @@ If `isActive = false`, validation is skipped entirely; rules are still saved.
     Try creating a link with bad values. Validation errors appear inline on the failing fields. Conditional auto-fills are applied silently to the stored record.
   </Step>
 </Steps>
+
+<Frame>
+  <img src="/images/utmrules1sthalf.png" alt="UTM Rules page - Space Character, Force Lowercase toggle, Max Length, Allowed Characters regex, and Prohibited Values settings" />
+</Frame>
 
 ## Real-world examples
 
@@ -131,7 +140,7 @@ If `isActive = false`, validation is skipped entirely; rules are still saved.
 ## Edge cases
 
 <Note>
-**Rules cleaning vs validation.** Steps 1–2 (lowercase, space replacement) **transform** values silently. Steps 3–6 (length, prohibited, regex, required) **reject** the save with errors. Step 7 (conditional) **transforms** silently — the saved record reflects the override but no warning surfaces.
+**Rules cleaning vs validation.** Steps 1–2 (lowercase, space replacement) **transform** values silently. Steps 3–6 (length, prohibited, regex, required) **reject** the save with errors. Step 7 (conditional) **transforms** silently - the saved record reflects the override but no warning surfaces.
 </Note>
 
 <Note>

@@ -26,13 +26,17 @@ When someone pastes your short link into Slack, LinkedIn, WhatsApp, etc., the pl
   </Step>
 </Steps>
 
+<Frame>
+  <img src="/images/OGpreview.png" alt="Link Preview modal - editable OG title and description fields with social card preview" />
+</Frame>
+
 ## Real-world example
 
 Same destination URL, different previews per channel:
 
 ```
 Short:        go.acme.com/launch-li     (LinkedIn)
-ogTitle:      Acme Widget — built for engineering teams
+ogTitle:      Acme Widget - built for engineering teams
 ogImage:      https://cdn.acme.com/og/launch-linkedin.png
 
 Short:        go.acme.com/launch-x      (X/Twitter)

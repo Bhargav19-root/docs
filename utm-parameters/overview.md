@@ -7,8 +7,8 @@ description: "The workspace dictionary of allowed UTM values. Powers autocomplet
 
 The Parameter library is your workspace's hierarchical dictionary of UTM values:
 
-- **Parents**: the five standard fields — `source`, `medium`, `campaign`, `term`, `content`.
-- **Children**: the allowed values under each parent — e.g., under `source`: `google`, `facebook`, `newsletter`, etc.
+- **Parents**: the five standard fields - `source`, `medium`, `campaign`, `term`, `content`.
+- **Children**: the allowed values under each parent - e.g., under `source`: `google`, `facebook`, `newsletter`, etc.
 
 The link builder's autocomplete pulls from this library.
 
@@ -40,7 +40,7 @@ When the library is empty, you can seed defaults that include:
   </Tab>
 </Tabs>
 
-The five parents (`source`/`medium`/`campaign`/`term`/`content`) are **system parameters** — they cannot be deleted, and only their `name` and `tooltip` can be edited. Children are fully editable.
+The five parents (`source`/`medium`/`campaign`/`term`/`content`) are **system parameters** - they cannot be deleted, and only their `name` and `tooltip` can be edited. Children are fully editable.
 
 ## How to manage it
 
@@ -59,6 +59,10 @@ The five parents (`source`/`medium`/`campaign`/`term`/`content`) are **system pa
     - Delete only if no children depend on it.
   </Step>
 </Steps>
+
+<Frame>
+  <img src="/images/customutmparam.png" alt="UTM Parameters page - five system parameters on the left, Source values list on the right (Google, Facebook, Twitter, LinkedIn, and more)" />
+</Frame>
 
 ## Real-world example
 
@@ -81,7 +85,7 @@ medium/
 └── webinar               ← custom
 ```
 
-The autocomplete now reflects how this team actually drives traffic — partner sites, content partnerships, webinars — not generic SaaS defaults.
+The autocomplete now reflects how this team actually drives traffic - partner sites, content partnerships, webinars - not generic SaaS defaults.
 
 ## Common mistakes
 
