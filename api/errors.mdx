@@ -33,13 +33,14 @@ Some endpoints return `message` as an array (validation errors with multiple fie
 | Code | Meaning | When you'll see it |
 |---|---|---|
 | `200` | OK | Successful GET/PATCH/DELETE |
-| `201` | Created | Successful POST that creates a resource |
+| `201` | Created | Successful POST. NestJS returns `201` for every POST route by default, including validation or processing POSTs that do not persist a new record |
 | `400` | Bad request | Invalid payload, missing required fields, invalid domain, validation rule violation |
 | `401` | Unauthorized | Missing or invalid JWT |
 | `403` | Forbidden | Workspace usage limit reached, role lacks permission, owner-only action |
 | `404` | Not found | Resource doesn't exist or is in a different workspace |
 | `409` | Conflict | Duplicate slug, duplicate name, member already invited |
 | `410` | Gone | Short URL past `expiresAt` (redirect endpoint) |
+| `429` | Too many requests | Global rate limit exceeded - 100 requests/minute per IP. Retry after backoff. |
 | `500` | Server error | Unexpected - open a support ticket with timestamp |
 
 ## Common error patterns
@@ -84,6 +85,13 @@ Some endpoints return `message` as an array (validation errors with multiple fie
 
   <Accordion title="400 Bad Request - folder validation">
     Examples: `"Folder name already exists"`, `"Folder not found"`, `"Folder belongs to a different workspace"`.
+  </Accordion>
+
+  <Accordion title="429 Too Many Requests - rate limit">
+    ```json
+    { "statusCode": 429, "message": "ThrottlerException: Too Many Requests", "error": "Too Many Requests" }
+    ```
+    The global limit is 100 requests per minute per IP. The window resets every 60 seconds - back off and retry. See [Best practices](/api/best-practices) for backoff guidance.
   </Accordion>
 </AccordionGroup>
 

@@ -10,11 +10,12 @@ Full reference for the `Link` resource. Use this when implementing a typed clien
 | Field | Type | Notes |
 |---|---|---|
 | `id` | string (UUID) | Server-generated. Stable. |
-| `shortCode` | string | Unique globally. 3–15 chars typical, max DB column size 255. |
+| `shortCode` | string | Unique globally. 3-15 chars typical, max DB column size 255. |
 | `workspaceId` | string (UUID) | Set on creation; immutable. |
-| `creatorId` | string (UUID) | The user who created the link. Set on creation. |
+| `createdById` | string (UUID) | The user who created the link. Set on creation. |
 | `domainId` | string (UUID) \| null | Which short domain the link uses. |
 | `folderId` | string (UUID) \| null | Containing folder, or `null` for unfiled. |
+| `templateId` | string (UUID) \| null | UTM template the link was created from, or `null`. |
 
 ## Destination + UTMs
 
@@ -52,6 +53,7 @@ Full reference for the `Link` resource. Use this when implementing a typed clien
 | `iosUrl` | string \| null | No | Stored only. |
 | `androidUrl` | string \| null | No | Stored only. |
 | `geoTargets` | object \| null | No | Stored only. |
+| `qrCodeEnabled` | boolean | n/a | Server-set from the workspace QR code quota: `true` while within quota, `false` once it is reached. Not settable on create or update. |
 
 ## Counters + timestamps
 

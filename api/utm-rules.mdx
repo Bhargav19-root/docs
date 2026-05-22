@@ -1,0 +1,451 @@
+---
+title: "UTM rules"
+description: "Workspace-wide normalization and validation rules applied to UTM values."
+---
+
+## Overview
+
+UTM rules are a single per-workspace configuration that normalizes and validates UTM values. Normalization (force lowercase, space replacement, length trimming) is applied to UTM values when links are created. Validation rules (prohibited values, allowed-character regex, required fields, conditional logic) surface errors and warnings before a value is saved.
+
+Every workspace has exactly one UTM rules record. It is created on first access with default settings. Every endpoint lives under `/api/v1/utm-rules`, requires a JWT, and is workspace-scoped.
+
+```
+Authorization: Bearer <jwt>
+x-workspace-id: <uuid_or_slug>
+```
+
+## What the rules do
+
+### Normalization (always applied first)
+
+These three settings are applied, in order, to every UTM value before validation runs and before a link is saved.
+
+| Setting | Type | Default | Effect |
+|---|---|---|---|
+| `forceLowercase` | boolean | `true` | Converts the value to lowercase. |
+| `spaceCharacter` | string | `_` | Replaces every run of whitespace with this character. For example, `Q2 Launch` becomes `q2_launch`. |
+| `maxParameterLength` | integer | `100` | Maximum value length. On the `process` endpoint the value is truncated to this length. On the `validate` endpoint an over-length value produces an error instead. |
+
+### Validation rules
+
+| Setting | Type | Effect |
+|---|---|---|
+| `allowedCharactersRegex` | string | A regular expression the processed value must match. A value that does not match produces a `Value contains disallowed characters` error. An invalid regex is skipped silently. |
+| `prohibitedValues` | string[] | A list of banned substrings. The check is case-insensitive: if the processed value contains any prohibited term, a `Value contains prohibited term` error is produced. |
+| `standardizationRules` | object[] | Named rules stored on the record (see [Standardization rules](#standardization-rules)). They are persisted by `update` but are not currently applied by `validate` or `process`. |
+| `requiredFieldRules` | object[] | Per-field validation rules - empty checks, length checks, regex checks, allowed-value checks (see [Required field rules](#required-field-rules)). |
+| `conditionalLogicRules` | object[] | If-then rules that auto-set one field based on the value of another (see [Conditional logic rules](#conditional-logic-rules)). |
+| `isActive` | boolean | Master switch. When `false`, `validate` returns `valid: true` with no processing, and `process` returns the value unchanged. |
+
+#### Standardization rules
+
+Each entry in `standardizationRules` has this shape:
+
+| Field | Type | Notes |
+|---|---|---|
+| `name` | string | Rule label. |
+| `isActive` | boolean | Whether the rule is enabled. |
+| `ruleType` | string | One of `trim_whitespace`, `remove_special_chars`, `replace_pattern`, `custom`. |
+| `description` | string | Optional explanation. |
+| `applyToParameters` | string[] | Parameter codes the rule targets, e.g., `["source", "medium"]`. |
+| `pattern` | string | Search pattern, used with `replace_pattern`. |
+| `replacement` | string | Replacement text, used with `replace_pattern`. |
+
+<Note>
+Standardization rules are stored and returned by the rules record, but the current `validate` and `process` logic does not apply them. Treat them as configuration that is persisted for future use.
+</Note>
+
+#### Required field rules
+
+Each entry in `requiredFieldRules` has this shape:
+
+| Field | Type | Notes |
+|---|---|---|
+| `name` | string | Rule label. |
+| `isActive` | boolean | Inactive rules are skipped. |
+| `description` | string | Used as the error message when the rule fails. |
+| `validationType` | string | One of `not_empty`, `min_length`, `max_length`, `regex`, `allowed_values`. |
+| `requiredParameters` | string[] | Parameter codes the rule applies to. |
+| `minChar` | integer | Minimum length, used with `min_length`. |
+| `maxChar` | integer | Maximum length, used with `max_length` (defaults to `100` if unset). |
+| `regex` | string | Pattern, used with `regex`. |
+| `allowedValues` | string[] | Permitted values, used with `allowed_values`. |
+
+Behavior of each `validationType`:
+
+- `not_empty` - the field must be present and not blank.
+- `min_length` - if the field has a value, it must be at least `minChar` characters.
+- `max_length` - if the field has a value, it must be at most `maxChar` characters.
+- `regex` - if the field has a value, it must match `regex`. An invalid regex is skipped silently.
+- `allowed_values` - if the field has a value, it must be one of `allowedValues`.
+
+When a check fails, the rule's `description` is used as the error message if set, otherwise a generated default message is used.
+
+#### Conditional logic rules
+
+Each entry in `conditionalLogicRules` has this shape:
+
+| Field | Type | Notes |
+|---|---|---|
+| `ifField` | string | Parameter code to test. |
+| `ifValue` | string | Value to compare against. |
+| `condition` | string | One of `equals`, `contains`, `starts_with`, `ends_with`, `not_empty`. |
+| `thenSet` | string | Parameter code to set when the condition is met. |
+| `toValue` | string | Value to set `thenSet` to. |
+
+When a condition is met during validation, `thenSet` is overwritten with `toValue` in `processedParams` and a warning is added describing the auto-set. Conditional rules run after normalization and required-field checks.
+
+## Get UTM rules
+
+```
+GET /api/v1/utm-rules
+```
+
+Returns the workspace's UTM rules. If no record exists yet, one is created with default settings and returned. This is a get-or-create endpoint.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/utm-rules \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex"
+```
+
+### Example response
+
+```json
+{
+  "id": "r-uuid",
+  "workspaceId": "8a7b6c5d-...",
+  "spaceCharacter": "_",
+  "forceLowercase": true,
+  "maxParameterLength": 100,
+  "allowedCharactersRegex": null,
+  "prohibitedValues": [],
+  "standardizationRules": [],
+  "requiredFieldRules": [],
+  "conditionalLogicRules": [],
+  "isActive": true,
+  "createdById": "1a2b3c4d-...",
+  "updatedById": null,
+  "createdAt": "2026-05-07T10:00:00.000Z",
+  "updatedAt": "2026-05-07T10:00:00.000Z"
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+
+## Update UTM rules
+
+```
+PUT /api/v1/utm-rules
+```
+
+Updates the workspace's UTM rules. The rules record is created first if it does not exist, then updated. All body fields are optional.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="spaceCharacter" type="string">
+  Character that replaces runs of whitespace in UTM values. Send an empty string to disable space replacement.
+</ParamField>
+
+<ParamField body="forceLowercase" type="boolean">
+  When `true`, UTM values are lowercased during processing.
+</ParamField>
+
+<ParamField body="maxParameterLength" type="integer">
+  Maximum value length. `process` truncates to this; `validate` flags an over-length value as an error.
+</ParamField>
+
+<ParamField body="allowedCharactersRegex" type="string">
+  Regular expression a processed value must match. An invalid regex is skipped during validation.
+</ParamField>
+
+<ParamField body="prohibitedValues" type="string[]">
+  Banned substrings. Matching is case-insensitive.
+</ParamField>
+
+<ParamField body="standardizationRules" type="object[]">
+  Named standardization rules. See [Standardization rules](#standardization-rules) for the object shape. Persisted but not currently applied.
+</ParamField>
+
+<ParamField body="requiredFieldRules" type="object[]">
+  Per-field validation rules. See [Required field rules](#required-field-rules) for the object shape.
+</ParamField>
+
+<ParamField body="conditionalLogicRules" type="object[]">
+  If-then auto-set rules. See [Conditional logic rules](#conditional-logic-rules) for the object shape.
+</ParamField>
+
+<ParamField body="isActive" type="boolean">
+  Master switch. When `false`, validation and processing are bypassed.
+</ParamField>
+
+<Warning>
+`update` passes each field straight to the database. Sending a field with `null` or an empty value overwrites the stored value. Send only the fields you intend to change, and re-send array fields in full since they are replaced, not merged.
+</Warning>
+
+### Example request
+
+```bash
+curl -X PUT https://api.linkutm.com/api/v1/utm-rules \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "spaceCharacter": "-",
+    "forceLowercase": true,
+    "maxParameterLength": 80,
+    "allowedCharactersRegex": "^[a-z0-9_-]+$",
+    "prohibitedValues": ["test", "untitled"],
+    "requiredFieldRules": [
+      {
+        "name": "Source required",
+        "isActive": true,
+        "description": "Source is required for all links",
+        "validationType": "not_empty",
+        "requiredParameters": ["source"]
+      }
+    ],
+    "conditionalLogicRules": [
+      {
+        "ifField": "medium",
+        "ifValue": "cpc",
+        "condition": "equals",
+        "thenSet": "source",
+        "toValue": "google"
+      }
+    ],
+    "isActive": true
+  }'
+```
+
+### Example response
+
+```json
+{
+  "id": "r-uuid",
+  "workspaceId": "8a7b6c5d-...",
+  "spaceCharacter": "-",
+  "forceLowercase": true,
+  "maxParameterLength": 80,
+  "allowedCharactersRegex": "^[a-z0-9_-]+$",
+  "prohibitedValues": ["test", "untitled"],
+  "standardizationRules": [],
+  "requiredFieldRules": [
+    {
+      "name": "Source required",
+      "isActive": true,
+      "description": "Source is required for all links",
+      "validationType": "not_empty",
+      "requiredParameters": ["source"]
+    }
+  ],
+  "conditionalLogicRules": [
+    {
+      "ifField": "medium",
+      "ifValue": "cpc",
+      "condition": "equals",
+      "thenSet": "source",
+      "toValue": "google"
+    }
+  ],
+  "isActive": true,
+  "createdById": "1a2b3c4d-...",
+  "updatedById": "1a2b3c4d-...",
+  "createdAt": "2026-05-07T10:00:00.000Z",
+  "updatedAt": "2026-05-07T11:00:00.000Z"
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+
+## Validate UTM parameters
+
+```
+POST /api/v1/utm-rules/validate
+```
+
+Runs a set of UTM values through the workspace rules and returns the validation result plus the normalized values. This endpoint does not save anything - use it to check a value before creating a link.
+
+When `isActive` is `false`, the response is `valid: true` with empty `errors` and `warnings`, and `processedParams` equal to the input.
+
+### Processing order
+
+For each supplied parameter:
+
+1. Force lowercase (if `forceLowercase`).
+2. Replace whitespace with `spaceCharacter` (if set).
+3. Check against `maxParameterLength` - over-length adds an error.
+4. Check against `prohibitedValues` - a contained prohibited term adds an error.
+5. Check against `allowedCharactersRegex` - a non-matching value adds an error.
+
+Then `requiredFieldRules` run against the processed values, and finally `conditionalLogicRules` run, which may auto-set fields and add warnings.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+The body is a flat object of parameter values. The standard keys are recognized, and any additional custom keys are also accepted and processed.
+
+<ParamField body="source" type="string">UTM source value.</ParamField>
+<ParamField body="medium" type="string">UTM medium value.</ParamField>
+<ParamField body="campaign" type="string">UTM campaign value.</ParamField>
+<ParamField body="term" type="string">UTM term value.</ParamField>
+<ParamField body="content" type="string">UTM content value.</ParamField>
+
+<Note>
+Any extra string key beyond the five standard ones is processed the same way. Keys with `undefined` or `null` values are skipped.
+</Note>
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/utm-rules/validate \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "source": "Google",
+    "medium": "CPC",
+    "campaign": "Q2 Launch"
+  }'
+```
+
+### Example response
+
+```json
+{
+  "valid": true,
+  "errors": [],
+  "warnings": [
+    {
+      "field": "source",
+      "message": "Auto-set to \"google\" based on conditional rule"
+    }
+  ],
+  "processedParams": {
+    "source": "google",
+    "medium": "cpc",
+    "campaign": "q2-launch"
+  }
+}
+```
+
+An invalid example, where `maxParameterLength` is exceeded and a prohibited term is present:
+
+```json
+{
+  "valid": false,
+  "errors": [
+    {
+      "field": "campaign",
+      "message": "Value exceeds maximum length of 80 characters"
+    },
+    {
+      "field": "source",
+      "message": "Value contains prohibited term: \"test\""
+    }
+  ],
+  "warnings": [],
+  "processedParams": {
+    "source": "test_source",
+    "campaign": "..."
+  }
+}
+```
+
+### Response fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `valid` | boolean | `true` when `errors` is empty. |
+| `errors` | object[] | Each is `{ field, message }`. A non-empty list means the values should not be saved. |
+| `warnings` | object[] | Each is `{ field, message }`. Currently only emitted by conditional logic rules. Warnings do not make the result invalid. |
+| `processedParams` | object | The normalized values, including any fields auto-set by conditional rules. |
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+
+## Process a single value
+
+```
+POST /api/v1/utm-rules/process
+```
+
+Normalizes a single string against the workspace rules and returns both the original and the processed value. This applies only the normalization steps - lowercase, space replacement, and length truncation. It does not run `prohibitedValues`, `allowedCharactersRegex`, `requiredFieldRules`, or `conditionalLogicRules`.
+
+When `isActive` is `false`, the value is returned unchanged.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="value" type="string" required>
+  The string to normalize.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/utm-rules/process \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex" \
+  -H "Content-Type: application/json" \
+  -d '{ "value": "Q2 Launch Campaign" }'
+```
+
+### Example response
+
+```json
+{
+  "original": "Q2 Launch Campaign",
+  "processed": "q2_launch_campaign"
+}
+```
+
+Here `forceLowercase` lowercased the string and `spaceCharacter` (`_`) replaced the spaces. If the result were longer than `maxParameterLength`, it would also be truncated to that length.
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |

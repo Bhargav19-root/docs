@@ -17,7 +17,7 @@ For self-hosted or staging environments, replace the host accordingly.
 
 ## Authentication
 
-All endpoints require a JWT bearer token. Tokens are issued by the auth flow (login response) and identify the user.
+Most endpoints authenticate with a JWT bearer token, issued by the auth flow (login or OTP verification response) and identifying the user. The Links API also accepts a workspace API key. See [Authentication](/api/auth) for the full flow.
 
 
 ```bash
@@ -32,11 +32,20 @@ curl https://api.linkutm.com/api/v1/links \
 
 ### API keys
 
-Workspaces can also generate long-lived API keys (format `lk_live_<hex>`) for server-to-server usage. Manage them under **Settings → Developer → API keys** in the dashboard.
+Workspaces can generate long-lived API keys (format `lk_live_<hex>`) for server-to-server use. Create and revoke them under **Settings → Developer → API keys** in the dashboard.
 
-<Warning>
-The current public surface authenticates via JWT bearer tokens. If you're integrating from a backend, exchange your credentials for a JWT via the auth endpoint. API keys exist for management but the auth strategy is JWT-bearer end-to-end.
-</Warning>
+An API key authenticates the **Links API**. Send it as the bearer token:
+
+```bash
+curl https://api.linkutm.com/api/v1/links \
+  -H "Authorization: Bearer lk_live_<hex>"
+```
+
+A key is bound to the workspace it was created in, so the `x-workspace-id` header is optional when you authenticate with a key. If you do send it, it must match the key's workspace.
+
+<Note>
+An API key covers the core Links endpoints: create, list, read, update, delete, bulk operations, and imports directly under `/links`. It does not cover link sub-resources served by separate controllers (`/links/:id/analytics`, `/links/:linkId/tags`, `/links/:linkId/pixels`), nor other modules (`workspaces`, `folders`, `tags`, `payments`, and so on). Those require a JWT bearer token.
+</Note>
 
 ## Required headers
 
@@ -45,6 +54,14 @@ The current public surface authenticates via JWT bearer tokens. If you're integr
 | `Authorization: Bearer <token>` | Yes | JWT token |
 | `x-workspace-id: <uuid_or_slug>` | Yes for workspace-scoped endpoints | UUID or slug |
 | `Content-Type: application/json` | For POST/PATCH | |
+
+## Rate limiting
+
+A global rate limit of **100 requests per minute per IP** applies across all endpoints. Exceeding it returns `429 Too Many Requests`. Back off and retry. See [Errors](/api/errors) and [Best practices](/api/best-practices).
+
+## API modules
+
+The `v1` API spans these modules: `links`, `analytics`, `workspaces`, `domains`, `tags`, `folders`, `templates`, `utm-rules`, `parameters`, `pixels`, `api-keys`, `google-analytics`, `storage`, `payments`, and `auth`.
 
 ## Versioning
 
@@ -81,30 +98,48 @@ The API is at `v1`. Breaking changes go behind a new version (`v2`). Within `v1`
 ## What's documented here
 
 <CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/api/auth">
+    Signup, OTP, login, sessions, Google OAuth.
+  </Card>
+  <Card title="Users & API keys" icon="user" href="/api/users">
+    Profile, notification settings, API key management.
+  </Card>
+  <Card title="Links" icon="link" href="/api/links-create">
+    Create, list, update, delete, bulk operations, imports.
+  </Card>
+  <Card title="Short link redirects" icon="arrow-right" href="/api/redirects">
+    Public resolution, expiry, passwords, deep linking.
+  </Card>
+  <Card title="Workspaces & team" icon="users" href="/api/workspaces">
+    Workspaces, members, invites, roles, permissions.
+  </Card>
+  <Card title="Folders & tags" icon="folder" href="/api/folders">
+    Organize and group links.
+  </Card>
+  <Card title="UTM standards" icon="sliders" href="/api/utm-rules">
+    Templates, parameters, and workspace UTM rules.
+  </Card>
+  <Card title="Domains" icon="globe" href="/api/domains">
+    Custom short domains and DNS verification.
+  </Card>
+  <Card title="Analytics & tracking" icon="chart-line" href="/api/analytics">
+    Click analytics, GA4 integration, tracking pixels.
+  </Card>
+  <Card title="Payments" icon="credit-card" href="/api/payments">
+    Plans, checkout, subscriptions, usage limits.
+  </Card>
   <Card title="Errors" icon="triangle-exclamation" href="/api/errors">
     Status codes, error shape, common cases.
   </Card>
   <Card title="Best practices" icon="check" href="/api/best-practices">
     Idempotency, rate limits, retries, secrets.
   </Card>
-  <Card title="Create link" icon="link" href="/api/links-create">
-    `POST /links`
-  </Card>
-  <Card title="Get / list links" icon="list" href="/api/links-get">
-    `GET /links`, `GET /links/:id`
-  </Card>
-  <Card title="Delete link" icon="trash" href="/api/links-delete">
-    `DELETE /links/:id`, bulk delete
-  </Card>
-  <Card title="Link parameters reference" icon="sliders" href="/api/links-parameters">
-    All link fields with types and constraints.
-  </Card>
 </CardGroup>
 
 ## Interactive Swagger
 
-Every deployment exposes Swagger UI at `/docs` with the full live schema. Useful for trying endpoints in dev:
+Every deployment exposes Swagger UI at `/docs` with the full live schema, handy for trying endpoints directly:
 
 ```
-http://localhost:8001/docs
+https://api.linkutm.com/docs
 ```

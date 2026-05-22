@@ -6,8 +6,9 @@ description: "Auth, retries, idempotency, secrets, rate limits."
 ## Authentication
 
 - **Use JWT bearer** for end-user-acting calls.
-- **Store tokens server-side**, never in client bundles, browser localStorage on untrusted pages, or repo files.
-- **Rotate** tokens periodically. Revocation = removing the user's session via auth endpoint.
+- **Use an API key** (`lk_live_`) for server-to-server access to the Links API. A key is workspace-bound, so it does not need the `x-workspace-id` header.
+- **Store tokens and keys server-side**, never in client bundles, browser localStorage on untrusted pages, or repo files.
+- **Rotate** credentials periodically. Revoke a leaked API key from **Settings → Developer → API keys**; revoke a JWT by removing the user's session via the auth endpoint.
 - **Workspace header** is required on workspace-scoped endpoints (`x-workspace-id: <uuid_or_slug>`). Get used to including it.
 
 ## Idempotency
@@ -45,23 +46,33 @@ Response shape:
 
 Iterate by incrementing `page` until `pagination.page === pagination.pages`. Don't rely on a "next cursor" - these endpoints are page-based.
 
+## Rate limiting
+
+A global rate limit of **100 requests per minute per IP** applies at the API edge. Exceeding it returns `429 Too Many Requests`. Back off and retry - the window resets every 60 seconds.
+
 ## Usage limits
 
-There's no published global request-rate limit at the API edge today. Workspaces have per-resource maximums:
+Separate from the request-rate limit, workspaces have per-resource maximums set by their plan:
 
 - **Total links** in a workspace.
 - **Total clicks tracked** in the current period.
 - **API call volume** in the current period.
 
-Hitting a maximum returns `403` with a message naming the exact `used / limit`. Don't retry - free up headroom (delete unused records, wait for the next period) before retrying.
+Hitting a maximum returns `403` with a message naming the exact `used / limit`. Don't retry - free up headroom (delete unused records, wait for the next period, or upgrade the plan) before retrying. See [Payments](/api/payments) for per-plan limits.
 
 For sustained high-volume access, contact support.
 
 ## Retries
 
-- **Retry**: `5xx`, network timeouts, `429` if you ever see it.
+- **Retry**: `5xx`, network timeouts, `429` (rate limit - back off first).
 - **Don't retry**: `4xx` (except `429`) - caller error, won't pass on retry.
 - **Backoff**: exponential with jitter. Suggested: `min(500ms × 2^attempt + jitter, 8s)`, max 3 retries.
+
+## Bulk imports
+
+Importing links from another shortener is a **two-step flow**: call the provider's `/import/<provider>/fetch` endpoint with your credentials to pull links, then post the returned set to `/import/<provider>` to write them in. Splitting fetch from import lets you review or filter before committing. After a large import, call `POST /links/notify-import` to email the workspace.
+
+Before a `POST /links/bulk-create` or import with explicit slugs, run `POST /links/check-shortcodes` as a pre-flight conflict check - short codes are globally unique and a bulk write that hits a taken slug is easier to avoid than to clean up.
 
 ## Secrets and PII
 
@@ -69,16 +80,8 @@ For sustained high-volume access, contact support.
 - **Never** put PII (emails, names, phone) in UTMs.
 - **Custom slugs** are visible in URL bars - don't encode anything sensitive in them.
 
-## Webhooks
-
-Webhooks are not currently implemented. Poll the relevant list endpoints for state changes, or open a feature request if you need event-driven integration.
-
 ## Performance tips
 
 - **Batch where possible.** Bulk endpoints exist for delete (`POST /links/bulk-delete`), archive (`/bulk-archive`), move (`/bulk-move`), tag (`/bulk-tag`).
 - **Use `archived=true` filter** to exclude archived links from list queries - they're excluded by default but you can also explicitly query them.
 - **Workspace-level analytics** is one query for the workspace, not N queries per link. Use it for dashboards.
-
-## Library and SDK
-
-No official SDK ships today. The API is small enough that direct `fetch`/`axios` usage is fine. If you want a typed client, generate one from the Swagger spec at `/docs`.

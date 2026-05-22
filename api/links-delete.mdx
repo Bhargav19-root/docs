@@ -1,6 +1,6 @@
 ---
 title: "Delete & bulk operations"
-description: "DELETE /links/:id, plus bulk delete / archive / move / tag."
+description: "DELETE /links/:id, bulk delete / archive / move / tag, bulk create, and imports."
 ---
 
 ## Delete a single link
@@ -121,3 +121,149 @@ POST /api/v1/links/bulk-tag
 <Warning>
 `mode: "set"` deletes all existing tags on the listed links before adding the new set. Destructive - use `add` unless replacement is intended.
 </Warning>
+
+---
+
+## Check short code availability
+
+```
+POST /api/v1/links/check-shortcodes
+```
+
+Pre-flight check for slug conflicts before a bulk create or import. Short codes are globally unique.
+
+### Body
+
+```json
+{ "shortCodes": ["q2-launch", "spring-sale", "promo-2026"] }
+```
+
+### Response
+
+```json
+{
+  "conflicts": {
+    "q2-launch": true,
+    "spring-sale": false,
+    "promo-2026": false
+  }
+}
+```
+
+`true` means the short code is already taken - pick a different one for that link.
+
+---
+
+## Bulk create
+
+```
+POST /api/v1/links/bulk-create
+```
+
+Create many links in one request. Useful for migrations and bulk imports.
+
+### Body
+
+```json
+{
+  "links": [
+    {
+      "url": "https://example.com/q2-launch",
+      "shortCode": "q2-launch",
+      "title": "Q2 Launch",
+      "utmSource": "google",
+      "utmMedium": "cpc",
+      "utmCampaign": "q2_launch"
+    },
+    {
+      "url": "https://example.com/spring-sale",
+      "title": "Spring Sale"
+    }
+  ]
+}
+```
+
+Per-link fields: `url` (required), `shortCode`, `title`, `description`, `utmSource`, `utmMedium`, `utmCampaign`, `utmTerm`, `utmContent`, `favicon`, `ogImage`. Omit `shortCode` to auto-generate one.
+
+<Note>
+Run `POST /links/check-shortcodes` first to confirm none of your `shortCode` values are taken. Bulk create counts each link against the workspace link maximum.
+</Note>
+
+---
+
+## Import from another shortener
+
+Imports are a two-step flow: **fetch** pulls links from the third-party provider using your credentials for that provider, then **import** writes the returned links into the workspace. This lets you review or filter the fetched set before committing it.
+
+### Short.io
+
+```
+POST /api/v1/links/import/shortio/fetch
+POST /api/v1/links/import/shortio
+```
+
+```json
+// fetch
+{ "apiKey": "<shortio_api_key>" }
+
+// import
+{ "links": [ /* links returned by fetch */ ] }
+```
+
+### Bitly
+
+```
+POST /api/v1/links/import/bitly/fetch
+POST /api/v1/links/import/bitly
+```
+
+```json
+// fetch
+{ "accessToken": "<bitly_access_token>" }
+
+// import
+{ "links": [ /* links returned by fetch */ ] }
+```
+
+### Rebrandly
+
+```
+POST /api/v1/links/import/rebrandly/fetch
+POST /api/v1/links/import/rebrandly
+```
+
+```json
+// fetch
+{ "apiKey": "<rebrandly_api_key>" }
+
+// import
+{
+  "links": [ /* links returned by fetch */ ],
+  "fieldMapping": {
+    "destination": "destinationUrl",
+    "title": "title",
+    "slashtag": "slashtag",
+    "createdAt": "createdAt"
+  }
+}
+```
+
+`fieldMapping` is optional and lets you remap Rebrandly's field names onto linkutm's `destination`, `title`, `slashtag`, and `createdAt`.
+
+---
+
+## Notify on import completion
+
+```
+POST /api/v1/links/notify-import
+```
+
+Triggers an import-completion notification email to the workspace.
+
+### Body
+
+```json
+{ "count": 142, "source": "bitly" }
+```
+
+`source` is optional. Call this after a bulk import or `bulk-create` finishes.

@@ -1,0 +1,516 @@
+---
+title: "Domains"
+description: "Add, verify, and manage custom domains for branded short links."
+---
+
+## Overview
+
+Custom domains let a workspace serve branded short links from its own hostname. Endpoints live under `/api/v1/domains`. All management endpoints require a JWT and the `x-workspace-id` header. One endpoint, `GET /domains/check`, is public and exists only for the Caddy on-demand TLS handshake.
+
+```
+Authorization: Bearer <jwt>
+x-workspace-id: <uuid_or_slug>
+```
+
+<Note>
+`x-workspace-id` accepts a workspace UUID or its slug.
+</Note>
+
+### How a domain becomes usable
+
+<Steps>
+  <Step title="Add the domain">
+    `POST /api/v1/domains` creates the record with `status: "pending"` and `verified: false`, and returns the `cnameTarget` value you need.
+  </Step>
+  <Step title="Point DNS">
+    Add a CNAME record for the domain pointing to the returned `cnameTarget`.
+  </Step>
+  <Step title="Verify">
+    `POST /api/v1/domains/:id/verify` resolves the CNAME. On success the domain flips to `verified: true` and `status: "active"`.
+  </Step>
+  <Step title="Set as default (optional)">
+    `POST /api/v1/domains/:id/set-default` makes the verified domain the default for new links in the workspace.
+  </Step>
+</Steps>
+
+System domains (workspace-scoped to `null`) are seeded automatically. They are pre-verified and active, cannot be updated or deleted, and appear in list results alongside workspace domains.
+
+## Add a custom domain
+
+```
+POST /api/v1/domains
+```
+
+Requires JWT (`@UseGuards(JwtAuthGuard)`).
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="domain" type="string" required>
+  The hostname to add, e.g. `go.acme.com`. Stored lowercased.
+</ParamField>
+
+<ParamField body="defaultRedirect" type="string">
+  Optional URL that the bare domain redirects to when no short code is present.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/domains \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "domain": "go.acme.com",
+    "defaultRedirect": "https://acme.com"
+  }'
+```
+
+### Example response
+
+```json
+{
+  "id": "9e8d7c6b-5a4b-4c3d-2e1f-0a9b8c7d6e5f",
+  "domain": "go.acme.com",
+  "defaultRedirect": "https://acme.com",
+  "status": "pending",
+  "verified": false,
+  "enabled": true,
+  "canDelete": true,
+  "canUpdate": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdById": "1a2b3c4d-...",
+  "createdAt": "2026-05-22T10:00:00.000Z",
+  "updatedAt": "2026-05-22T10:00:00.000Z",
+  "cnameTarget": "cname.linkutm.com"
+}
+```
+
+<Note>
+The `cnameTarget` field tells you where to point the CNAME record. Use this value, not a hardcoded host - it is environment driven.
+</Note>
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `403` | Domain limit for the workspace plan reached. Message includes used and limit counts. |
+| `409` | A domain with that hostname already exists |
+
+## List domains
+
+```
+GET /api/v1/domains
+```
+
+Requires JWT (`@UseGuards(JwtAuthGuard)`). Returns the workspace's domains plus any seeded system domains, paginated.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Query parameters
+
+<ParamField query="search" type="string">
+  Case-insensitive substring match on the domain hostname.
+</ParamField>
+
+<ParamField query="page" type="integer" default="1">
+  Page number. Defaults to `1`.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="10">
+  Results per page. Defaults to `10`.
+</ParamField>
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/domains?search=acme&page=1&limit=10 \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE"
+```
+
+### Example response
+
+```json
+{
+  "data": [
+    {
+      "id": "9e8d7c6b-...",
+      "domain": "go.acme.com",
+      "defaultRedirect": "https://acme.com",
+      "status": "active",
+      "verified": true,
+      "enabled": true,
+      "canDelete": true,
+      "canUpdate": true,
+      "workspaceId": "8a7b6c5d-...",
+      "createdAt": "2026-05-22T10:00:00.000Z",
+      "updatedAt": "2026-05-22T10:05:00.000Z",
+      "linksCount": 12,
+      "cnameTarget": "cname.linkutm.com",
+      "isDefault": true,
+      "primary": false
+    }
+  ],
+  "pagination": {
+    "total": 1,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 1
+  },
+  "cnameTarget": "cname.linkutm.com"
+}
+```
+
+### Behavior notes
+
+- Each entry carries `linksCount` (number of links using the domain), `isDefault` (whether it is the workspace default), and a `primary` boolean stored on the domain record.
+- System domains (those with no workspace) are merged in. If a system domain shares a hostname with a workspace domain, the system entry is dropped to avoid duplicates.
+- The default domain, if any, is moved to the front of `data`.
+- `pagination.total` includes the merged system domains.
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+
+## Get a domain by ID
+
+```
+GET /api/v1/domains/:id
+```
+
+Requires JWT (`@UseGuards(JwtAuthGuard)`). Looks up the domain scoped to the workspace.
+
+<Note>
+This endpoint only resolves domains that belong to the workspace in `x-workspace-id`. Seeded system domains appear in `GET /domains` but are not workspace-scoped, so requesting one by its ID here returns `404`.
+</Note>
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/domains/9e8d7c6b-5a4b-4c3d-2e1f-0a9b8c7d6e5f \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE"
+```
+
+### Example response
+
+```json
+{
+  "id": "9e8d7c6b-...",
+  "domain": "go.acme.com",
+  "defaultRedirect": "https://acme.com",
+  "status": "active",
+  "verified": true,
+  "enabled": true,
+  "canDelete": true,
+  "canUpdate": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdAt": "2026-05-22T10:00:00.000Z",
+  "updatedAt": "2026-05-22T10:05:00.000Z",
+  "linksCount": 12,
+  "cnameTarget": "cname.linkutm.com"
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `404` | Domain not found in this workspace |
+
+## Update a domain
+
+```
+PATCH /api/v1/domains/:id
+```
+
+Requires JWT (`@UseGuards(JwtAuthGuard)`).
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="domain" type="string">
+  New hostname. Stored lowercased.
+</ParamField>
+
+<ParamField body="defaultRedirect" type="string">
+  New default redirect URL for the bare domain.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X PATCH https://api.linkutm.com/api/v1/domains/9e8d7c6b-5a4b-4c3d-2e1f-0a9b8c7d6e5f \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "defaultRedirect": "https://acme.com/home"
+  }'
+```
+
+### Example response
+
+```json
+{
+  "id": "9e8d7c6b-...",
+  "domain": "go.acme.com",
+  "defaultRedirect": "https://acme.com/home",
+  "status": "active",
+  "verified": true,
+  "enabled": true,
+  "canDelete": true,
+  "canUpdate": true,
+  "workspaceId": "8a7b6c5d-...",
+  "updatedById": "1a2b3c4d-...",
+  "updatedAt": "2026-05-22T11:00:00.000Z"
+}
+```
+
+<Warning>
+Changing the `domain` value resets the record to `verified: false` and `status: "pending"`. You must point DNS to the CNAME target and run verify again before the new hostname can serve links.
+</Warning>
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `403` | The domain has `canUpdate: false` (system domain) |
+| `404` | Domain not found in this workspace |
+| `409` | The new `domain` hostname is already taken by another record |
+
+## Delete a domain
+
+```
+DELETE /api/v1/domains/:id
+```
+
+Requires JWT (`@UseGuards(JwtAuthGuard)`).
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Example request
+
+```bash
+curl -X DELETE https://api.linkutm.com/api/v1/domains/9e8d7c6b-5a4b-4c3d-2e1f-0a9b8c7d6e5f \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE"
+```
+
+### Example response
+
+Returns the deleted domain record.
+
+```json
+{
+  "id": "9e8d7c6b-...",
+  "domain": "go.acme.com",
+  "status": "active",
+  "verified": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdAt": "2026-05-22T10:00:00.000Z",
+  "updatedAt": "2026-05-22T11:00:00.000Z"
+}
+```
+
+<Warning>
+A domain with one or more links attached cannot be deleted. Reassign or remove those links first. The error message states how many links are blocking the delete.
+</Warning>
+
+### Errors
+
+| Code | When |
+|---|---|
+| `400` | The domain still has links attached |
+| `401` | Missing or invalid JWT |
+| `403` | The domain has `canDelete: false` (system domain) |
+| `404` | Domain not found in this workspace |
+
+## Verify DNS
+
+```
+POST /api/v1/domains/:id/verify
+```
+
+Requires JWT (`@UseGuards(JwtAuthGuard)`). Resolves the domain's CNAME record and, if it points to a valid target, marks the domain verified and active.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/domains/9e8d7c6b-5a4b-4c3d-2e1f-0a9b8c7d6e5f/verify \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE"
+```
+
+### Example responses
+
+Already verified:
+
+```json
+{ "verified": true, "message": "Domain is already verified" }
+```
+
+CNAME not yet pointing correctly:
+
+```json
+{
+  "verified": false,
+  "message": "CNAME not pointing to cname.linkutm.com. Please add a CNAME record and try again.",
+  "cnameTarget": "cname.linkutm.com"
+}
+```
+
+Verified successfully:
+
+```json
+{ "verified": true, "message": "Domain verified successfully" }
+```
+
+### Behavior notes
+
+- Verification reads the live CNAME record for the domain. If the lookup fails or no record matches a known target, the response is `verified: false` with HTTP `200` (not an error).
+- A successful verification flips the record to `verified: true` and `status: "active"`, and queues a notification email to the workspace owner.
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `404` | Domain not found in this workspace |
+
+## Set default domain
+
+```
+POST /api/v1/domains/:id/set-default
+```
+
+Requires JWT (`@UseGuards(JwtAuthGuard)`). Sets the domain as the workspace default for new links. The domain may be a workspace domain or a system domain.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/domains/9e8d7c6b-5a4b-4c3d-2e1f-0a9b8c7d6e5f/set-default \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE"
+```
+
+### Example response
+
+Returns the domain that is now the default.
+
+```json
+{
+  "id": "9e8d7c6b-...",
+  "domain": "go.acme.com",
+  "status": "active",
+  "verified": true,
+  "workspaceId": "8a7b6c5d-..."
+}
+```
+
+<Warning>
+Only a verified, active domain can be set as default. A pending or unverified domain returns a `400`.
+</Warning>
+
+### Errors
+
+| Code | When |
+|---|---|
+| `400` | The domain is not verified or not active |
+| `401` | Missing or invalid JWT |
+| `404` | Domain not found in this workspace or as a system domain |
+
+## Caddy TLS check (public)
+
+```
+GET /api/v1/domains/check
+```
+
+Public endpoint. No JWT and no `x-workspace-id`. This is the on-demand TLS authorization endpoint that the Caddy reverse proxy calls before issuing a certificate for a custom domain. It is not intended for client integrations.
+
+### Query parameters
+
+<ParamField query="domain" type="string" required>
+  The hostname Caddy is requesting a certificate for.
+</ParamField>
+
+<ParamField query="token" type="string" required>
+  The shared internal token. Must match the server's configured Caddy token.
+</ParamField>
+
+### Example request
+
+```bash
+curl "https://api.linkutm.com/api/v1/domains/check?domain=go.acme.com&token=$CADDY_TOKEN"
+```
+
+### Example response
+
+```json
+{ "ok": true }
+```
+
+### Behavior notes
+
+- Returns `{ "ok": true }` only when the domain exists and is `verified` and `status: "active"`.
+- An empty `domain` or a token mismatch returns `403`.
+- A domain that is not found, not verified, or not active returns `404`.
+
+### Errors
+
+| Code | When |
+|---|---|
+| `403` | Missing `domain` or invalid `token` |
+| `404` | Domain not found, not verified, or not active |

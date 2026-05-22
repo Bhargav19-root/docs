@@ -1,0 +1,173 @@
+---
+title: "API keys"
+description: "Create, list, and revoke workspace API keys used to authenticate the Links API."
+---
+
+## Overview
+
+API keys let server-side integrations authenticate against the linkutm API without a user JWT. Endpoints live under `/api/v1/api-keys`.
+
+A key:
+
+- Is **workspace-scoped**. It is created against one workspace and only ever acts within that workspace.
+- Has the format `lk_live_<48 hex characters>`, for example `lk_live_3f1c...`. The hex portion is 24 random bytes.
+- Authenticates the [Links API](/api/links-create). Pass it on Links requests instead of a user JWT.
+
+<Warning>
+The full key value is returned only in the create response. Store it securely at that point. The list endpoint returns the stored key records, so treat any place a key appears as sensitive.
+</Warning>
+
+### Management endpoints require a JWT
+
+The three endpoints below - create, list, and revoke - manage keys and are themselves protected by a **JWT bearer token**, not by an API key. The API key is what you then use to call the Links API. You also pass the `x-workspace-id` header so the server knows which workspace the keys belong to.
+
+```
+Authorization: Bearer <jwt>
+x-workspace-id: <uuid_or_slug>
+```
+
+## Create an API key
+
+```
+POST /api/v1/api-keys
+```
+
+Generates a new `lk_live_` key for the workspace in `x-workspace-id`. The key is owned by the authenticated user and scoped to that workspace.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace, by UUID or slug |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="name" type="string" required>
+  A label for the key, so you can identify it later (for example `production-server` or `zapier`).
+</ParamField>
+
+<ParamField body="expiresAt" type="string">
+  ISO 8601 date or datetime. After this moment the key stops validating. Omit it for a key that does not expire.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/api-keys \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "production-server",
+    "expiresAt": "2027-01-01T00:00:00.000Z"
+  }'
+```
+
+### Example response
+
+```json
+{
+  "id": "7c8d9e0f-1a2b-4c3d-8e5f-6a7b8c9d0e1f",
+  "name": "production-server",
+  "key": "lk_live_3f1c2a4b5e6d7c8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e",
+  "expiresAt": "2027-01-01T00:00:00.000Z",
+  "lastUsedAt": null,
+  "workspaceId": "8a7b6c5d-4e3f-4a2b-9c1d-0e1f2a3b4c5d",
+  "userId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+  "createdAt": "2026-05-22T14:00:00.000Z"
+}
+```
+
+<Note>
+The `key` field holds the value you use to authenticate the Links API. This is the only response that returns it as part of a fresh generation, so capture it now.
+</Note>
+
+## List API keys
+
+```
+GET /api/v1/api-keys
+```
+
+Returns all API keys for the workspace in `x-workspace-id`, ordered newest first.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace, by UUID or slug |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/api-keys \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex"
+```
+
+### Example response
+
+```json
+[
+  {
+    "id": "7c8d9e0f-1a2b-4c3d-8e5f-6a7b8c9d0e1f",
+    "name": "production-server",
+    "key": "lk_live_3f1c2a4b5e6d7c8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e",
+    "expiresAt": "2027-01-01T00:00:00.000Z",
+    "lastUsedAt": "2026-05-22T13:55:00.000Z",
+    "workspaceId": "8a7b6c5d-4e3f-4a2b-9c1d-0e1f2a3b4c5d",
+    "userId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+    "createdAt": "2026-05-22T14:00:00.000Z"
+  }
+]
+```
+
+`lastUsedAt` is updated each time the key successfully authenticates a request. It is `null` until the key is first used.
+
+## Revoke an API key
+
+```
+DELETE /api/v1/api-keys/:id
+```
+
+Deletes the API key with the given ID. The key must belong to the workspace in `x-workspace-id`. Once deleted, the key no longer authenticates any request.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace, by UUID or slug |
+
+### Example request
+
+```bash
+curl -X DELETE https://api.linkutm.com/api/v1/api-keys/7c8d9e0f-1a2b-4c3d-8e5f-6a7b8c9d0e1f \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex"
+```
+
+### Example response
+
+Returns the deleted API key record.
+
+<Warning>
+Revocation is immediate and permanent. Any integration still using the key starts failing right away.
+</Warning>
+
+## Key expiration
+
+A key with `expiresAt` set in the past is treated as invalid and fails authentication, even though the record still exists. Revoke keys you no longer need rather than relying on expiry alone.
+
+## Errors
+
+| Code | When |
+|---|---|
+| `400` | Missing `name`, or `expiresAt` is not a valid ISO 8601 date string |
+| `401` | Missing or invalid JWT |
+| `404` | API key not found, or it does not belong to the workspace in `x-workspace-id` |
+| `429` | Rate limit exceeded (100 requests/minute per IP) |
+
+See [Errors](/api/errors) for the full error envelope.

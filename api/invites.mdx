@@ -1,0 +1,293 @@
+---
+title: "Invites"
+description: "Create, list, resend, cancel, and accept workspace invites, plus the public invite lookup."
+---
+
+## Overview
+
+Invites add new people to a workspace by email. An invite carries a token, a role to grant on acceptance, and a 7-day expiry. Management endpoints live under `/api/v1/workspaces` and authenticate with a JWT bearer token. One public lookup endpoint lives under `/api/v1/invites`.
+
+```
+Authorization: Bearer <jwt>
+x-workspace-id: <uuid_or_slug>
+```
+
+The `x-workspace-id` header accepts a workspace UUID **or** a workspace slug. It is not used on the accept endpoint or the public lookup, which resolve the workspace from the invite token.
+
+## Create an invite
+
+```
+POST /api/v1/workspaces/invite
+```
+
+Invites a person to the workspace by email. The invite token is valid for 7 days and an invite email is queued. The team member limit of the workspace plan is enforced before the invite is created.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="email" type="string" required>
+  Invitee email. Lowercased and trimmed before use.
+</ParamField>
+
+<ParamField body="role" type="string" required>
+  Role to grant when the invite is accepted.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/workspaces/invite \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE" \
+  -H "Content-Type: application/json" \
+  -d '{ "email": "sam@acme.com", "role": "editor" }'
+```
+
+### Example response
+
+```json
+{
+  "id": "inv-...",
+  "workspaceId": "8a7b6c5d-...",
+  "email": "sam@acme.com",
+  "role": "editor",
+  "token": "<32-char-token>",
+  "expiresAt": "2026-05-29T10:00:00.000Z",
+  "createdAt": "2026-05-22T10:05:00.000Z"
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `400` | The invite email could not be sent (the invite is rolled back) |
+| `403` | Team member limit reached for the workspace plan |
+| `409` | An invite already exists for this email, or the user is already a member |
+
+## List pending invites
+
+```
+GET /api/v1/workspaces/invites
+```
+
+Returns the workspace's invites that have not yet expired, newest first.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/workspaces/invites \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE"
+```
+
+### Example response
+
+```json
+[
+  {
+    "id": "inv-...",
+    "workspaceId": "8a7b6c5d-...",
+    "email": "sam@acme.com",
+    "role": "editor",
+    "token": "<32-char-token>",
+    "expiresAt": "2026-05-29T10:00:00.000Z",
+    "createdAt": "2026-05-22T10:05:00.000Z"
+  }
+]
+```
+
+## Resend an invite
+
+```
+POST /api/v1/workspaces/invites/:inviteId/resend
+```
+
+Issues a fresh token, extends the expiry by 7 days from now, and re-sends the invite email. `:inviteId` is the invite UUID.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/workspaces/invites/inv-.../resend \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE"
+```
+
+### Example response
+
+Returns the updated invite with its new token and expiry.
+
+```json
+{
+  "id": "inv-...",
+  "workspaceId": "8a7b6c5d-...",
+  "email": "sam@acme.com",
+  "role": "editor",
+  "token": "<new-32-char-token>",
+  "expiresAt": "2026-05-29T11:00:00.000Z",
+  "createdAt": "2026-05-22T10:05:00.000Z"
+}
+```
+
+<Note>
+Resending an invite invalidates the previous token. Any link from an earlier invite email stops working.
+</Note>
+
+### Errors
+
+| Code | When |
+|---|---|
+| `404` | Invite not found in this workspace |
+
+## Cancel an invite
+
+```
+DELETE /api/v1/workspaces/invites/:inviteId
+```
+
+Deletes a pending invite. `:inviteId` is the invite UUID.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Example request
+
+```bash
+curl -X DELETE https://api.linkutm.com/api/v1/workspaces/invites/inv-... \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE"
+```
+
+### Example response
+
+Returns the deleted invite record.
+
+### Errors
+
+| Code | When |
+|---|---|
+| `404` | Invite not found in this workspace |
+
+## Accept an invite
+
+```
+POST /api/v1/workspaces/invite/:token/accept
+```
+
+The authenticated user accepts an invite. `:token` is the invite token from the invite email. The user's email must match the invited email. On success the user is added as a member with the invited role and the invite is deleted.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | The accepting user's JWT. No `x-workspace-id` needed; the workspace is resolved from the token. |
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/workspaces/invite/<token>/accept \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+```json
+{
+  "message": "Invite accepted successfully",
+  "workspaceId": "8a7b6c5d-...",
+  "workspace": { "id": "8a7b6c5d-...", "name": "Acme Marketing", "slug": "acme-marketing" }
+}
+```
+
+Existing members are emailed a `teamNotification` with action `joined`, subject to each member's notification preferences.
+
+### Errors
+
+| Code | When |
+|---|---|
+| `403` | Invite has expired, or the caller's email does not match the invited email |
+| `404` | Invite not found |
+| `409` | Caller is already a member of the workspace |
+
+## Get an invite by token (public)
+
+```
+GET /api/v1/invites/:token
+```
+
+Public endpoint. Returns invite details so an invite-acceptance page can be rendered before the user signs in. No `Authorization` header is required.
+
+### Headers
+
+None required.
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/invites/<token>
+```
+
+### Example response
+
+```json
+{
+  "id": "inv-...",
+  "email": "sam@acme.com",
+  "role": "editor",
+  "expiresAt": "2026-05-29T10:00:00.000Z",
+  "workspace": {
+    "id": "8a7b6c5d-...",
+    "name": "Acme Marketing",
+    "slug": "acme-marketing",
+    "logo": null
+  }
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `403` | Invite has expired |
+| `404` | Invite not found |
+
+## Behavior notes
+
+<AccordionGroup>
+  <Accordion title="Invite tokens expire after 7 days">
+    A created or resent invite token is valid for 7 days. Resending an invite generates a new token and invalidates the old one. Accepting or fetching an expired invite returns `403`.
+  </Accordion>
+  <Accordion title="Invite emails are queued">
+    Invite and re-invite emails are sent through an outbound email queue. If the email send fails on create, the invite is rolled back and the call returns `400`.
+  </Accordion>
+  <Accordion title="Plan limit enforced before invite">
+    The workspace plan's team member limit is checked before an invite is created. A workspace at its limit returns `403`.
+  </Accordion>
+</AccordionGroup>
+
+See [Errors](/api/errors) for the full error envelope.

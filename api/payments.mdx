@@ -1,0 +1,281 @@
+---
+title: "Payments & subscriptions"
+description: "Plans, checkout, subscription lifecycle, invoices, and usage limits."
+---
+
+## Overview
+
+Billing runs on **Dodo Payments**. Endpoints live under `/api/v1/payments`. Most are workspace-scoped and require the `x-workspace-id` header plus workspace admin access. Plan listings are public.
+
+```
+Authorization: Bearer <jwt>
+x-workspace-id: <uuid_or_slug>
+```
+
+## Plans
+
+### List plans
+
+```
+GET /api/v1/payments/plans
+```
+
+Public. Returns all active plans.
+
+### Get a plan
+
+```
+GET /api/v1/payments/plans/:id
+```
+
+Public. Returns one plan by ID.
+
+### Plan fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `price` | number | Monthly price. |
+| `yearlyPrice` | number | Yearly price. |
+| `currency` | string | ISO currency code. |
+| `badge` | string \| null | Display badge, e.g. `Popular`. |
+| `maxLinks` | integer | Link maximum. |
+| `maxClicks` | integer | Tracked-click maximum per period. |
+| `maxApiCalls` | integer | API call maximum per period. |
+| `maxTeamMembers` | integer | Team member maximum. |
+| `maxDomains` | integer | Custom domain maximum. |
+| `maxFolders` | integer | Folder maximum. |
+| `maxTags` | integer | Tag maximum. |
+| `maxUtmTemplates` | integer | UTM template maximum. |
+| `maxQrCodes` | integer | QR code maximum. |
+| `maxPasswordProtectedLinks` | integer | Password-protected link maximum. |
+| `analyticsRetention` | integer | Analytics retention window (days). |
+| `features` | object | Feature flags (JSON). |
+
+## Checkout
+
+```
+POST /api/v1/payments/checkout
+```
+
+Requires workspace admin access. Returns a Dodo-hosted checkout URL.
+
+<ParamField body="planId" type="string" required>
+  UUID of the target plan.
+</ParamField>
+<ParamField body="billingCycle" type="string" default="monthly">
+  `monthly` or `yearly`.
+</ParamField>
+<ParamField body="workspaceId" type="string">
+  Target workspace. Defaults to the workspace in `x-workspace-id`.
+</ParamField>
+
+Redirect the user to the returned URL to complete payment.
+
+### Confirm checkout
+
+```
+POST /api/v1/payments/confirm
+```
+
+<ParamField body="subscriptionId" type="string" required>
+  The subscription ID returned by the checkout flow.
+</ParamField>
+
+Finalizes the subscription after the user returns from the Dodo checkout.
+
+### Customer portal
+
+```
+POST /api/v1/payments/portal
+```
+
+Returns a Dodo customer-portal URL where the user can manage payment methods and billing details.
+
+## Subscription
+
+### Get current subscription
+
+```
+GET /api/v1/payments/subscription
+```
+
+Returns the current workspace subscription.
+
+```
+GET /api/v1/payments/subscription/details
+```
+
+Same, plus the linked Dodo subscription data.
+
+### Subscription fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `status` | string | Subscription state. |
+| `billingCycle` | string | `monthly` or `yearly`. |
+| `currentPeriodStart` | timestamp | Start of the current billing period. |
+| `currentPeriodEnd` | timestamp | End of the current billing period. |
+| `cancelAtPeriodEnd` | boolean | `true` if a cancellation is scheduled. |
+| `linksUsed` | integer | Links consumed this period. |
+| `clicksUsed` | integer | Clicks tracked this period. |
+| `apiCallsUsed` | integer | API calls made this period. |
+
+The record also carries pending plan and cycle fields when a downgrade or cycle change is scheduled.
+
+### Cancel
+
+```
+POST /api/v1/payments/subscription/cancel
+```
+
+Cancels the subscription. It typically stays active until `currentPeriodEnd` (`cancelAtPeriodEnd` becomes `true`).
+
+## Plan changes
+
+### Schedule a downgrade
+
+```
+POST /api/v1/payments/subscription/schedule-downgrade
+```
+
+<ParamField body="planId" type="string" required>
+  Target (lower) plan UUID.
+</ParamField>
+<ParamField body="billingCycle" type="string" required>
+  `monthly` or `yearly`.
+</ParamField>
+
+### Downgrade preview
+
+```
+GET /api/v1/payments/subscription/downgrade-preview?planId=<uuid>
+```
+
+Returns the resources that exceed the target plan's limits, so the user can decide what to keep.
+
+### Execute a downgrade
+
+```
+POST /api/v1/payments/subscription/downgrade-execute
+```
+
+Applies the downgrade. You choose which resources to keep within the new limits; the rest are deactivated.
+
+<ParamField body="planId" type="string" required>Target plan UUID.</ParamField>
+<ParamField body="billingCycle" type="string" required>`monthly` or `yearly`.</ParamField>
+<ParamField body="keepDomainIds" type="string[]" required>Domain UUIDs to keep.</ParamField>
+<ParamField body="keepMemberIds" type="string[]" required>Team member UUIDs to keep.</ParamField>
+<ParamField body="keepTemplateIds" type="string[]" required>UTM template UUIDs to keep.</ParamField>
+<ParamField body="keepTagIds" type="string[]" required>Tag UUIDs to keep.</ParamField>
+<ParamField body="keepFolderIds" type="string[]" required>Folder UUIDs to keep.</ParamField>
+
+<Warning>
+Resources not listed in the `keep*` arrays are deactivated when the downgrade executes. Use `downgrade-preview` first to see exactly what exceeds the target plan.
+</Warning>
+
+### Upgrade activation preview
+
+```
+GET /api/v1/payments/subscription/upgrade-activation-preview?planId=<uuid>
+```
+
+Returns previously deactivated resources that can be reactivated on the higher target plan.
+
+### Save upgrade selections
+
+```
+POST /api/v1/payments/subscription/save-upgrade-selections
+```
+
+Records which deactivated resources to reactivate on upgrade.
+
+<ParamField body="planId" type="string" required>Target plan UUID.</ParamField>
+<ParamField body="memberIds" type="string[]">Team member UUIDs to reactivate.</ParamField>
+<ParamField body="domainIds" type="string[]">Domain UUIDs to reactivate.</ParamField>
+<ParamField body="tagIds" type="string[]">Tag UUIDs to reactivate.</ParamField>
+<ParamField body="folderIds" type="string[]">Folder UUIDs to reactivate.</ParamField>
+<ParamField body="templateIds" type="string[]">UTM template UUIDs to reactivate.</ParamField>
+
+## Billing history
+
+### Payment history
+
+```
+GET /api/v1/payments/history
+```
+
+Returns the workspace's payment history.
+
+### Download an invoice
+
+```
+GET /api/v1/payments/invoice/:id/download
+```
+
+Streams the invoice PDF for the given payment.
+
+### Sync history
+
+```
+POST /api/v1/payments/history/sync
+```
+
+Pulls the latest payment records from Dodo into the workspace.
+
+## Plan, usage & features
+
+### Current plan and usage
+
+```
+GET /api/v1/payments/plan
+```
+
+Returns the workspace's current plan together with usage figures.
+
+### All usage limits
+
+```
+GET /api/v1/payments/usage
+```
+
+Returns usage against every limit.
+
+### A single limit
+
+```
+GET /api/v1/payments/usage/:limitType
+```
+
+`limitType` is one of: `links`, `clicks`, `apiCalls`, `teamMembers`, `domains`, `folders`, `tags`, `utmTemplates`, `passwordProtectedLinks`.
+
+### Feature check
+
+```
+GET /api/v1/payments/feature/:featureKey
+```
+
+Returns whether the workspace's plan unlocks the given feature.
+
+```json
+{ "feature": "custom_domains", "allowed": true }
+```
+
+## Webhook
+
+```
+POST /api/v1/payments/webhook
+```
+
+The endpoint Dodo Payments calls for subscription and payment events. Signatures are verified internally by `@dodopayments/express` - this endpoint is for Dodo, not for client integrations.
+
+## Errors
+
+| Code | When |
+|---|---|
+| `400` | Invalid `planId`, `billingCycle`, or missing fields |
+| `401` | Missing or invalid JWT |
+| `403` | Caller is not a workspace admin |
+| `404` | Plan, subscription, or workspace not found |
+| `429` | Rate limit exceeded (100 requests/minute per IP) |
+
+See [Errors](/api/errors) for the full error envelope.

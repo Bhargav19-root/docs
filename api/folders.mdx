@@ -1,0 +1,493 @@
+---
+title: "Folders"
+description: "Create, organize, and manage link folders - including tree views, moves, and the default folder."
+---
+
+## Overview
+
+Folders organize links into a workspace-scoped hierarchy. A folder can have a parent (one level of nesting is returned in tree views) and an optional default flag that determines where new links land.
+
+Endpoints live under `/api/v1/folders`. All folder endpoints require a JWT. Creating, listing, and setting the default folder also require the `x-workspace-id` header.
+
+```
+Authorization: Bearer <jwt>
+x-workspace-id: <uuid_or_slug>
+```
+
+<Note>
+Folders are gated behind the `tagsAndFolders` plan feature. Creating a folder on a plan without that feature returns `403`.
+</Note>
+
+## Create a folder
+
+```
+POST /api/v1/folders
+```
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="name" type="string" required>
+  Folder name. The reserved name `Links` (case-insensitive, trimmed) is rejected with `400`.
+</ParamField>
+
+<ParamField body="color" type="string">
+  Display color for the folder.
+</ParamField>
+
+<ParamField body="parentId" type="string">
+  UUID of the parent folder. Must belong to the same workspace. Omit for a root folder.
+</ParamField>
+
+<ParamField body="isDefault" type="boolean" default="false">
+  If `true`, this folder becomes the workspace default for new links. Any existing default in the workspace is cleared first.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/folders \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Q2 Campaigns",
+    "color": "#3b82f6",
+    "isDefault": true
+  }'
+```
+
+### Example response
+
+```json
+{
+  "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "Q2 Campaigns",
+  "color": "#3b82f6",
+  "parentId": null,
+  "isDefault": true,
+  "isActive": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdById": "1a2b3c4d-...",
+  "createdAt": "2026-05-07T10:00:00.000Z",
+  "updatedAt": "2026-05-07T10:00:00.000Z",
+  "_count": { "links": 0, "children": 0 }
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `400` | `name` is the reserved word `Links`, or `parentId` belongs to a different workspace |
+| `403` | The `tagsAndFolders` feature is not available on the workspace plan |
+| `404` | `parentId` folder not found |
+| `409` | A folder with the same name already exists |
+
+## List folders (tree)
+
+```
+GET /api/v1/folders
+```
+
+Returns active root folders for the workspace, each with its immediate children nested under `children`. Inactive folders are excluded. Folders are sorted by name ascending.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/folders \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex"
+```
+
+### Example response
+
+```json
+[
+  {
+    "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+    "name": "Q2 Campaigns",
+    "color": "#3b82f6",
+    "parentId": null,
+    "isDefault": true,
+    "createdAt": "2026-05-07T10:00:00.000Z",
+    "children": [
+      {
+        "id": "6a4c3b2d-5e7f-5b9c-ad1e-2f3a4b5c6d7e",
+        "name": "Paid Search",
+        "color": "#f97316",
+        "parentId": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+        "isDefault": false,
+        "createdAt": "2026-05-07T10:05:00.000Z"
+      }
+    ]
+  }
+]
+```
+
+<Note>
+Only root folders are returned at the top level. Child folders appear inside their parent's `children` array, not as separate top-level entries.
+</Note>
+
+## List folders (flat)
+
+```
+GET /api/v1/folders/flat
+```
+
+Returns every folder in the workspace as a flat list, intended for dropdowns. Includes inactive folders. Each folder carries a link count. The response also reports how many active links are unfiled.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/folders/flat \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex"
+```
+
+### Example response
+
+```json
+{
+  "folders": [
+    {
+      "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+      "name": "Q2 Campaigns",
+      "color": "#3b82f6",
+      "isDefault": true,
+      "isActive": true,
+      "createdAt": "2026-05-07T10:00:00.000Z",
+      "_count": { "links": 12 }
+    }
+  ],
+  "unsortedCount": 4
+}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `folders` | array | All folders, sorted by active first, then default first, then name ascending |
+| `unsortedCount` | integer | Count of active links with no folder (`folderId` is null) |
+
+## Get a folder by ID
+
+```
+GET /api/v1/folders/:id
+```
+
+Returns one folder with its child folders and up to 20 of its most recent links (newest first). Each link includes its creator and tags.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/folders/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+```json
+{
+  "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "Q2 Campaigns",
+  "color": "#3b82f6",
+  "parentId": null,
+  "isDefault": true,
+  "isActive": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdAt": "2026-05-07T10:00:00.000Z",
+  "updatedAt": "2026-05-07T10:00:00.000Z",
+  "_count": { "links": 12, "children": 1 },
+  "children": [
+    {
+      "id": "6a4c3b2d-5e7f-5b9c-ad1e-2f3a4b5c6d7e",
+      "name": "Paid Search",
+      "color": "#f97316",
+      "_count": { "links": 5 }
+    }
+  ],
+  "links": [
+    {
+      "id": "7b5d4c3e-...",
+      "url": "https://example.com/q2-launch",
+      "shortCode": "q2-launch",
+      "title": "Q2 Launch",
+      "createdAt": "2026-05-07T11:00:00.000Z",
+      "createdBy": {
+        "id": "1a2b3c4d-...",
+        "name": "Jane",
+        "email": "jane@example.com",
+        "avatar": null
+      },
+      "tags": [
+        { "tag": { "id": "tag-uuid-1", "name": "paid", "color": "#f97316" } }
+      ]
+    }
+  ]
+}
+```
+
+<Note>
+The `links` array is capped at 20 entries. Use the tag or link list endpoints for full pagination.
+</Note>
+
+### Errors
+
+| Code | When |
+|---|---|
+| `404` | Folder not found |
+
+## Update a folder
+
+```
+PATCH /api/v1/folders/:id
+```
+
+Updates a folder's name, color, parent, or default flag. All body fields are optional; send only what you want to change.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="name" type="string">
+  New folder name. The reserved name `Links` is rejected with `400`. A name that collides with another folder in the same parent and workspace is rejected with `409` (case-insensitive).
+</ParamField>
+
+<ParamField body="color" type="string">
+  New display color.
+</ParamField>
+
+<ParamField body="parentId" type="string">
+  UUID of the new parent folder. Pass `null` to move the folder to the root. The new parent must belong to the same workspace, cannot be the folder itself, and cannot be a descendant of the folder.
+</ParamField>
+
+<ParamField body="isDefault" type="boolean">
+  If `true`, this folder becomes the workspace default and any existing default is cleared first.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X PATCH https://api.linkutm.com/api/v1/folders/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Q2 2026 Campaigns",
+    "color": "#22c55e"
+  }'
+```
+
+### Example response
+
+```json
+{
+  "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "Q2 2026 Campaigns",
+  "color": "#22c55e",
+  "parentId": null,
+  "isDefault": true,
+  "isActive": true,
+  "workspaceId": "8a7b6c5d-...",
+  "updatedById": "1a2b3c4d-...",
+  "updatedAt": "2026-05-07T12:00:00.000Z",
+  "_count": { "links": 12, "children": 1 }
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `400` | `name` is the reserved word `Links`; `parentId` is the folder itself; `parentId` is a descendant of this folder; `parentId` belongs to a different workspace |
+| `404` | Folder not found, or `parentId` folder not found |
+| `409` | A folder with the same name already exists in the target parent |
+
+## Delete a folder
+
+```
+DELETE /api/v1/folders/:id
+```
+
+Deletes the folder. Links in the folder are not deleted - their `folderId` is set to null (they become unfiled). Child folders are not deleted - their `parentId` is set to null (they become root folders).
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Example request
+
+```bash
+curl -X DELETE https://api.linkutm.com/api/v1/folders/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+Returns the deleted folder record.
+
+```json
+{
+  "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "Q2 2026 Campaigns",
+  "color": "#22c55e",
+  "parentId": null,
+  "isDefault": true,
+  "isActive": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdAt": "2026-05-07T10:00:00.000Z",
+  "updatedAt": "2026-05-07T12:00:00.000Z"
+}
+```
+
+<Warning>
+Deleting a folder does not delete its links or subfolders, but it does orphan them to the root or unfiled state. There is no undo.
+</Warning>
+
+### Errors
+
+| Code | When |
+|---|---|
+| `404` | Folder not found |
+
+## Move links to a folder
+
+```
+POST /api/v1/folders/move-links
+```
+
+Moves a set of links into a folder, or unfiles them. This is a bulk update of the `folderId` on each link.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="linkIds" type="string[]" required>
+  Array of link UUIDs to move.
+</ParamField>
+
+<ParamField body="folderId" type="string" required>
+  UUID of the destination folder, or `null` to unfile the links. When a UUID is given, the folder must exist.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/folders/move-links \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "linkIds": ["link-uuid-1", "link-uuid-2"],
+    "folderId": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d"
+  }'
+```
+
+### Example response
+
+```json
+{ "count": 2 }
+```
+
+`count` is the number of links updated.
+
+### Errors
+
+| Code | When |
+|---|---|
+| `404` | Destination `folderId` folder not found |
+
+## Set the default folder
+
+```
+POST /api/v1/folders/set-default
+```
+
+Sets which folder new links go into by default. Passing `null` clears the default so new links are unfiled. Any existing default in the workspace is cleared first.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="folderId" type="string" required>
+  UUID of the folder to set as default, or `null` to clear the default. When a UUID is given, the folder must exist and belong to the workspace.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/folders/set-default \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex" \
+  -H "Content-Type: application/json" \
+  -d '{ "folderId": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d" }'
+```
+
+### Example response
+
+When a folder is set, the updated folder record is returned:
+
+```json
+{
+  "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "Q2 Campaigns",
+  "color": "#3b82f6",
+  "parentId": null,
+  "isDefault": true,
+  "isActive": true,
+  "workspaceId": "8a7b6c5d-...",
+  "_count": { "links": 12, "children": 1 }
+}
+```
+
+When `folderId` is `null`, the response is `null` (new links become unfiled).
+
+### Errors
+
+| Code | When |
+|---|---|
+| `400` | The folder belongs to a different workspace |
+| `404` | Folder not found |

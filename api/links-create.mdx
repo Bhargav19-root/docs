@@ -45,6 +45,10 @@ POST /api/v1/links
   Arbitrary custom UTM keys. `{"audience": "lookalike_3"}` becomes `&utm_audience=lookalike_3` on redirect.
 </ParamField>
 
+<ParamField body="templateId" type="string">
+  UUID of a UTM template to apply. Pre-fills UTM fields from the saved template. Any UTM fields you send explicitly take precedence.
+</ParamField>
+
 <ParamField body="domainId" type="string">
   UUID of the workspace's domain to use. Defaults to the workspace's default domain. Must be verified and enabled.
 </ParamField>
@@ -131,13 +135,15 @@ All `id` fields are UUIDs.
   "clicks": 0,
   "createdAt": "2026-05-07T10:00:00.000Z",
   "updatedAt": "2026-05-07T10:00:00.000Z",
+  "qrCodeEnabled": true,
+  "lastClickAt": null,
   "workspaceId": "8a7b6c5d-...",
-  "creatorId": "1a2b3c4d-...",
+  "createdById": "1a2b3c4d-...",
   "domainId": "9e8d7c6b-...",
   "folder": null,
   "domain": { "id": "9e8d7c6b-...", "domain": "go.acme.com" },
   "tags": [],
-  "creator": { "id": "1a2b3c4d-...", "name": "Jane", "email": "jane@example.com" }
+  "createdBy": { "id": "1a2b3c4d-...", "name": "Jane", "email": "jane@example.com", "avatar": null }
 }
 ```
 
@@ -157,3 +163,4 @@ All `id` fields are UUIDs.
 - `tagIds` are attached **after** the link is created, in a separate join-table insert. If any tag UUID doesn't exist or belongs to a different workspace, the join insert fails with a foreign-key error - but the link is already saved at that point. Validate `tagIds` before posting (e.g., `GET /tags`) to avoid orphaned links with no tags.
 - Link usage counter is incremented async - your response returns immediately.
 - At 80% of the workspace's link maximum, the owner gets a warning email.
+- `qrCodeEnabled` is set by the server, not the request body. The link gets `qrCodeEnabled: true` when the workspace is within its QR code quota, and `false` once the quota is reached. It is returned on the link record but cannot be supplied on create.

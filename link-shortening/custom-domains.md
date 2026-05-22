@@ -29,7 +29,7 @@ Skip it for ads-only links - auto-generated codes on the system domain are fine 
 
     | Type | Name | Value | TTL |
     |---|---|---|---|
-    | `CNAME` | `go` | `cname-staging.linkutm.com` (or your env's target) | 300–3600 |
+    | `CNAME` | `go` | `cname-staging.linkutm.com` (or your env's target) | 300-3600 |
 
     The exact CNAME target is shown in the Domains page after you add the domain.
 

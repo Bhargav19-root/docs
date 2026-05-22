@@ -140,7 +140,7 @@ If `isActive = false`, validation is skipped entirely; rules are still saved.
 ## Edge cases
 
 <Note>
-**Rules cleaning vs validation.** Steps 1–2 (lowercase, space replacement) **transform** values silently. Steps 3–6 (length, prohibited, regex, required) **reject** the save with errors. Step 7 (conditional) **transforms** silently - the saved record reflects the override but no warning surfaces.
+**Rules cleaning vs validation.** Steps 1-2 (lowercase, space replacement) **transform** values silently. Steps 3-6 (length, prohibited, regex, required) **reject** the save with errors. Step 7 (conditional) **transforms** silently - the saved record reflects the override but no warning surfaces.
 </Note>
 
 <Note>

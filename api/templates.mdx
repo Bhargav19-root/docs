@@ -1,0 +1,490 @@
+---
+title: "UTM templates"
+description: "Create, list, and apply reusable UTM templates that pre-fill link UTM fields."
+---
+
+## Overview
+
+UTM templates are reusable sets of UTM values (source, medium, campaign, term, content) saved to a workspace. They are referenced from [Create link](/api/links-create) via `templateId` to pre-fill UTM fields. Every endpoint lives under `/api/v1/templates`, requires a JWT, and is workspace-scoped.
+
+```
+Authorization: Bearer <jwt>
+x-workspace-id: <uuid_or_slug>
+```
+
+## Template fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | string (UUID) | Server-generated. |
+| `name` | string | Template label. |
+| `description` | string \| null | Internal context. |
+| `utmSource` | string \| null | Pre-fill value for `utm_source`. |
+| `utmMedium` | string \| null | Pre-fill value for `utm_medium`. |
+| `utmCampaign` | string \| null | Pre-fill value for `utm_campaign`. |
+| `utmTerm` | string \| null | Pre-fill value for `utm_term`. |
+| `utmContent` | string \| null | Pre-fill value for `utm_content`. |
+| `usageCount` | integer | Times the template has been applied. Drives the most-used ranking. |
+| `isActive` | boolean | Active templates sort first and are the only ones returned by most-used. |
+| `workspaceId` | string (UUID) | Set on creation; immutable. |
+| `createdById` | string (UUID) | User who created the template. |
+| `updatedById` | string (UUID) \| null | User who last updated the template. |
+| `createdAt` | timestamp | UTC. |
+| `updatedAt` | timestamp | UTC. |
+
+<Note>
+The `customUtmParams` field is accepted in the request body interface but is not persisted on the template record. Set custom UTM keys directly on the link instead.
+</Note>
+
+## Create a template
+
+```
+POST /api/v1/templates
+```
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="name" type="string" required>
+  Template label.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Internal context.
+</ParamField>
+
+<ParamField body="utmSource" type="string">UTM source pre-fill, e.g., `google`.</ParamField>
+<ParamField body="utmMedium" type="string">UTM medium pre-fill, e.g., `cpc`.</ParamField>
+<ParamField body="utmCampaign" type="string">UTM campaign pre-fill, e.g., `q2_launch`.</ParamField>
+<ParamField body="utmTerm" type="string">UTM term pre-fill.</ParamField>
+<ParamField body="utmContent" type="string">UTM content pre-fill.</ParamField>
+
+<ParamField body="customUtmParams" type="object">
+  Accepted by the request interface but not stored on the template record.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/templates \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Google Search - Brand",
+    "description": "Brand search campaigns",
+    "utmSource": "google",
+    "utmMedium": "cpc",
+    "utmCampaign": "q2_launch"
+  }'
+```
+
+### Example response
+
+```json
+{
+  "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "Google Search - Brand",
+  "description": "Brand search campaigns",
+  "utmSource": "google",
+  "utmMedium": "cpc",
+  "utmCampaign": "q2_launch",
+  "utmTerm": null,
+  "utmContent": null,
+  "usageCount": 0,
+  "isActive": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdById": "1a2b3c4d-...",
+  "updatedById": null,
+  "createdAt": "2026-05-07T10:00:00.000Z",
+  "updatedAt": "2026-05-07T10:00:00.000Z"
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `400` | Validation failure |
+| `401` | Missing or invalid JWT |
+| `403` | Workspace UTM template maximum reached - the message reports used and limit counts and asks you to upgrade the plan |
+| `404` | Workspace not found |
+
+## List templates
+
+```
+GET /api/v1/templates
+```
+
+Returns templates for the workspace, paginated. Active templates sort first, then newest first.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Query parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="20">
+  Items per page.
+</ParamField>
+
+<ParamField query="search" type="string">
+  Case-insensitive substring match against `name`, `description`, `utmSource`, `utmMedium`, and `utmCampaign`.
+</ParamField>
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/templates?page=1&limit=20&search=google \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex"
+```
+
+### Example response
+
+```json
+{
+  "templates": [
+    {
+      "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+      "name": "Google Search - Brand",
+      "description": "Brand search campaigns",
+      "utmSource": "google",
+      "utmMedium": "cpc",
+      "utmCampaign": "q2_launch",
+      "utmTerm": null,
+      "utmContent": null,
+      "usageCount": 12,
+      "isActive": true,
+      "workspaceId": "8a7b6c5d-...",
+      "createdById": "1a2b3c4d-...",
+      "updatedById": null,
+      "createdAt": "2026-05-07T10:00:00.000Z",
+      "updatedAt": "2026-05-07T10:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "pages": 1
+  }
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+
+## Most used templates
+
+```
+GET /api/v1/templates/most-used
+```
+
+Returns the workspace's active templates ranked by `usageCount` descending. Only templates with `isActive=true` are included.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Query parameters
+
+<ParamField query="limit" type="integer" default="5">
+  Number of templates to return.
+</ParamField>
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/templates/most-used?limit=5 \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex"
+```
+
+### Example response
+
+```json
+[
+  {
+    "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+    "name": "Google Search - Brand",
+    "description": "Brand search campaigns",
+    "utmSource": "google",
+    "utmMedium": "cpc",
+    "utmCampaign": "q2_launch",
+    "utmTerm": null,
+    "utmContent": null,
+    "usageCount": 12,
+    "isActive": true,
+    "workspaceId": "8a7b6c5d-...",
+    "createdById": "1a2b3c4d-...",
+    "updatedById": null,
+    "createdAt": "2026-05-07T10:00:00.000Z",
+    "updatedAt": "2026-05-07T10:00:00.000Z"
+  }
+]
+```
+
+The response is a plain array, not a paginated envelope.
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+
+## Get a template
+
+```
+GET /api/v1/templates/:id
+```
+
+Returns one template by ID. This endpoint does not check the `x-workspace-id` header against the template's workspace, but it is still recommended to send it for consistency.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/templates/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+```json
+{
+  "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "Google Search - Brand",
+  "description": "Brand search campaigns",
+  "utmSource": "google",
+  "utmMedium": "cpc",
+  "utmCampaign": "q2_launch",
+  "utmTerm": null,
+  "utmContent": null,
+  "usageCount": 12,
+  "isActive": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdById": "1a2b3c4d-...",
+  "updatedById": null,
+  "createdAt": "2026-05-07T10:00:00.000Z",
+  "updatedAt": "2026-05-07T10:00:00.000Z"
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `404` | Template not found |
+
+## Update a template
+
+```
+PATCH /api/v1/templates/:id
+```
+
+Updates a template. All body fields are optional. The user making the request is recorded as `updatedById`.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="name" type="string">Template label.</ParamField>
+<ParamField body="description" type="string">Internal context.</ParamField>
+<ParamField body="utmSource" type="string">UTM source pre-fill.</ParamField>
+<ParamField body="utmMedium" type="string">UTM medium pre-fill.</ParamField>
+<ParamField body="utmCampaign" type="string">UTM campaign pre-fill.</ParamField>
+<ParamField body="utmTerm" type="string">UTM term pre-fill.</ParamField>
+<ParamField body="utmContent" type="string">UTM content pre-fill.</ParamField>
+
+<ParamField body="customUtmParams" type="object">
+  Accepted by the request interface but not persisted.
+</ParamField>
+
+<Warning>
+Fields you omit are passed through to the update as `undefined`, which leaves the stored value unchanged. Fields you send with an explicit value overwrite the stored value.
+</Warning>
+
+### Example request
+
+```bash
+curl -X PATCH https://api.linkutm.com/api/v1/templates/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "Google Search - Brand v2", "utmContent": "headline_a" }'
+```
+
+### Example response
+
+```json
+{
+  "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "Google Search - Brand v2",
+  "description": "Brand search campaigns",
+  "utmSource": "google",
+  "utmMedium": "cpc",
+  "utmCampaign": "q2_launch",
+  "utmTerm": null,
+  "utmContent": "headline_a",
+  "usageCount": 12,
+  "isActive": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdById": "1a2b3c4d-...",
+  "updatedById": "1a2b3c4d-...",
+  "createdAt": "2026-05-07T10:00:00.000Z",
+  "updatedAt": "2026-05-07T11:00:00.000Z"
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `404` | Template not found |
+
+## Delete a template
+
+```
+DELETE /api/v1/templates/:id
+```
+
+Deletes a template. Deletion is blocked while the template is still in use.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Behavior
+
+- If any link still has `templateId` set to this template, the request fails with `400`. The message reports how many links reference it.
+- If `usageCount` is greater than `0`, the request fails with `400` even when no link currently references it.
+- Clear the UTM parameters on the linked links or delete those links before removing the template.
+
+### Example request
+
+```bash
+curl -X DELETE https://api.linkutm.com/api/v1/templates/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+Returns the deleted template record.
+
+```json
+{
+  "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "Google Search - Brand",
+  "description": "Brand search campaigns",
+  "utmSource": "google",
+  "utmMedium": "cpc",
+  "utmCampaign": "q2_launch",
+  "utmTerm": null,
+  "utmContent": null,
+  "usageCount": 0,
+  "isActive": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdById": "1a2b3c4d-...",
+  "updatedById": null,
+  "createdAt": "2026-05-07T10:00:00.000Z",
+  "updatedAt": "2026-05-07T10:00:00.000Z"
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `400` | Template is referenced by one or more links, or `usageCount` is greater than `0` |
+| `401` | Missing or invalid JWT |
+| `404` | Template not found |
+
+## Increment usage count
+
+```
+POST /api/v1/templates/:id/use
+```
+
+Increments the template's `usageCount` by `1`. Call this when a template is applied to a link so it ranks in [Most used templates](#most-used-templates).
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/templates/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d/use \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+Returns the updated template record with the incremented `usageCount`.
+
+```json
+{
+  "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "Google Search - Brand",
+  "description": "Brand search campaigns",
+  "utmSource": "google",
+  "utmMedium": "cpc",
+  "utmCampaign": "q2_launch",
+  "utmTerm": null,
+  "utmContent": null,
+  "usageCount": 13,
+  "isActive": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdById": "1a2b3c4d-...",
+  "updatedById": null,
+  "createdAt": "2026-05-07T10:00:00.000Z",
+  "updatedAt": "2026-05-07T12:00:00.000Z"
+}
+```
+
+<Note>
+The request body is ignored - the increment applies to the template named in the path. Note that a non-zero `usageCount` blocks deletion of the template.
+</Note>
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `404` | Template not found |

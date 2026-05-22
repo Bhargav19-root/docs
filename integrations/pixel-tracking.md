@@ -30,7 +30,7 @@ Pixel tracking lets you attach one or more ad-network pixels to your workspace. 
     Click **Add Pixel** in the top-right corner.
   </Step>
   <Step title="Fill in the form">
-    - **Name** - internal label (e.g. `Facebook Pixel – Main`, `GA4 – linkutm`). Not shown to visitors.
+    - **Name** - internal label (e.g. `Facebook Pixel - Main`, `GA4 - linkutm`). Not shown to visitors.
     - **Platform** - select from the supported list.
     - **Pixel ID** - the ID from your ad platform. Use **How to find your ID** link for platform-specific instructions.
   </Step>
@@ -81,16 +81,16 @@ You run paid campaigns across Facebook, Google, and TikTok.
 
 ```
 Workspace pixels configured:
-  - Facebook Pixel – Main   (enabled)
-  - GA4 – linkutm           (enabled)
-  - TikTok Pixel – Q2       (enabled)
+  - Facebook Pixel - Main   (enabled)
+  - GA4 - linkutm           (enabled)
+  - TikTok Pixel - Q2       (enabled)
 
 Link: go.acme.com/fb-q2
-  Pixels selected: Facebook Pixel – Main only
+  Pixels selected: Facebook Pixel - Main only
   → Only Facebook pixel fires on click
 
 Link: go.acme.com/tiktok-q2
-  Pixels selected: TikTok Pixel – Q2 only
+  Pixels selected: TikTok Pixel - Q2 only
   → Only TikTok pixel fires on click
 
 Link: go.acme.com/email-q2
@@ -107,7 +107,7 @@ Your ad platforms each get accurate PageView events without any changes to the d
     linkutm fires a **PageView** event. Conversion events (Purchase, Lead, etc.) must be fired separately on your destination page. linkutm handles top-of-funnel click attribution; your site handles the downstream conversion events.
   </Accordion>
   <Accordion title="Wrong Pixel ID format">
-    Each platform has a distinct ID shape. Facebook IDs are all-numeric (15–16 digits). GA4 IDs start with `G-`. GTM IDs start with `GTM-`. Paste from the platform's dashboard - don't type from memory.
+    Each platform has a distinct ID shape. Facebook IDs are all-numeric (15-16 digits). GA4 IDs start with `G-`. GTM IDs start with `GTM-`. Paste from the platform's dashboard - don't type from memory.
   </Accordion>
   <Accordion title="Pixel shows as active but no data in ad platform">
     Ad blockers and iOS 14.5+ ATT restrictions suppress pixel fires in-browser. This is expected and not a linkutm bug. Use server-side Conversions API on your destination site to recover blocked signals.

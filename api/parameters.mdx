@@ -1,0 +1,560 @@
+---
+title: "UTM parameters"
+description: "Manage the workspace dictionary of UTM parameters and their allowed values."
+---
+
+## Overview
+
+UTM parameters define a workspace's controlled vocabulary for UTM fields. The model is two-level: parent parameters (such as `source`, `medium`, `campaign`) and their child values (such as `google`, `cpc`, `spring_sale`). A child links to its parent through `parentCode`. Every endpoint lives under `/api/v1/parameters`, requires a JWT, and is workspace-scoped.
+
+```
+Authorization: Bearer <jwt>
+x-workspace-id: <uuid_or_slug>
+```
+
+## Parameter fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | string (UUID) | Server-generated. |
+| `name` | string | Display label, e.g., `Source`. |
+| `code` | string | Machine code. Lowercased on create. Unique per workspace. |
+| `tooltip` | string \| null | Short hint shown in the UI. |
+| `description` | string \| null | Longer description. |
+| `weight` | integer | Sort order within its level. Defaults to `0`. |
+| `parentCode` | string \| null | `code` of the parent parameter. `null` for a top-level parameter. |
+| `isSystem` | boolean | `true` for seeded standard parameters. System parameters have edit restrictions. |
+| `canEdit` | boolean | Whether the parameter can be edited. Defaults to `true` for custom parameters. |
+| `canDelete` | boolean | Whether the parameter can be deleted. Defaults to `true` for custom parameters. |
+| `workspaceId` | string (UUID) | Set on creation; immutable. |
+| `createdById` | string (UUID) | User who created the parameter. |
+| `updatedById` | string (UUID) \| null | User who last updated the parameter. |
+| `createdBy` | object | Included on list and get responses: `{ id, name, email }`. |
+| `createdAt` | timestamp | UTC. |
+| `updatedAt` | timestamp | UTC. |
+
+## Create a parameter
+
+```
+POST /api/v1/parameters
+```
+
+Creates a parameter. Pass `parentCode` to create a child value under an existing parameter.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="name" type="string" required>
+  Display label.
+</ParamField>
+
+<ParamField body="code" type="string" required>
+  Machine code. Lowercased before save. Must be unique within the workspace.
+</ParamField>
+
+<ParamField body="tooltip" type="string">
+  Short hint.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Longer description.
+</ParamField>
+
+<ParamField body="weight" type="integer" default="0">
+  Sort order within the parameter's level.
+</ParamField>
+
+<ParamField body="parentCode" type="string">
+  `code` of an existing parameter in the same workspace. When set, the new parameter is created as a child value. The parent must already exist.
+</ParamField>
+
+<Note>
+Custom parameters are always created with `isSystem=false`, `canEdit=true`, and `canDelete=true`. The `isSystem`, `canEdit`, and `canDelete` flags are only set internally by the seed routine.
+</Note>
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/parameters \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Snapchat",
+    "code": "snapchat",
+    "tooltip": "Snapchat ad traffic",
+    "weight": 12,
+    "parentCode": "source"
+  }'
+```
+
+### Example response
+
+```json
+{
+  "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "Snapchat",
+  "code": "snapchat",
+  "tooltip": "Snapchat ad traffic",
+  "description": null,
+  "weight": 12,
+  "parentCode": "source",
+  "isSystem": false,
+  "canEdit": true,
+  "canDelete": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdById": "1a2b3c4d-...",
+  "updatedById": null,
+  "createdAt": "2026-05-07T10:00:00.000Z",
+  "updatedAt": "2026-05-07T10:00:00.000Z"
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `400` | `parentCode` is set but no parameter with that code exists in the workspace |
+| `401` | Missing or invalid JWT |
+| `409` | A parameter with the same `code` already exists in the workspace |
+
+## List parameters
+
+```
+GET /api/v1/parameters
+```
+
+Returns parameters for the workspace, paginated. Sorted by `weight` ascending, then `createdAt` ascending. Each item includes the `createdBy` user object.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Query parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="100">
+  Items per page.
+</ParamField>
+
+<ParamField query="search" type="string">
+  Case-insensitive substring match against `name`, `code`, and `description`.
+</ParamField>
+
+<ParamField query="parentCode" type="string">
+  Filter by parent code. Pass a parent `code` to return only that parameter's child values. Pass an empty string to return only top-level parameters (those with `parentCode` null). Omit to return all parameters.
+</ParamField>
+
+### Example request
+
+```bash
+curl "https://api.linkutm.com/api/v1/parameters?parentCode=source&limit=100" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex"
+```
+
+### Example response
+
+```json
+{
+  "parameters": [
+    {
+      "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+      "name": "Google",
+      "code": "google",
+      "tooltip": null,
+      "description": null,
+      "weight": 0,
+      "parentCode": "source",
+      "isSystem": false,
+      "canEdit": true,
+      "canDelete": true,
+      "workspaceId": "8a7b6c5d-...",
+      "createdById": "1a2b3c4d-...",
+      "updatedById": null,
+      "createdAt": "2026-05-07T10:00:00.000Z",
+      "updatedAt": "2026-05-07T10:00:00.000Z",
+      "createdBy": { "id": "1a2b3c4d-...", "name": "Jane", "email": "jane@example.com" }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 100,
+    "total": 1,
+    "pages": 1
+  }
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+
+## List parameters hierarchically
+
+```
+GET /api/v1/parameters/hierarchical
+```
+
+Returns top-level parameters with their child values nested under a `children` array. Both levels are sorted by `weight` ascending, then `createdAt` ascending. This endpoint is not paginated.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/parameters/hierarchical \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex"
+```
+
+### Example response
+
+```json
+[
+  {
+    "id": "p-source-uuid",
+    "name": "Source",
+    "code": "source",
+    "tooltip": "Identifies which site sent the traffic (e.g., google, newsletter)",
+    "description": "The referrer: google, newsletter, facebook",
+    "weight": 1,
+    "parentCode": null,
+    "isSystem": true,
+    "canEdit": false,
+    "canDelete": false,
+    "workspaceId": "8a7b6c5d-...",
+    "createdById": "1a2b3c4d-...",
+    "updatedById": null,
+    "createdAt": "2026-05-07T10:00:00.000Z",
+    "updatedAt": "2026-05-07T10:00:00.000Z",
+    "children": [
+      {
+        "id": "v-google-uuid",
+        "name": "Google",
+        "code": "google",
+        "weight": 0,
+        "parentCode": "source",
+        "isSystem": false,
+        "canEdit": true,
+        "canDelete": true,
+        "workspaceId": "8a7b6c5d-...",
+        "createdById": "1a2b3c4d-...",
+        "createdAt": "2026-05-07T10:00:00.000Z",
+        "updatedAt": "2026-05-07T10:00:00.000Z"
+      }
+    ]
+  }
+]
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+
+## Seed default parameters
+
+```
+POST /api/v1/parameters/seed
+```
+
+Creates the five standard UTM parameters (`source`, `medium`, `campaign`, `term`, `content`) plus a starter set of child values for each. The five parents are created as system parameters (`isSystem=true`, `canEdit=false`, `canDelete=false`). The seeded child values are regular parameters (`isSystem=false`, `canEdit=true`, `canDelete=true`).
+
+The seed is idempotent: if the workspace already has any system parameter, nothing is created and `seeded` is `false`.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+This endpoint takes no request body.
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/parameters/seed \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex" \
+  -H "Content-Type: application/json"
+```
+
+### Example response
+
+When the seed runs:
+
+```json
+{
+  "message": "Created 5 standard UTM parameters with 51 default values",
+  "seeded": true,
+  "count": 5,
+  "valuesCount": 51
+}
+```
+
+When the workspace was already seeded:
+
+```json
+{
+  "message": "Default parameters already exist",
+  "seeded": false
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+
+## Reorder parameters
+
+```
+POST /api/v1/parameters/reorder
+```
+
+Sets the `weight` of each listed parameter to its index in the array. The first ID gets `weight` `0`, the second `1`, and so on. Send the parameter IDs in the order you want them sorted.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="parameterIds" type="string[]" required>
+  Ordered array of parameter UUIDs. Each parameter's `weight` is set to its position in the array.
+</ParamField>
+
+<Note>
+Reorder updates every ID in the array regardless of `isSystem`, `canEdit`, or level. Include only the IDs you intend to re-weight - typically all parameters of one level.
+</Note>
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/parameters/reorder \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "parameterIds": ["p-source-uuid", "p-medium-uuid", "p-campaign-uuid"]
+  }'
+```
+
+### Example response
+
+```json
+{ "message": "Parameters reordered successfully" }
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `404` | One of the supplied IDs does not exist |
+
+## Get a parameter
+
+```
+GET /api/v1/parameters/:id
+```
+
+Returns one parameter by ID, including its `createdBy` user object.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/parameters/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+```json
+{
+  "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "Snapchat",
+  "code": "snapchat",
+  "tooltip": "Snapchat ad traffic",
+  "description": null,
+  "weight": 12,
+  "parentCode": "source",
+  "isSystem": false,
+  "canEdit": true,
+  "canDelete": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdById": "1a2b3c4d-...",
+  "updatedById": null,
+  "createdAt": "2026-05-07T10:00:00.000Z",
+  "updatedAt": "2026-05-07T10:00:00.000Z",
+  "createdBy": { "id": "1a2b3c4d-...", "name": "Jane", "email": "jane@example.com" }
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `404` | Parameter not found |
+
+## Update a parameter
+
+```
+PATCH /api/v1/parameters/:id
+```
+
+Updates a parameter. All body fields are optional. `code` and `parentCode` cannot be changed.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="name" type="string">Display label.</ParamField>
+<ParamField body="tooltip" type="string">Short hint.</ParamField>
+<ParamField body="description" type="string">Longer description.</ParamField>
+<ParamField body="weight" type="integer">Sort order within the parameter's level.</ParamField>
+
+### Behavior
+
+- A parameter with `canEdit=false` that is not a system parameter cannot be edited - the request fails with `400`.
+- For system parameters (`isSystem=true`), only `name` and `tooltip` are applied. Any `description` or `weight` you send is ignored.
+- For non-system parameters, `name`, `tooltip`, `description`, and `weight` are all applied.
+- The user making the request is recorded as `updatedById`.
+
+### Example request
+
+```bash
+curl -X PATCH https://api.linkutm.com/api/v1/parameters/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "Snapchat Ads", "weight": 13 }'
+```
+
+### Example response
+
+```json
+{
+  "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "Snapchat Ads",
+  "code": "snapchat",
+  "tooltip": "Snapchat ad traffic",
+  "description": null,
+  "weight": 13,
+  "parentCode": "source",
+  "isSystem": false,
+  "canEdit": true,
+  "canDelete": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdById": "1a2b3c4d-...",
+  "updatedById": "1a2b3c4d-...",
+  "createdAt": "2026-05-07T10:00:00.000Z",
+  "updatedAt": "2026-05-07T11:00:00.000Z"
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `400` | Parameter has `canEdit=false` and is not a system parameter |
+| `401` | Missing or invalid JWT |
+| `404` | Parameter not found |
+
+## Delete a parameter
+
+```
+DELETE /api/v1/parameters/:id
+```
+
+Deletes a parameter. Deletion is blocked for protected parameters and for parents that still have children.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Behavior
+
+- A parameter with `canDelete=false` cannot be deleted - the request fails with `400`. The five seeded system parameters have `canDelete=false`.
+- A parameter that still has child values cannot be deleted - the request fails with `400`. The message reports the child count. Delete the child values first.
+
+### Example request
+
+```bash
+curl -X DELETE https://api.linkutm.com/api/v1/parameters/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+Returns the deleted parameter record.
+
+```json
+{
+  "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "Snapchat Ads",
+  "code": "snapchat",
+  "tooltip": "Snapchat ad traffic",
+  "description": null,
+  "weight": 13,
+  "parentCode": "source",
+  "isSystem": false,
+  "canEdit": true,
+  "canDelete": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdById": "1a2b3c4d-...",
+  "updatedById": "1a2b3c4d-...",
+  "createdAt": "2026-05-07T10:00:00.000Z",
+  "updatedAt": "2026-05-07T11:00:00.000Z"
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `400` | Parameter has `canDelete=false`, or it still has one or more child values |
+| `401` | Missing or invalid JWT |
+| `404` | Parameter not found |

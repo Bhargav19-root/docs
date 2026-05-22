@@ -1,0 +1,314 @@
+---
+title: "Current user"
+description: "Get, update, and delete the authenticated user, upload an avatar, and manage notification settings."
+---
+
+## Overview
+
+These endpoints act on the currently authenticated user. They live under `/api/v1/users` and require a JWT bearer token. They do **not** use the `x-workspace-id` header - they target the user account itself, not a workspace.
+
+```
+Authorization: Bearer <jwt>
+```
+
+The user identity is taken from the JWT, so every `me` path resolves to the token holder.
+
+## Get current user
+
+```
+GET /api/v1/users/me
+```
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/users/me \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+```json
+{
+  "id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+  "email": "jane@example.com",
+  "name": "Jane",
+  "avatar": "https://cdn.linkutm.com/avatars/1a2b3c4d-1715000000000.png",
+  "onboardingCompleted": true,
+  "subscribed": true,
+  "role": "marketer",
+  "isSuperAdmin": false,
+  "createdAt": "2026-01-12T09:30:00.000Z",
+  "updatedAt": "2026-05-07T10:00:00.000Z"
+}
+```
+
+<Note>
+This response is a fixed projection. The password hash and workspace memberships are never returned by this endpoint.
+</Note>
+
+## Update current user
+
+```
+PATCH /api/v1/users/me
+```
+
+Updates the authenticated user's profile. All fields are optional - send only what you want to change.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="name" type="string">
+  Display name.
+</ParamField>
+
+<ParamField body="avatar" type="string">
+  Avatar URL. To upload an image file instead of setting a URL directly, use [Upload avatar](#upload-avatar).
+</ParamField>
+
+<ParamField body="subscribed" type="boolean">
+  Marketing email subscription flag on the user record.
+</ParamField>
+
+<ParamField body="role" type="string">
+  Free-text role label stored on the user account (for example a job title). This is a profile field on the user and is separate from workspace membership roles used for [permissions](/api/permissions).
+</ParamField>
+
+<ParamField body="onboardingCompleted" type="boolean">
+  Marks whether the user has finished the onboarding flow.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X PATCH https://api.linkutm.com/api/v1/users/me \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Jane Doe",
+    "onboardingCompleted": true
+  }'
+```
+
+### Example response
+
+Returns the full updated user record.
+
+```json
+{
+  "id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+  "email": "jane@example.com",
+  "name": "Jane Doe",
+  "avatar": "https://cdn.linkutm.com/avatars/1a2b3c4d-1715000000000.png",
+  "subscribed": true,
+  "role": "marketer",
+  "onboardingCompleted": true,
+  "createdAt": "2026-01-12T09:30:00.000Z",
+  "updatedAt": "2026-05-22T14:00:00.000Z"
+}
+```
+
+## Upload avatar
+
+```
+POST /api/v1/users/me/avatar
+```
+
+Uploads an avatar image as `multipart/form-data`. The image is stored, and the user record's `avatar` field is updated with the resulting URL.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `Content-Type: multipart/form-data` | Yes | |
+
+### Form fields
+
+<ParamField body="file" type="file" required>
+  The image file. The form field name must be `file`. Allowed types: PNG, JPEG, and WebP. Maximum size: 2 MB.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/users/me/avatar \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@avatar.png"
+```
+
+### Example response
+
+```json
+{
+  "avatarUrl": "https://cdn.linkutm.com/avatars/1a2b3c4d-1715000000000.png"
+}
+```
+
+<Warning>
+The upload is rejected with `400` if no file is sent, the file type is not PNG, JPEG, or WebP, or the file is larger than 2 MB. The stored file name is derived from the user ID and a timestamp, so each upload produces a new URL.
+</Warning>
+
+## Delete current user
+
+```
+DELETE /api/v1/users/me
+```
+
+Permanently deletes the authenticated user's account. This is not reversible.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Example request
+
+```bash
+curl -X DELETE https://api.linkutm.com/api/v1/users/me \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+Returns the deleted user record.
+
+<Warning>
+Account deletion is permanent. The JWT becomes unusable once the underlying account is gone.
+</Warning>
+
+## Notification settings
+
+Each user has one notification settings record. It controls which transactional and email notifications are sent to that user.
+
+### Get notification settings
+
+```
+GET /api/v1/users/me/notifications
+```
+
+Returns the authenticated user's notification settings. If no settings record exists yet, one is created with defaults and returned.
+
+```bash
+curl https://api.linkutm.com/api/v1/users/me/notifications \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Update notification settings
+
+```
+PATCH /api/v1/users/me/notifications
+```
+
+Updates notification settings. All fields are optional - send only the toggles you want to change. If no settings record exists yet, one is created.
+
+#### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `Content-Type: application/json` | Yes | |
+
+#### Body
+
+<ParamField body="domainUpdates" type="boolean">
+  Notifications about custom domain status changes.
+</ParamField>
+
+<ParamField body="monthlySummary" type="boolean">
+  Monthly summary email.
+</ParamField>
+
+<ParamField body="linkClickMilestones" type="boolean">
+  Alert when a link reaches a click milestone.
+</ParamField>
+
+<ParamField body="linkExpiry" type="boolean">
+  Alert when a link is about to expire or has expired.
+</ParamField>
+
+<ParamField body="linkDeleted" type="boolean">
+  Alert when a link is deleted.
+</ParamField>
+
+<ParamField body="memberJoined" type="boolean">
+  Alert when a member joins a workspace.
+</ParamField>
+
+<ParamField body="memberLeft" type="boolean">
+  Alert when a member leaves a workspace.
+</ParamField>
+
+<ParamField body="roleChanged" type="boolean">
+  Alert when a member's workspace role changes.
+</ParamField>
+
+<ParamField body="productUpdates" type="boolean">
+  Product update emails.
+</ParamField>
+
+<ParamField body="tipsTutorials" type="boolean">
+  Tips and tutorials emails.
+</ParamField>
+
+<Note>
+Critical alerts - workspace deletion, security alerts, and billing alerts - cannot be disabled. The service forces these to `true` on every update, so sending `false` for them has no effect.
+</Note>
+
+#### Example request
+
+```bash
+curl -X PATCH https://api.linkutm.com/api/v1/users/me/notifications \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "monthlySummary": false,
+    "productUpdates": false
+  }'
+```
+
+#### Example response
+
+Returns the full notification settings record.
+
+```json
+{
+  "id": "9b8a7c6d-5e4f-4a3b-2c1d-0e9f8a7b6c5d",
+  "domainUpdates": true,
+  "monthlySummary": false,
+  "linkClickMilestones": true,
+  "linkExpiry": true,
+  "linkDeleted": true,
+  "memberJoined": true,
+  "memberLeft": true,
+  "roleChanged": true,
+  "workspaceDeleted": true,
+  "securityAlerts": true,
+  "billingAlerts": true,
+  "productUpdates": false,
+  "tipsTutorials": true
+}
+```
+
+## Errors
+
+| Code | When |
+|---|---|
+| `400` | Avatar upload with no file, an unsupported file type, or a file over 2 MB |
+| `401` | Missing or invalid JWT |
+| `429` | Rate limit exceeded (100 requests/minute per IP) |
+
+See [Errors](/api/errors) for the full error envelope.

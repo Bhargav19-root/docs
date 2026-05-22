@@ -1,0 +1,623 @@
+---
+title: "Pixels"
+description: "Create tracking pixels and attach them to links for conversion tracking."
+---
+
+## Overview
+
+Pixels are workspace-scoped tracking tags (Facebook, GA4, TikTok, and others) that fire on a link's redirect interstitial. There are two controllers:
+
+- `/api/v1/pixels` - manage the pixel records themselves.
+- `/api/v1/links/:linkId/pixels` - attach pixels to and detach them from a specific link.
+
+Every endpoint in both controllers requires a JWT (`@UseGuards(JwtAuthGuard)` is applied at the controller level).
+
+```
+Authorization: Bearer <jwt>
+x-workspace-id: <uuid_or_slug>
+```
+
+<Note>
+`x-workspace-id` accepts a workspace UUID or its slug. It is required on the pixel endpoints that read or write workspace-scoped data (`POST /pixels` and `GET /pixels`). The link-pixel endpoints and the single-pixel endpoints operate by ID and do not read this header.
+</Note>
+
+### Supported platforms
+
+| Platform id | Display name |
+|---|---|
+| `facebook` | Facebook Pixel |
+| `ga4` | Google Analytics 4 |
+| `gtm` | Google Tag Manager |
+| `twitter` | Twitter/X Pixel |
+| `linkedin` | LinkedIn Insight Tag |
+| `tiktok` | TikTok Pixel |
+| `pinterest` | Pinterest Tag |
+| `snapchat` | Snapchat Pixel |
+| `google_ads` | Google Ads |
+| `bing_ads` | Bing Ads |
+| `quora` | Quora Pixel |
+| `adroll` | AdRoll |
+
+The `platform` value is validated against this list and stored lowercased. An unrecognized platform is rejected.
+
+## Create a pixel
+
+```
+POST /api/v1/pixels
+```
+
+Requires JWT. Creates a pixel record in the workspace.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="name" type="string" required>
+  Internal label for the pixel.
+</ParamField>
+
+<ParamField body="platform" type="string" required>
+  One of the supported platform ids. Stored lowercased.
+</ParamField>
+
+<ParamField body="pixelId" type="string" required>
+  The platform's own pixel or measurement ID, e.g. a Facebook pixel ID or a GA4 measurement ID.
+</ParamField>
+
+<ParamField body="enabled" type="boolean" default="true">
+  Whether the pixel is active. Defaults to `true`.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/pixels \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Acme Facebook Pixel",
+    "platform": "facebook",
+    "pixelId": "123456789012345",
+    "enabled": true
+  }'
+```
+
+### Example response
+
+```json
+{
+  "id": "7a6b5c4d-3e2f-4a1b-9c8d-0e1f2a3b4c5d",
+  "name": "Acme Facebook Pixel",
+  "platform": "facebook",
+  "pixelId": "123456789012345",
+  "enabled": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdById": "1a2b3c4d-...",
+  "createdAt": "2026-05-22T10:00:00.000Z",
+  "updatedAt": "2026-05-22T10:00:00.000Z"
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `409` | `platform` is not one of the supported platform ids. The error lists the valid values. |
+
+## List pixels
+
+```
+GET /api/v1/pixels
+```
+
+Requires JWT. Returns every pixel in the workspace, newest first.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/pixels \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE"
+```
+
+### Example response
+
+Each pixel includes a `_count.links` figure: the number of links the pixel is attached to.
+
+```json
+[
+  {
+    "id": "7a6b5c4d-...",
+    "name": "Acme Facebook Pixel",
+    "platform": "facebook",
+    "pixelId": "123456789012345",
+    "enabled": true,
+    "workspaceId": "8a7b6c5d-...",
+    "createdById": "1a2b3c4d-...",
+    "createdAt": "2026-05-22T10:00:00.000Z",
+    "updatedAt": "2026-05-22T10:00:00.000Z",
+    "_count": { "links": 4 }
+  }
+]
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+
+## List supported platforms
+
+```
+GET /api/v1/pixels/platforms
+```
+
+Requires JWT. Returns the supported platforms as id and display-name pairs. Useful for populating a platform picker.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/pixels/platforms \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+```json
+[
+  { "id": "facebook", "name": "Facebook Pixel" },
+  { "id": "ga4", "name": "Google Analytics 4" },
+  { "id": "gtm", "name": "Google Tag Manager" },
+  { "id": "twitter", "name": "Twitter/X Pixel" },
+  { "id": "linkedin", "name": "LinkedIn Insight Tag" },
+  { "id": "tiktok", "name": "TikTok Pixel" },
+  { "id": "pinterest", "name": "Pinterest Tag" },
+  { "id": "snapchat", "name": "Snapchat Pixel" },
+  { "id": "google_ads", "name": "Google Ads" },
+  { "id": "bing_ads", "name": "Bing Ads" },
+  { "id": "quora", "name": "Quora Pixel" },
+  { "id": "adroll", "name": "AdRoll" }
+]
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+
+## Get a pixel
+
+```
+GET /api/v1/pixels/:id
+```
+
+Requires JWT. Returns a single pixel by ID.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/pixels/7a6b5c4d-3e2f-4a1b-9c8d-0e1f2a3b4c5d \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+```json
+{
+  "id": "7a6b5c4d-...",
+  "name": "Acme Facebook Pixel",
+  "platform": "facebook",
+  "pixelId": "123456789012345",
+  "enabled": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdById": "1a2b3c4d-...",
+  "createdAt": "2026-05-22T10:00:00.000Z",
+  "updatedAt": "2026-05-22T10:00:00.000Z",
+  "_count": { "links": 4 }
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `404` | Pixel not found |
+
+## Update a pixel
+
+```
+PATCH /api/v1/pixels/:id
+```
+
+Requires JWT. Updates one or more fields on the pixel.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="name" type="string">
+  New internal label.
+</ParamField>
+
+<ParamField body="platform" type="string">
+  New platform id. Validated against the supported list and stored lowercased.
+</ParamField>
+
+<ParamField body="pixelId" type="string">
+  New platform pixel or measurement ID.
+</ParamField>
+
+<ParamField body="enabled" type="boolean">
+  Enable or disable the pixel.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X PATCH https://api.linkutm.com/api/v1/pixels/7a6b5c4d-3e2f-4a1b-9c8d-0e1f2a3b4c5d \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Acme Facebook Pixel - Prod",
+    "pixelId": "987654321098765"
+  }'
+```
+
+### Example response
+
+```json
+{
+  "id": "7a6b5c4d-...",
+  "name": "Acme Facebook Pixel - Prod",
+  "platform": "facebook",
+  "pixelId": "987654321098765",
+  "enabled": true,
+  "workspaceId": "8a7b6c5d-...",
+  "updatedById": "1a2b3c4d-...",
+  "updatedAt": "2026-05-22T11:00:00.000Z",
+  "_count": { "links": 4 }
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `404` | Pixel not found |
+| `409` | `platform` is supplied and is not a supported platform id |
+
+## Toggle a pixel
+
+```
+PATCH /api/v1/pixels/:id/toggle
+```
+
+Requires JWT. Sets the pixel's `enabled` flag explicitly. A disabled pixel does not fire on link redirects.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="enabled" type="boolean" required>
+  The desired enabled state. Sent at the top level of the JSON body.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X PATCH https://api.linkutm.com/api/v1/pixels/7a6b5c4d-3e2f-4a1b-9c8d-0e1f2a3b4c5d/toggle \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "enabled": false }'
+```
+
+### Example response
+
+```json
+{
+  "id": "7a6b5c4d-...",
+  "name": "Acme Facebook Pixel - Prod",
+  "platform": "facebook",
+  "pixelId": "987654321098765",
+  "enabled": false,
+  "workspaceId": "8a7b6c5d-...",
+  "updatedAt": "2026-05-22T11:30:00.000Z",
+  "_count": { "links": 4 }
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `404` | Pixel not found |
+
+## Delete a pixel
+
+```
+DELETE /api/v1/pixels/:id
+```
+
+Requires JWT. Permanently deletes the pixel.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Example request
+
+```bash
+curl -X DELETE https://api.linkutm.com/api/v1/pixels/7a6b5c4d-3e2f-4a1b-9c8d-0e1f2a3b4c5d \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+Returns the deleted pixel record.
+
+```json
+{
+  "id": "7a6b5c4d-...",
+  "name": "Acme Facebook Pixel - Prod",
+  "platform": "facebook",
+  "pixelId": "987654321098765",
+  "enabled": false,
+  "workspaceId": "8a7b6c5d-..."
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `404` | Pixel not found |
+
+## Link pixels
+
+These endpoints live on a separate controller mounted at `links/:linkId/pixels`. They attach pixels to and remove them from a specific link. All require a JWT.
+
+### Get pixels for a link
+
+```
+GET /api/v1/links/:linkId/pixels
+```
+
+Requires JWT. Returns the pixels attached to the link.
+
+#### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+#### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/links/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d/pixels \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+#### Example response
+
+Returns an array of pixel records. An empty array means no pixels are attached.
+
+```json
+[
+  {
+    "id": "7a6b5c4d-...",
+    "name": "Acme Facebook Pixel",
+    "platform": "facebook",
+    "pixelId": "123456789012345",
+    "enabled": true,
+    "workspaceId": "8a7b6c5d-..."
+  }
+]
+```
+
+#### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+
+### Add a pixel to a link
+
+```
+POST /api/v1/links/:linkId/pixels/:pixelId
+```
+
+Requires JWT. Attaches the pixel identified by `:pixelId` to the link identified by `:linkId`.
+
+#### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+#### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/links/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d/pixels/7a6b5c4d-3e2f-4a1b-9c8d-0e1f2a3b4c5d \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+#### Example response
+
+Returns the link-pixel association, including the embedded pixel.
+
+```json
+{
+  "linkId": "5f3b2a1c-...",
+  "pixelId": "7a6b5c4d-...",
+  "pixel": {
+    "id": "7a6b5c4d-...",
+    "name": "Acme Facebook Pixel",
+    "platform": "facebook",
+    "pixelId": "123456789012345",
+    "enabled": true
+  }
+}
+```
+
+#### Behavior notes
+
+- The operation is idempotent. If the pixel is already attached to the link, the existing association is returned and no duplicate is created.
+
+#### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `404` | Pixel not found |
+
+### Remove a pixel from a link
+
+```
+DELETE /api/v1/links/:linkId/pixels/:pixelId
+```
+
+Requires JWT. Detaches the pixel from the link. The pixel record itself is not deleted.
+
+#### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+#### Example request
+
+```bash
+curl -X DELETE https://api.linkutm.com/api/v1/links/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d/pixels/7a6b5c4d-3e2f-4a1b-9c8d-0e1f2a3b4c5d \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+#### Example response
+
+Returns the deleted link-pixel association.
+
+```json
+{
+  "linkId": "5f3b2a1c-...",
+  "pixelId": "7a6b5c4d-..."
+}
+```
+
+#### Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `404` | The pixel is not associated with this link |
+
+### Set all pixels for a link
+
+```
+POST /api/v1/links/:linkId/pixels
+```
+
+Requires JWT. Replaces the link's entire pixel set with the supplied list. Existing associations not in the list are removed; any in the list are added.
+
+#### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `Content-Type: application/json` | Yes | |
+
+#### Body
+
+<ParamField body="pixelIds" type="string[]" required>
+  Array of pixel UUIDs the link should have. Pass an empty array to detach all pixels.
+</ParamField>
+
+#### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/links/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d/pixels \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "pixelIds": ["7a6b5c4d-3e2f-4a1b-9c8d-0e1f2a3b4c5d", "8b7c6d5e-..."]
+  }'
+```
+
+#### Example response
+
+Returns the updated link with its `pixels` association list.
+
+```json
+{
+  "id": "5f3b2a1c-...",
+  "shortCode": "q2-launch",
+  "url": "https://example.com/q2-launch",
+  "pixels": [
+    {
+      "linkId": "5f3b2a1c-...",
+      "pixelId": "7a6b5c4d-...",
+      "pixel": {
+        "id": "7a6b5c4d-...",
+        "name": "Acme Facebook Pixel",
+        "platform": "facebook",
+        "pixelId": "123456789012345",
+        "enabled": true
+      }
+    }
+  ]
+}
+```
+
+<Warning>
+This is a full replace, not a merge. Any pixel currently attached to the link but absent from `pixelIds` is detached. To add a single pixel without disturbing the others, use `POST /api/v1/links/:linkId/pixels/:pixelId` instead.
+</Warning>
+
+#### Errors
+
+| Code | When |
+|---|---|
+| `400` | `pixelIds` is missing or not an array |
+| `401` | Missing or invalid JWT |

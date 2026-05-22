@@ -1,0 +1,313 @@
+---
+title: "Team & members"
+description: "List workspace members, remove members, change roles, and manage per-member notification settings."
+---
+
+## Overview
+
+Team endpoints manage the members of a workspace and each member's notification preferences. They live under `/api/v1/workspaces` and authenticate with a JWT bearer token. Every endpoint here is scoped to one workspace through the `x-workspace-id` header, which accepts a workspace UUID **or** a workspace slug.
+
+```
+Authorization: Bearer <jwt>
+x-workspace-id: <uuid_or_slug>
+```
+
+Pending invites are documented separately in [Invites](/api/invites).
+
+## Team
+
+```
+GET /api/v1/workspaces/team
+```
+
+Returns the workspace members and the pending invites in a single response. This combines `GET /workspaces/members` and `GET /workspaces/invites`.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/workspaces/team \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE"
+```
+
+### Example response
+
+```json
+{
+  "members": [
+    {
+      "id": "m1-...",
+      "workspaceId": "8a7b6c5d-...",
+      "userId": "1a2b3c4d-...",
+      "role": "owner",
+      "isActive": true,
+      "createdAt": "2026-05-22T10:00:00.000Z",
+      "user": { "id": "1a2b3c4d-...", "email": "owner@acme.com", "name": "Jane", "avatar": null }
+    }
+  ],
+  "invites": [
+    {
+      "id": "inv-...",
+      "workspaceId": "8a7b6c5d-...",
+      "email": "sam@acme.com",
+      "role": "editor",
+      "token": "<32-char-token>",
+      "expiresAt": "2026-05-29T10:00:00.000Z",
+      "createdAt": "2026-05-22T10:05:00.000Z"
+    }
+  ]
+}
+```
+
+## List members
+
+```
+GET /api/v1/workspaces/members
+```
+
+Returns every member of the workspace. Active members are listed first, then ordered by role and creation date.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/workspaces/members \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE"
+```
+
+### Example response
+
+```json
+[
+  {
+    "id": "m1-...",
+    "workspaceId": "8a7b6c5d-...",
+    "userId": "1a2b3c4d-...",
+    "role": "owner",
+    "isActive": true,
+    "createdAt": "2026-05-22T10:00:00.000Z",
+    "user": { "id": "1a2b3c4d-...", "email": "owner@acme.com", "name": "Jane", "avatar": null }
+  }
+]
+```
+
+## Remove a member
+
+```
+DELETE /api/v1/workspaces/members/:memberId
+```
+
+Removes a member from the workspace. `:memberId` is the **user ID** of the member to remove. The workspace owner cannot be removed.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Example request
+
+```bash
+curl -X DELETE https://api.linkutm.com/api/v1/workspaces/members/2b3c4d5e-... \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE"
+```
+
+### Example response
+
+Returns the deleted membership record.
+
+```json
+{
+  "id": "m2-...",
+  "workspaceId": "8a7b6c5d-...",
+  "userId": "2b3c4d5e-...",
+  "role": "editor",
+  "isActive": true,
+  "createdAt": "2026-05-21T08:00:00.000Z"
+}
+```
+
+The remaining members are emailed a `teamNotification` with action `left`, subject to each member's notification preferences.
+
+### Errors
+
+| Code | When |
+|---|---|
+| `403` | Target member is the workspace owner |
+| `404` | Member not found in this workspace |
+
+## Update a member role
+
+```
+PATCH /api/v1/workspaces/members/:memberId/role
+```
+
+Changes a member's role. `:memberId` is the **user ID** of the member. The owner role cannot be changed.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="role" type="string" required>
+  The new role to assign to the member.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X PATCH https://api.linkutm.com/api/v1/workspaces/members/2b3c4d5e-.../role \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE" \
+  -H "Content-Type: application/json" \
+  -d '{ "role": "admin" }'
+```
+
+### Example response
+
+Returns the updated membership record with the embedded user.
+
+```json
+{
+  "id": "m2-...",
+  "workspaceId": "8a7b6c5d-...",
+  "userId": "2b3c4d5e-...",
+  "role": "admin",
+  "isActive": true,
+  "user": { "id": "2b3c4d5e-...", "email": "sam@acme.com", "name": "Sam", "avatar": null }
+}
+```
+
+All members are emailed a `teamNotification` with action `role_changed`, subject to each member's notification preferences.
+
+### Errors
+
+| Code | When |
+|---|---|
+| `403` | Target member is the workspace owner |
+| `404` | Member not found in this workspace |
+
+## Notification settings
+
+These settings are per member, per workspace. They control which team and link emails the caller receives for the workspace.
+
+### Get notification settings
+
+```
+GET /api/v1/workspaces/notifications
+```
+
+Returns the caller's notification flags for the workspace.
+
+#### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+#### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/workspaces/notifications \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE"
+```
+
+#### Example response
+
+```json
+{
+  "notifyNewLinks": true,
+  "notifyLinkClicks": false,
+  "notifyWeeklyReport": true,
+  "notifyTeamChanges": true
+}
+```
+
+### Update notification settings
+
+```
+PATCH /api/v1/workspaces/notifications
+```
+
+Updates the caller's notification flags. Send only the flags you want to change.
+
+#### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+#### Body
+
+<ParamField body="notifyNewLinks" type="boolean">
+  Email the member when a new link is created in the workspace.
+</ParamField>
+<ParamField body="notifyLinkClicks" type="boolean">
+  Email the member about link clicks.
+</ParamField>
+<ParamField body="notifyWeeklyReport" type="boolean">
+  Send the member the weekly report email.
+</ParamField>
+<ParamField body="notifyTeamChanges" type="boolean">
+  Email the member about team changes (members joining, leaving, role changes).
+</ParamField>
+
+#### Example request
+
+```bash
+curl -X PATCH https://api.linkutm.com/api/v1/workspaces/notifications \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE" \
+  -H "Content-Type: application/json" \
+  -d '{ "notifyLinkClicks": true, "notifyWeeklyReport": false }'
+```
+
+#### Example response
+
+Returns the updated membership record.
+
+#### Errors
+
+| Code | When |
+|---|---|
+| `404` | Caller is not a member of the workspace |
+
+## Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `403` | Action targets the workspace owner |
+| `404` | Workspace or member not found |
+| `429` | Rate limit exceeded (100 requests/minute per IP) |
+
+See [Errors](/api/errors) for the full error envelope.
+
+<Note>
+Team events (member joined, member left, role changed) enqueue emails through an outbound email queue and respect each member's per-workspace notification flags.
+</Note>

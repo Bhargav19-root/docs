@@ -1,0 +1,535 @@
+---
+title: "Workspaces"
+description: "Create and manage workspaces, logos, soft delete and restore, and import API keys."
+---
+
+## Overview
+
+Workspaces are the top-level container for links, domains, and team members. Workspace endpoints live under `/api/v1/workspaces`. Every endpoint authenticates with a JWT bearer token. Workspace endpoints never use API keys.
+
+```
+Authorization: Bearer <jwt>
+```
+
+Some endpoints are scoped to a single workspace through the `x-workspace-id` header, which accepts a workspace UUID **or** a workspace slug.
+
+```
+x-workspace-id: <uuid_or_slug>
+```
+
+Team members and invites are documented separately: see [Team and members](/api/team) and [Invites](/api/invites).
+
+<Note>
+Routing order matters on the server. Static paths such as `team`, `members`, `invites`, `deleted`, and `import-api-keys` are matched before the dynamic `:id` and `:slug` routes. A workspace whose slug collides with one of those reserved words is not reachable through the slug-check endpoint.
+</Note>
+
+## Create a workspace
+
+```
+POST /api/v1/workspaces
+```
+
+Creates a workspace owned by the authenticated user and adds that user as a member with the `owner` role. The newest active system domain (if one exists) becomes the workspace default domain.
+
+This endpoint accepts `multipart/form-data` so an optional logo file can be uploaded in the same request.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `Content-Type: multipart/form-data` | Yes | The body is multipart so the `logo` file part can be included. |
+
+### Body
+
+<ParamField body="name" type="string" required>
+  Workspace display name. Must be unique (case-insensitive) among the caller's other non-deleted workspaces.
+</ParamField>
+
+<ParamField body="slug" type="string">
+  URL slug. If omitted, a slug is generated from `name`: lowercased, non-alphanumeric runs replaced with hyphens, leading/trailing hyphens stripped, then a 6-character nanoid suffix appended.
+</ParamField>
+
+<ParamField body="logo" type="file">
+  Optional image file part. Validated as an image. If the upload fails after the workspace is created, the workspace is still saved and the response carries a `logoUploadError` field.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/workspaces \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "name=Acme Marketing" \
+  -F "slug=acme-marketing" \
+  -F "logo=@/path/to/logo.png"
+```
+
+### Example response
+
+```json
+{
+  "id": "8a7b6c5d-4e3f-4a2b-9c1d-0e1f2a3b4c5d",
+  "name": "Acme Marketing",
+  "slug": "acme-marketing",
+  "logo": "https://cdn.linkutm.com/workspace-logos/8a7b6c5d-...",
+  "ownerId": "1a2b3c4d-...",
+  "createdAt": "2026-05-22T10:00:00.000Z",
+  "updatedAt": "2026-05-22T10:00:00.000Z"
+}
+```
+
+If a logo was sent but the upload failed, the response also includes `"logoUploadError": "<reason>"`.
+
+### Errors
+
+| Code | When |
+|---|---|
+| `400` | Logo file is not a valid image |
+| `409` | Caller already has a workspace with this name, or the slug is already taken |
+| `404` | User not found (try logging in again) |
+
+## List workspaces
+
+```
+GET /api/v1/workspaces
+```
+
+Returns every non-deleted workspace the authenticated user belongs to, oldest first. Each entry includes up to 5 non-owner members and a `_count` of non-owner members.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/workspaces \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+```json
+[
+  {
+    "id": "8a7b6c5d-...",
+    "name": "Acme Marketing",
+    "slug": "acme-marketing",
+    "logo": "https://cdn.linkutm.com/workspace-logos/8a7b6c5d-...",
+    "ownerId": "1a2b3c4d-...",
+    "createdAt": "2026-05-22T10:00:00.000Z",
+    "updatedAt": "2026-05-22T10:00:00.000Z",
+    "isSoftDeleted": false,
+    "softDeletedAt": null,
+    "members": [
+      { "user": { "id": "2b3c4d5e-...", "name": "Sam", "avatar": null } }
+    ],
+    "_count": { "members": 1 }
+  }
+]
+```
+
+## Check slug availability
+
+```
+GET /api/v1/workspaces/:slug
+```
+
+Checks whether a workspace slug is already taken. The path segment is the candidate slug.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/workspaces/acme-marketing \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+```json
+{ "available": false, "message": "Slug is already taken" }
+```
+
+When the slug is free:
+
+```json
+{ "available": true, "message": "Slug is available" }
+```
+
+<Warning>
+This route shares the `/workspaces/:param` path with other endpoints. Reserved segments (`team`, `members`, `invites`, `notifications`, `deleted`, `import-api-keys`) are matched first and are never treated as a slug check.
+</Warning>
+
+## Update a workspace
+
+```
+PATCH /api/v1/workspaces/:id
+```
+
+Updates a workspace by UUID.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="name" type="string">
+  New workspace name. Must be unique (case-insensitive) among workspaces owned by the same owner.
+</ParamField>
+
+<ParamField body="slug" type="string">
+  New slug.
+</ParamField>
+
+<ParamField body="logo" type="string">
+  Logo URL. Pass an empty string or `null` to clear the logo (the stored file is deleted). A `data:image/...` base64 string is rejected - upload binary images through `POST /workspaces/:id/logo` instead.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X PATCH https://api.linkutm.com/api/v1/workspaces/8a7b6c5d-... \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "Acme Growth" }'
+```
+
+### Example response
+
+Returns the full updated workspace record.
+
+```json
+{
+  "id": "8a7b6c5d-...",
+  "name": "Acme Growth",
+  "slug": "acme-marketing",
+  "logo": null,
+  "ownerId": "1a2b3c4d-...",
+  "updatedById": "1a2b3c4d-...",
+  "createdAt": "2026-05-22T10:00:00.000Z",
+  "updatedAt": "2026-05-22T11:30:00.000Z"
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `400` | Logo sent as an embedded `data:image/...` base64 string |
+| `409` | Owner already has another workspace with this name |
+
+## Upload or replace the logo
+
+```
+POST /api/v1/workspaces/:id/logo
+```
+
+Uploads a binary logo image for a workspace. Only the workspace **owner** can call this. If a logo already exists, the old file is deleted after the new one is stored. The path segment is the workspace UUID.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `Content-Type: multipart/form-data` | Yes | |
+
+### Body
+
+<ParamField body="file" type="file" required>
+  The logo image. Sent as the multipart part named `file`. Validated as an image.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/workspaces/8a7b6c5d-.../logo \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@/path/to/logo.png"
+```
+
+### Example response
+
+```json
+{
+  "id": "8a7b6c5d-...",
+  "name": "Acme Growth",
+  "slug": "acme-marketing",
+  "logo": "https://cdn.linkutm.com/workspace-logos/8a7b6c5d-...",
+  "ownerId": "1a2b3c4d-...",
+  "createdAt": "2026-05-22T10:00:00.000Z",
+  "updatedAt": "2026-05-22T12:00:00.000Z"
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `400` | No file provided, or the file is not a valid image |
+| `404` | Workspace not found, or the caller is not the workspace owner |
+
+## Delete a workspace
+
+```
+DELETE /api/v1/workspaces/:id
+```
+
+Deletes a workspace by UUID. Only the workspace **owner** can delete. The request body selects soft delete (move to trash) or permanent delete. If no body is sent, the delete is permanent.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `Content-Type: application/json` | Yes | Only needed when sending a body. |
+
+### Body
+
+<ParamField body="type" type="string" default="permanent">
+  `soft` moves the workspace to trash. `permanent` deletes it immediately. Defaults to `permanent` when the field or body is omitted.
+</ParamField>
+
+<ParamField body="confirmationText" type="string" required>
+  Confirmation phrase. Must equal `delete/<workspace-slug>` exactly, for both soft and permanent delete.
+</ParamField>
+
+<Warning>
+Permanent delete is irreversible. The workspace record is destroyed and every member is emailed a `workspaceDeleted` notice. Use `type: "soft"` if you may need to restore.
+</Warning>
+
+### Example request (soft delete)
+
+```bash
+curl -X DELETE https://api.linkutm.com/api/v1/workspaces/8a7b6c5d-... \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "type": "soft", "confirmationText": "delete/acme-marketing" }'
+```
+
+### Example response
+
+Soft delete:
+
+```json
+{ "message": "Workspace moved to trash. You have 7 days to restore it." }
+```
+
+Permanent delete:
+
+```json
+{ "message": "Workspace permanently deleted" }
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `400` | `confirmationText` does not equal `delete/<slug>`, or the workspace is already in trash (soft delete) |
+| `403` | Caller is not the workspace owner |
+| `404` | Workspace not found |
+
+### Behavior notes
+
+- Soft delete sets `isSoftDeleted` and `softDeletedAt`. A purge date 7 days later is included in the `workspaceSoftDeleted` email sent to every member.
+- Soft-deleted workspaces stop appearing in `GET /workspaces`.
+- After the 7-day window, a soft-deleted workspace is purged permanently and the owner receives a `workspacePurged` email.
+- Permanent delete and purge both destroy the record and all data tied to it.
+
+## List deleted workspaces
+
+```
+GET /api/v1/workspaces/deleted
+```
+
+Returns the soft-deleted workspaces **owned** by the authenticated user, most recently deleted first. Use this to find a workspace to restore before its 7-day window closes.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/workspaces/deleted \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+```json
+[
+  {
+    "id": "8a7b6c5d-...",
+    "name": "Acme Marketing",
+    "slug": "acme-marketing",
+    "logo": null,
+    "softDeletedAt": "2026-05-20T09:00:00.000Z"
+  }
+]
+```
+
+## Restore a workspace
+
+```
+POST /api/v1/workspaces/:id/restore
+```
+
+Restores a soft-deleted workspace. Only the workspace **owner** can restore. Returns HTTP `200`. The path segment is the workspace UUID.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/workspaces/8a7b6c5d-.../restore \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+```json
+{ "message": "Workspace restored successfully", "slug": "acme-marketing" }
+```
+
+The owner is emailed a `workspaceRestored` notice.
+
+### Errors
+
+| Code | When |
+|---|---|
+| `400` | Workspace is not in trash |
+| `403` | Caller is not the workspace owner |
+| `404` | Workspace not found |
+
+## Import API keys
+
+linkutm can import links from Bitly, Rebrandly, and Short.io. The provider API keys used for those imports are stored on the workspace.
+
+### Get saved import API keys
+
+```
+GET /api/v1/workspaces/import-api-keys
+```
+
+Returns the stored import API keys for the workspace.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/workspaces/import-api-keys \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE"
+```
+
+### Example response
+
+```json
+{
+  "bitlyApiKey": "<bitly-key>",
+  "rebrandlyApiKey": null,
+  "shortioApiKey": null
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `404` | Workspace not found |
+
+### Save an import API key
+
+```
+PATCH /api/v1/workspaces/import-api-keys
+```
+
+Stores an import API key for one provider. Each call sets exactly one provider key.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="source" type="string" required>
+  Provider to store the key for. One of `bitly`, `rebrandly`, `shortio`.
+</ParamField>
+
+<ParamField body="apiKey" type="string" required>
+  The provider API key value to store.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X PATCH https://api.linkutm.com/api/v1/workspaces/import-api-keys \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: $WORKSPACE" \
+  -H "Content-Type: application/json" \
+  -d '{ "source": "bitly", "apiKey": "<bitly-key>" }'
+```
+
+### Example response
+
+```json
+{ "id": "8a7b6c5d-..." }
+```
+
+## Errors
+
+| Code | When |
+|---|---|
+| `400` | Validation failure - bad confirmation text, invalid logo, missing fields |
+| `401` | Missing or invalid JWT |
+| `403` | Caller is not the owner where ownership is required |
+| `404` | Workspace not found |
+| `409` | Duplicate workspace name or slug |
+| `429` | Rate limit exceeded (100 requests/minute per IP) |
+
+See [Errors](/api/errors) for the full error envelope.
+
+## Behavior notes
+
+<AccordionGroup>
+  <Accordion title="x-workspace-id accepts a UUID or a slug">
+    Workspace-scoped endpoints read the workspace from the `x-workspace-id` header. The value can be the workspace UUID or its slug. Endpoints that take the workspace in the URL path (`:id`) expect the UUID.
+  </Accordion>
+  <Accordion title="Soft delete has a 7-day window">
+    A soft-deleted workspace can be restored for 7 days through `POST /workspaces/:id/restore`. After that window it is purged permanently and cannot be recovered. The purge date is included in the soft-delete email.
+  </Accordion>
+  <Accordion title="Emails are queued, not sent inline">
+    Workspace lifecycle events (delete, soft-delete, restore, purge) enqueue emails through an outbound email queue. Team notifications respect each member's per-workspace notification flags.
+  </Accordion>
+  <Accordion title="Ownership-gated actions">
+    Logo upload, update, delete, soft-delete, and restore require the caller to be the workspace owner.
+  </Accordion>
+</AccordionGroup>

@@ -1,0 +1,238 @@
+---
+title: "Update link"
+description: "PATCH /links/:id - change the destination, UTMs, archive state, tags, and more on an existing link."
+---
+
+## Endpoint
+
+```
+PATCH /api/v1/links/:id
+```
+
+`:id` is the link's UUID, not its short code.
+
+## Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes (or API key) | A workspace JWT |
+| `Authorization: Bearer lk_live_...` | Yes (or JWT) | A workspace API key works equally well |
+| `Content-Type: application/json` | Yes | |
+
+<Note>
+This endpoint sits behind the `JwtOrApiKeyGuard`. Either a JWT or an API key (`lk_live_` prefix) authenticates the request - send one of them in the `Authorization` header. The caller identified by the credential is recorded as the link's `updatedById`.
+</Note>
+
+The `x-workspace-id` header is not read by this endpoint. The link is located purely by its `:id`.
+
+## Body
+
+Every field is optional. Only the fields you send are changed - omitted fields are left untouched. This is a true PATCH.
+
+<ParamField body="url" type="string">
+  New destination URL.
+</ParamField>
+
+<ParamField body="title" type="string">
+  Internal label. Not visible to visitors.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Internal context.
+</ParamField>
+
+<ParamField body="comments" type="string">
+  Free-form notes on the link.
+</ParamField>
+
+<ParamField body="customSlug" type="string">
+  New short code. Validated server-side: only letters, numbers, hyphens, and underscores (`^[a-zA-Z0-9_-]+$`), and 50 characters or fewer. Checked for global uniqueness against every other link - a clash returns `409`. Sending an empty string is treated as "no change" and the slug is left as-is.
+</ParamField>
+
+<ParamField body="utmSource" type="string">UTM source.</ParamField>
+<ParamField body="utmMedium" type="string">UTM medium.</ParamField>
+<ParamField body="utmCampaign" type="string">UTM campaign.</ParamField>
+<ParamField body="utmTerm" type="string">UTM term.</ParamField>
+<ParamField body="utmContent" type="string">UTM content.</ParamField>
+
+<ParamField body="customUtmParams" type="object">
+  Arbitrary custom UTM keys. `{"audience": "lookalike_3"}` becomes `&utm_audience=lookalike_3` on redirect. Sending this field replaces the stored object.
+</ParamField>
+
+<ParamField body="templateId" type="string | null">
+  UUID of a UTM template the link is associated with. Pass `null` to detach the link from its template. The value is written directly to the record - the update path does not re-apply template UTM fields, so set the UTM fields explicitly if you want them changed.
+</ParamField>
+
+<ParamField body="folderId" type="string | null">
+  UUID of the folder to move the link into. Pass `null` to unfile the link.
+</ParamField>
+
+<ParamField body="archived" type="boolean">
+  Set `true` to archive the link, `false` to restore it. Archived links return `404` on the public redirect and drop out of default list views. See [Behavior notes](#behavior-notes).
+</ParamField>
+
+<ParamField body="tagIds" type="string[]">
+  Full replacement set of tag UUIDs. See [How tags are handled](#how-tags-are-handled) - this is a replace, not an append.
+</ParamField>
+
+<ParamField body="password" type="string">
+  Sets or changes the link password. Stored on the record. The public redirect gates on this - see [Redirects](/api/redirects).
+</ParamField>
+
+<ParamField body="expiresAt" type="string | null">
+  ISO 8601 timestamp. Three behaviors based on what you send - see [How expiresAt is parsed](#how-expiresat-is-parsed).
+</ParamField>
+
+<ParamField body="fallbackUrl" type="string | null">
+  Planned fallback destination. Empty string and `null` both clear it - see [How fallbackUrl is parsed](#how-fallbackurl-is-parsed).
+</ParamField>
+
+<ParamField body="clickLimit" type="integer">
+  Max clicks. Recorded for reporting; the public redirect does not stop on it.
+</ParamField>
+
+<ParamField body="iosUrl" type="string">
+  Destination for iOS visitors. The public redirect does route to this when the visitor's OS is detected as iOS - see [Redirects](/api/redirects).
+</ParamField>
+
+<ParamField body="androidUrl" type="string">
+  Destination for Android visitors. Same routing behavior as `iosUrl`.
+</ParamField>
+
+<ParamField body="geoTargets" type="object">
+  Country-code to URL map. Stored on the record; the public redirect does not currently route on country.
+</ParamField>
+
+<ParamField body="ogTitle" type="string">Override OG title for social previews.</ParamField>
+<ParamField body="ogDescription" type="string">Override OG description.</ParamField>
+<ParamField body="ogImage" type="string">Override OG image URL.</ParamField>
+<ParamField body="favicon" type="string">Override favicon URL.</ParamField>
+
+## How expiresAt is parsed
+
+The controller inspects `expiresAt` before passing it to the service:
+
+| You send | Stored value |
+|---|---|
+| `null` | `null` - expiry is removed, the link no longer expires |
+| A non-empty string | Parsed as a `Date` and stored |
+| An empty or whitespace-only string | `undefined` - field is omitted, current expiry left unchanged |
+| Field absent | Field is omitted, current expiry left unchanged |
+
+To clear an expiry, send `"expiresAt": null` explicitly. Sending `""` does not clear it.
+
+## How fallbackUrl is parsed
+
+| You send | Stored value |
+|---|---|
+| `null` | `null` |
+| An empty string `""` | `null` - empty string is normalized to `null` |
+| A non-empty string | Stored as-is |
+| Field absent | Field is omitted, current value left unchanged |
+
+Both `null` and `""` clear `fallbackUrl`. This differs from `expiresAt`, where an empty string is a no-op.
+
+## How tags are handled
+
+`tagIds` is a full replacement. When the field is present, the service:
+
+1. Deletes every existing `link_tags` row for this link.
+2. Inserts one row per UUID in the array you sent.
+3. Returns the link re-fetched with its new tag set.
+
+<Warning>
+Sending `"tagIds": []` removes all tags from the link. Omit the field entirely if you do not want to touch tags. To add tags without replacing the existing set, use `POST /links/bulk-tag` with `mode: "add"` - see [Delete and bulk operations](/api/links-delete).
+</Warning>
+
+The tag insert runs after the link row is already updated. If a tag UUID does not exist, the join insert fails with a foreign-key error while the rest of the update has already been committed. Validate `tagIds` before patching.
+
+## Example request
+
+```bash
+curl -X PATCH https://api.linkutm.com/api/v1/links/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Q2 Launch - Google Search - Brand (updated)",
+    "utmContent": "headline_b",
+    "expiresAt": "2026-09-30T23:59:59.000Z",
+    "fallbackUrl": "",
+    "archived": false,
+    "tagIds": ["tag-uuid-1", "tag-uuid-3"]
+  }'
+```
+
+The same call with an API key:
+
+```bash
+curl -X PATCH https://api.linkutm.com/api/v1/links/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
+  -H "Authorization: Bearer lk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{ "archived": true }'
+```
+
+## Example response
+
+All `id` fields are UUIDs. When `tagIds` is present in the request, the response is the link re-fetched after the tag rows are rewritten, and `tags` contains `{ tagId }` entries. When `tagIds` is absent, the response is the updated link with fully expanded `tags` (each carrying the joined `tag` object).
+
+```json
+{
+  "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "url": "https://example.com/q2-launch",
+  "shortCode": "q2-launch",
+  "title": "Q2 Launch - Google Search - Brand (updated)",
+  "description": null,
+  "comments": null,
+  "utmSource": "google",
+  "utmMedium": "cpc",
+  "utmCampaign": "q2_launch",
+  "utmTerm": null,
+  "utmContent": "headline_b",
+  "customUtmParams": null,
+  "password": null,
+  "expiresAt": "2026-09-30T23:59:59.000Z",
+  "fallbackUrl": null,
+  "clickLimit": null,
+  "iosUrl": null,
+  "androidUrl": null,
+  "geoTargets": null,
+  "ogTitle": null,
+  "ogDescription": null,
+  "ogImage": null,
+  "favicon": null,
+  "qrCodeEnabled": true,
+  "archived": false,
+  "clicks": 42,
+  "lastClickAt": "2026-05-20T08:14:00.000Z",
+  "createdAt": "2026-05-07T10:00:00.000Z",
+  "updatedAt": "2026-05-22T09:30:00.000Z",
+  "workspaceId": "8a7b6c5d-...",
+  "createdById": "1a2b3c4d-...",
+  "updatedById": "1a2b3c4d-...",
+  "domainId": "9e8d7c6b-...",
+  "folderId": null,
+  "templateId": null,
+  "tags": [{ "tagId": "tag-uuid-1" }, { "tagId": "tag-uuid-3" }]
+}
+```
+
+## Errors
+
+| Code | When |
+|---|---|
+| `400` | `customSlug` contains characters outside `[a-zA-Z0-9_-]`, or is longer than 50 characters |
+| `401` | Missing or invalid JWT / API key |
+| `404` | Link with the given `:id` does not exist |
+| `409` | `customSlug` is already in use by another link |
+
+See [Errors](/api/errors) for the full error envelope.
+
+## Behavior notes
+
+- This is a partial update. Fields you omit are never written, so you can safely send only the fields you want to change.
+- UTM string fields are written directly. The update path does not run the workspace [UTM Rules](/utm-rules/overview) processing that link creation does - the values you send are stored verbatim.
+- `customSlug` maps to the link's `shortCode`. Changing it changes every existing short URL for the link, including its QR code target. Old short codes stop resolving immediately.
+- `updatedById` is set to the user resolved from the JWT or API key on every successful update.
+- `archived` toggled here affects only the single link. Workspace link-usage counters are recalculated by the bulk archive endpoint, not by this PATCH - use `POST /links/bulk-archive` when you need the usage counter kept in sync.
+- `expiresAt` and `archived` are the two fields enforced by the public redirect. An expired link returns `410`, an archived link returns `404`. See [Redirects](/api/redirects).
+- `fallbackUrl`, `clickLimit`, and `geoTargets` are stored but not acted on by the redirect. `iosUrl` and `androidUrl` are stored and are used by the redirect for device-based routing.

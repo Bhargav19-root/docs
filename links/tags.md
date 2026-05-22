@@ -56,7 +56,7 @@ A single link can be `seasonal` + `experiment`. Folder might be **Email Campaign
     Tag names are case-insensitive unique per workspace. `Email` and `email` collide.
   </Accordion>
   <Accordion title="Color overload">
-    More than 8–10 colors becomes visual noise. Reuse colors with distinct names.
+    More than 8-10 colors becomes visual noise. Reuse colors with distinct names.
   </Accordion>
 </AccordionGroup>
 

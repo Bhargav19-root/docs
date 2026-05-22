@@ -1,0 +1,200 @@
+---
+title: "Authentication"
+description: "Signup with OTP, login, password management, sessions, and Google OAuth."
+---
+
+## Overview
+
+All API endpoints authenticate with a JWT bearer token. Tokens are issued by signup (OTP verification), login, or Google OAuth, and carried on every request:
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+Auth endpoints live under `/api/v1/auth` and do **not** require the `x-workspace-id` header.
+
+## Signup (OTP flow)
+
+Account creation is a two-step flow: request an OTP, then verify it.
+
+### Step 1: Send OTP
+
+```
+POST /api/v1/auth/send-otp
+```
+
+<ParamField body="email" type="string" required>
+  Email address for the new account.
+</ParamField>
+<ParamField body="name" type="string" required>
+  Display name.
+</ParamField>
+<ParamField body="password" type="string" required>
+  Account password. Minimum 8 characters.
+</ParamField>
+
+Sends a one-time code to the email. The account is not created yet.
+
+### Step 2: Verify OTP
+
+```
+POST /api/v1/auth/verify-otp
+```
+
+<ParamField body="email" type="string" required>
+  Same email used in `send-otp`.
+</ParamField>
+<ParamField body="otp" type="string" required>
+  The code from the email. Minimum 6 characters.
+</ParamField>
+
+On success the account is created and a JWT is returned.
+
+```json
+{
+  "token": "<jwt_token>",
+  "user": { "id": "1a2b3c4d-...", "name": "Jane", "email": "jane@example.com" }
+}
+```
+
+### Resend OTP
+
+```
+POST /api/v1/auth/resend-otp
+```
+
+<ParamField body="email" type="string" required>
+  Email to resend the code to. Use when the original code expired or was not received.
+</ParamField>
+
+## Login
+
+```
+POST /api/v1/auth/login
+```
+
+<ParamField body="email" type="string" required>
+  Account email.
+</ParamField>
+<ParamField body="password" type="string" required>
+  Account password.
+</ParamField>
+
+Returns a JWT and the user object, same shape as `verify-otp`.
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{ "email": "jane@example.com", "password": "<password>" }'
+```
+
+## Password management
+
+### Forgot password
+
+```
+POST /api/v1/auth/forgot-password
+```
+
+<ParamField body="email" type="string" required>
+  Email to send a password-reset link to.
+</ParamField>
+
+### Reset password
+
+```
+POST /api/v1/auth/reset-password
+```
+
+<ParamField body="token" type="string" required>
+  Reset token from the email link.
+</ParamField>
+<ParamField body="newPassword" type="string" required>
+  New password. Minimum 8 characters.
+</ParamField>
+
+### Change password
+
+```
+POST /api/v1/auth/change-password
+```
+
+Authenticated. Requires a valid JWT.
+
+<ParamField body="currentPassword" type="string" required>
+  The current password, for verification.
+</ParamField>
+<ParamField body="newPassword" type="string" required>
+  New password. Minimum 8 characters.
+</ParamField>
+
+## Profile
+
+```
+GET /api/v1/auth/profile
+```
+
+Returns the currently authenticated user.
+
+```bash
+curl https://api.linkutm.com/api/v1/auth/profile \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+## Sessions
+
+Each sign-in creates a session record. The `user-agent` header on the request is captured so users can identify devices.
+
+### List sessions
+
+```
+GET /api/v1/auth/sessions
+```
+
+Returns the authenticated user's active sign-in sessions.
+
+### Revoke one session
+
+```
+DELETE /api/v1/auth/sessions/:sessionId
+```
+
+Signs out the specified session.
+
+### Revoke all sessions
+
+```
+DELETE /api/v1/auth/sessions
+```
+
+Signs out everywhere - revokes every session for the user.
+
+## Google OAuth
+
+```
+GET /api/v1/auth/google
+GET /api/v1/auth/google/callback
+```
+
+Redirect the browser to `GET /auth/google` to start the Google OAuth flow. After Google authenticates the user, the callback redirects to:
+
+```
+<FRONTEND_URL>/auth/google/callback?token=<jwt>
+```
+
+Read the `token` query parameter from that redirect and use it as the bearer token.
+
+<Note>
+The Google OAuth endpoints are browser-redirect endpoints, not JSON APIs. Do not call them with `fetch`/`curl` expecting a JSON body.
+</Note>
+
+## Errors
+
+| Code | When |
+|---|---|
+| `400` | Validation failure - missing fields, password too short, invalid OTP |
+| `401` | Wrong credentials, expired or invalid JWT, expired reset token |
+| `409` | Email already registered |
+| `429` | Rate limit exceeded (100 requests/minute per IP) |
+
+See [Errors](/api/errors) for the full error envelope.

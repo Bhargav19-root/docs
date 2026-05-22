@@ -1,0 +1,257 @@
+---
+title: "Analytics"
+description: "Workspace analytics, link analytics, resetting click data, and geo backfill."
+---
+
+## Overview
+
+Analytics endpoints aggregate click data captured by linkutm whenever a short link is visited. Each click record stores geo (country, region, city), device, browser, OS, and referrer.
+
+Endpoints live under `/api/v1`. They require a JWT and the `x-workspace-id` header, which accepts a workspace UUID or slug.
+
+```
+Authorization: Bearer <jwt>
+x-workspace-id: <uuid_or_slug>
+```
+
+<Note>
+Date ranges are capped by your plan's analytics retention window. If `startDate` falls before the retention cutoff, it is clamped forward to the earliest retained date. Workspaces with no active plan default to a 30 day retention window.
+</Note>
+
+## Get workspace analytics
+
+```
+GET /api/v1/analytics
+```
+
+Aggregates click data across every link in the workspace.
+
+### Headers
+
+| Header | Required |
+|---|---|
+| `Authorization: Bearer <jwt>` | Yes |
+| `x-workspace-id: <uuid_or_slug>` | Yes |
+
+### Query parameters
+
+<ParamField query="startDate" type="string">ISO 8601 date. Defaults to 30 days before `endDate`. Clamped forward to the plan retention cutoff if earlier.</ParamField>
+<ParamField query="endDate" type="string">ISO 8601 date. Defaults to now.</ParamField>
+
+### Example
+
+```bash
+curl "https://api.linkutm.com/api/v1/analytics?startDate=2026-04-01&endDate=2026-05-01" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex"
+```
+
+### Response
+
+```json
+{
+  "totalClicks": 18420,
+  "uniqueVisitors": 9211,
+  "totalLinks": 273,
+  "conversionRate": 50.0,
+  "topLinks": [
+    {
+      "link": {
+        "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+        "shortCode": "q2-launch",
+        "title": "Q2 Launch - Google",
+        "url": "https://example.com/landing"
+      },
+      "clicks": 4102
+    }
+  ],
+  "clicksOverTime": [
+    { "date": "2026-04-01", "clicks": 612 },
+    { "date": "2026-04-02", "clicks": 588 }
+  ],
+  "topCountries": [
+    { "country": "United States", "_count": 7301 },
+    { "country": "India", "_count": 2980 }
+  ],
+  "topSources": [
+    { "source": "google", "clicks": 8302 },
+    { "source": "newsletter", "clicks": 3110 }
+  ]
+}
+```
+
+### Response fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `totalClicks` | integer | Total clicks across all links in the range. |
+| `uniqueVisitors` | integer | Distinct IP count across all links in the range. |
+| `totalLinks` | integer | Number of links in the workspace. |
+| `conversionRate` | number | `uniqueVisitors / totalClicks * 100`, rounded to 1 decimal. `0` when there are no clicks. |
+| `topLinks` | array | Up to 10 most-clicked links. Each item has `link` (id, shortCode, title, url) and `clicks`. |
+| `clicksOverTime` | array | One `{ date, clicks }` entry per day in the range, including days with `0` clicks. |
+| `topCountries` | array | Up to 10 countries by click count. Each item has `country` and `_count`. Clicks with no country are excluded. |
+| `topSources` | array | Up to 10 UTM sources by click count. Each item has `source` and `clicks`. Links with no `utmSource` are excluded. |
+
+## Get link analytics
+
+```
+GET /api/v1/links/:linkId/analytics
+```
+
+Aggregates click data for a single link, with deeper geo and technology breakdowns than the workspace endpoint.
+
+### Headers
+
+| Header | Required |
+|---|---|
+| `Authorization: Bearer <jwt>` | Yes |
+
+### Query parameters
+
+<ParamField query="startDate" type="string">ISO 8601 date. Defaults to 30 days before `endDate`. Clamped forward to the plan retention cutoff if earlier.</ParamField>
+<ParamField query="endDate" type="string">ISO 8601 date. Defaults to now.</ParamField>
+
+### Example
+
+```bash
+curl "https://api.linkutm.com/api/v1/links/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d/analytics?startDate=2026-04-01&endDate=2026-05-01" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Response
+
+```json
+{
+  "totalClicks": 8302,
+  "uniqueVisitors": 4011,
+  "clicksOverTime": [
+    { "date": "2026-04-01", "clicks": 240 },
+    { "date": "2026-04-03", "clicks": 198 }
+  ],
+  "topCountries": [
+    { "country": "United States", "_count": 3920 }
+  ],
+  "topRegions": [
+    { "region": "California", "country": "United States", "_count": 1180 }
+  ],
+  "topCities": [
+    { "city": "San Francisco", "country": "United States", "_count": 640 }
+  ],
+  "topReferrers": [
+    { "referrerDomain": "Direct", "_count": 5200 },
+    { "referrerDomain": "QR Code", "_count": 1100 }
+  ],
+  "deviceBreakdown": [
+    { "device": "desktop", "_count": 5100 },
+    { "device": "mobile", "_count": 3000 },
+    { "device": "tablet", "_count": 202 }
+  ],
+  "browserBreakdown": [
+    { "browser": "Chrome", "_count": 5900 }
+  ],
+  "osBreakdown": [
+    { "os": "Windows", "_count": 4200 }
+  ]
+}
+```
+
+### Response fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `totalClicks` | integer | Total clicks for the link in the range. |
+| `uniqueVisitors` | integer | Distinct IP count for the link in the range. |
+| `clicksOverTime` | array | One `{ date, clicks }` entry per day that had at least one click. Days with no clicks are omitted. |
+| `topCountries` | array | Up to 10 countries by click count. Each item has `country` and `_count`. |
+| `topRegions` | array | Up to 10 regions by click count. Each item has `region`, `country`, and `_count`. |
+| `topCities` | array | Up to 10 cities by click count. Each item has `city`, `country`, and `_count`. |
+| `topReferrers` | array | Up to 10 referrer domains by click count. Each item has `referrerDomain` and `_count`. A `null` referrer is reported as `Direct`; QR code scans are reported as `QR Code`. |
+| `deviceBreakdown` | array | Click counts per device, ordered by count. Each item has `device` (`desktop`, `mobile`, or `tablet`) and `_count`. |
+| `browserBreakdown` | array | Up to 10 browsers by click count. Each item has `browser` and `_count`. |
+| `osBreakdown` | array | Up to 10 operating systems by click count. Each item has `os` and `_count`. |
+
+<Note>
+Geo, device, browser, and OS breakdowns exclude clicks where the value is missing. `clicksOverTime` here differs from the workspace endpoint: it only lists days that had clicks, rather than filling the full range.
+</Note>
+
+## Reset link analytics
+
+```
+DELETE /api/v1/links/:linkId/analytics
+```
+
+Permanently deletes every click record for the link and resets its `clicks` counter to `0`.
+
+### Headers
+
+| Header | Required |
+|---|---|
+| `Authorization: Bearer <jwt>` | Yes |
+
+### Example
+
+```bash
+curl -X DELETE https://api.linkutm.com/api/v1/links/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d/analytics \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Response
+
+```json
+{
+  "deletedClicks": 8302,
+  "message": "Analytics data has been reset successfully"
+}
+```
+
+<Warning>
+This is destructive and cannot be undone. All click history for the link, including geo, device, and referrer data, is deleted.
+</Warning>
+
+## Backfill geo data
+
+```
+POST /api/v1/analytics/backfill-geo
+```
+
+Re-processes stored click records that are missing geo data or have an `unknown` browser or OS. For each affected click, the service re-runs IP geolocation and re-parses the stored user agent. Local or private IPs fall back to the server's public IP location. This endpoint takes no body.
+
+### Headers
+
+| Header | Required |
+|---|---|
+| `Authorization: Bearer <jwt>` | Yes |
+
+### Example
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/analytics/backfill-geo \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Response
+
+```json
+{
+  "total": 1240,
+  "updated": 1187
+}
+```
+
+### Response fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `total` | integer | Number of click records examined (missing country, or `unknown` browser or OS). |
+| `updated` | integer | Number of records that were actually updated. |
+
+## Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `404` | Workspace or link not found |
+| `429` | Rate limit exceeded (100 requests/minute per IP) |
+
+See [Errors](/api/errors) for the full error envelope.

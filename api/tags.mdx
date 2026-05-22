@@ -1,0 +1,533 @@
+---
+title: "Tags"
+description: "Create and manage workspace tags, list links by tag, and attach or detach tags on individual links."
+---
+
+## Overview
+
+Tags are workspace-scoped labels you attach to links. A link can carry many tags, and a tag can be on many links - the relationship is a join table.
+
+Tag management endpoints live under `/api/v1/tags`. Link-level tag operations live under `/api/v1/links/:linkId/tags`. All endpoints require a JWT. Creating, listing, and updating tags also require the `x-workspace-id` header.
+
+```
+Authorization: Bearer <jwt>
+x-workspace-id: <uuid_or_slug>
+```
+
+<Note>
+Tags are gated behind the `tagsAndFolders` plan feature. Creating a tag on a plan without that feature returns `403`.
+</Note>
+
+## Create a tag
+
+```
+POST /api/v1/tags
+```
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="name" type="string" required>
+  Tag name. Must be unique within the workspace.
+</ParamField>
+
+<ParamField body="color" type="string" default="#f97316">
+  Display color. Defaults to `#f97316` if omitted.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/tags \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "paid-social",
+    "color": "#3b82f6"
+  }'
+```
+
+### Example response
+
+```json
+{
+  "id": "tag-5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "paid-social",
+  "color": "#3b82f6",
+  "isActive": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdById": "1a2b3c4d-...",
+  "createdAt": "2026-05-07T10:00:00.000Z",
+  "updatedAt": "2026-05-07T10:00:00.000Z",
+  "_count": { "links": 0 }
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `403` | The `tagsAndFolders` feature is not available on the workspace plan |
+| `409` | A tag with the same name already exists in the workspace |
+
+## List tags
+
+```
+GET /api/v1/tags
+```
+
+Returns every tag in the workspace, each with a link count. Sorted by active first, then name ascending.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/tags \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex"
+```
+
+### Example response
+
+```json
+[
+  {
+    "id": "tag-5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+    "name": "paid-social",
+    "color": "#3b82f6",
+    "isActive": true,
+    "workspaceId": "8a7b6c5d-...",
+    "createdAt": "2026-05-07T10:00:00.000Z",
+    "_count": { "links": 8 }
+  }
+]
+```
+
+## Get a tag by ID
+
+```
+GET /api/v1/tags/:id
+```
+
+Returns one tag with its link count.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/tags/tag-5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+```json
+{
+  "id": "tag-5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "paid-social",
+  "color": "#3b82f6",
+  "isActive": true,
+  "workspaceId": "8a7b6c5d-...",
+  "createdAt": "2026-05-07T10:00:00.000Z",
+  "updatedAt": "2026-05-07T10:00:00.000Z",
+  "_count": { "links": 8 }
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `404` | Tag not found |
+
+## Get links by tag
+
+```
+GET /api/v1/tags/:id/links
+```
+
+Returns the links carrying this tag, paginated. Links are newest first and each includes its creator and full tag set.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Query params
+
+<ParamField query="page" type="integer" default="1">
+  Page number. Defaults to `1`.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="20">
+  Results per page. Defaults to `20`.
+</ParamField>
+
+### Example request
+
+```bash
+curl "https://api.linkutm.com/api/v1/tags/tag-5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d/links?page=1&limit=20" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+```json
+{
+  "tag": {
+    "id": "tag-5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+    "name": "paid-social",
+    "color": "#3b82f6",
+    "_count": { "links": 8 }
+  },
+  "links": [
+    {
+      "id": "7b5d4c3e-...",
+      "url": "https://example.com/q2-launch",
+      "shortCode": "q2-launch",
+      "title": "Q2 Launch",
+      "createdAt": "2026-05-07T11:00:00.000Z",
+      "createdBy": {
+        "id": "1a2b3c4d-...",
+        "name": "Jane",
+        "email": "jane@example.com",
+        "avatar": null
+      },
+      "tags": [
+        { "tag": { "id": "tag-5f3b2a1c-...", "name": "paid-social", "color": "#3b82f6" } }
+      ]
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 8,
+    "pages": 1
+  }
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `404` | Tag not found |
+
+## Update a tag
+
+```
+PATCH /api/v1/tags/:id
+```
+
+Updates a tag's name or color. Both body fields are optional; send only what you want to change.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="name" type="string">
+  New tag name. A name that collides with another tag in the workspace is rejected with `409` (case-insensitive).
+</ParamField>
+
+<ParamField body="color" type="string">
+  New display color.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X PATCH https://api.linkutm.com/api/v1/tags/tag-5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "paid-social-2026",
+    "color": "#22c55e"
+  }'
+```
+
+### Example response
+
+```json
+{
+  "id": "tag-5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "paid-social-2026",
+  "color": "#22c55e",
+  "isActive": true,
+  "workspaceId": "8a7b6c5d-...",
+  "updatedById": "1a2b3c4d-...",
+  "updatedAt": "2026-05-07T12:00:00.000Z",
+  "_count": { "links": 8 }
+}
+```
+
+### Errors
+
+| Code | When |
+|---|---|
+| `404` | Tag not found |
+| `409` | A tag with the same name already exists in the workspace |
+
+## Delete a tag
+
+```
+DELETE /api/v1/tags/:id
+```
+
+Deletes the tag. Its link associations are cascade deleted, so the tag is removed from every link that carried it. The links themselves are not deleted.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Example request
+
+```bash
+curl -X DELETE https://api.linkutm.com/api/v1/tags/tag-5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Example response
+
+Returns the deleted tag record.
+
+```json
+{
+  "id": "tag-5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "paid-social-2026",
+  "color": "#22c55e",
+  "isActive": true,
+  "workspaceId": "8a7b6c5d-..."
+}
+```
+
+<Warning>
+Deleting a tag removes it from every link in the workspace. There is no undo.
+</Warning>
+
+### Errors
+
+| Code | When |
+|---|---|
+| `404` | Tag not found |
+
+## Set links for a tag
+
+```
+POST /api/v1/tags/:id/links
+```
+
+Replaces the entire set of links carrying this tag. All current associations for the tag are removed, then the provided links are associated. Pass an empty array to clear the tag from every link.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `Content-Type: application/json` | Yes | |
+
+### Body
+
+<ParamField body="linkIds" type="string[]" required>
+  Array of link UUIDs that should carry this tag. An empty array removes the tag from all links.
+</ParamField>
+
+### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/tags/tag-5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d/links \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "linkIds": ["link-uuid-1", "link-uuid-2"] }'
+```
+
+### Example response
+
+Returns the tag record with its refreshed link count.
+
+```json
+{
+  "id": "tag-5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "paid-social",
+  "color": "#3b82f6",
+  "isActive": true,
+  "workspaceId": "8a7b6c5d-...",
+  "_count": { "links": 2 }
+}
+```
+
+<Warning>
+This is a full replace. Every existing association for the tag is deleted before the new set is written. Use the per-link endpoints below to add or remove a single tag without disturbing the rest.
+</Warning>
+
+### Errors
+
+| Code | When |
+|---|---|
+| `404` | Tag not found |
+
+## Link tags
+
+The following endpoints operate on a single link, under the path `/api/v1/links/:linkId/tags`. They manage which tags are attached to one link.
+
+### Add a tag to a link
+
+```
+POST /api/v1/links/:linkId/tags/:tagId
+```
+
+Attaches one tag to one link. If the tag is already on the link, the existing association is returned unchanged (idempotent).
+
+#### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+#### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/links/link-uuid-1/tags/tag-5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+#### Example response
+
+```json
+{
+  "linkId": "link-uuid-1",
+  "tagId": "tag-5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "createdAt": "2026-05-07T13:00:00.000Z",
+  "tag": {
+    "id": "tag-5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+    "name": "paid-social",
+    "color": "#3b82f6"
+  }
+}
+```
+
+When the tag was already on the link, the existing join record is returned without the nested `tag` object.
+
+#### Errors
+
+| Code | When |
+|---|---|
+| `404` | Tag not found |
+
+### Remove a tag from a link
+
+```
+DELETE /api/v1/links/:linkId/tags/:tagId
+```
+
+Detaches one tag from one link. The tag and the link both remain - only the association is removed.
+
+#### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+#### Example request
+
+```bash
+curl -X DELETE https://api.linkutm.com/api/v1/links/link-uuid-1/tags/tag-5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+#### Example response
+
+Returns the deleted association record.
+
+```json
+{
+  "linkId": "link-uuid-1",
+  "tagId": "tag-5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+  "createdAt": "2026-05-07T13:00:00.000Z"
+}
+```
+
+#### Errors
+
+| Code | When |
+|---|---|
+| `404` | The tag is not associated with this link |
+
+### Set all tags for a link
+
+```
+POST /api/v1/links/:linkId/tags
+```
+
+Replaces the entire tag set on one link. All current tags on the link are removed, then the provided tags are attached. Pass an empty array to remove every tag from the link.
+
+#### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `Content-Type: application/json` | Yes | |
+
+#### Body
+
+<ParamField body="tagIds" type="string[]" required>
+  Array of tag UUIDs the link should carry. An empty array removes all tags from the link.
+</ParamField>
+
+#### Example request
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/links/link-uuid-1/tags \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "tagIds": ["tag-uuid-1", "tag-uuid-2"] }'
+```
+
+#### Example response
+
+Returns the link with its refreshed tag set.
+
+```json
+{
+  "id": "link-uuid-1",
+  "url": "https://example.com/q2-launch",
+  "shortCode": "q2-launch",
+  "title": "Q2 Launch",
+  "tags": [
+    { "tag": { "id": "tag-uuid-1", "name": "paid-social", "color": "#3b82f6" } },
+    { "tag": { "id": "tag-uuid-2", "name": "q2", "color": "#f97316" } }
+  ]
+}
+```
+
+<Warning>
+This is a full replace. Every existing tag on the link is removed before the new set is written. Use `POST /api/v1/links/:linkId/tags/:tagId` to add a single tag without disturbing the rest.
+</Warning>

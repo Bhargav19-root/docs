@@ -20,7 +20,7 @@ The short code is the path after your short domain: `go.acme.com/{shortCode}`. l
     Leave the **Custom slug** field empty when creating a link. linkutm generates a 7-character alphanumeric code.
   </Tab>
   <Tab title="Custom slug">
-    Type your slug in the **Custom slug** field. Allowed: lowercase letters, numbers, hyphens. Keep it short - 3–15 chars reads best.
+    Type your slug in the **Custom slug** field. Allowed: lowercase letters, numbers, hyphens. Keep it short - 3-15 chars reads best.
   </Tab>
 </Tabs>
 

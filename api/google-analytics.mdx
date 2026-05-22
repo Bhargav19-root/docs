@@ -1,0 +1,601 @@
+---
+title: "Google Analytics (GA4)"
+description: "Connect a GA4 property, then read GA4 metrics for the links it tracks."
+---
+
+## Overview
+
+The Google Analytics integration links a linkutm workspace to a GA4 property over OAuth. Once connected, linkutm matches your short links against the property's web data stream URLs and reports GA4 session metrics for each matched link.
+
+Endpoints live under `/api/v1/google-analytics`.
+
+<Warning>
+GA4 endpoints take `workspaceId` as a query parameter (`?workspaceId=`), not the `x-workspace-id` header used elsewhere. The `workspaceId` here must be a workspace UUID. The OAuth callback is the only endpoint that does not require a JWT.
+</Warning>
+
+```
+Authorization: Bearer <jwt>
+```
+
+### Connection flow
+
+<AccordionGroup>
+  <Accordion title="1. Start OAuth">
+    Call `GET /google-analytics/auth` to get a Google consent URL and redirect the user to it.
+  </Accordion>
+  <Accordion title="2. Callback">
+    Google redirects the user back to `GET /google-analytics/callback`. linkutm stores the OAuth tokens against the workspace and redirects the user to the app. The connection is not finished yet.
+  </Accordion>
+  <Accordion title="3. Pick an account and property">
+    Use `GET /google-analytics/metadata` to list the user's GA4 accounts, then again with `accountId` to list properties.
+  </Accordion>
+  <Accordion title="4. Connect">
+    Call `POST /google-analytics/connect` with the chosen account and property. This sets the connection live.
+  </Accordion>
+</AccordionGroup>
+
+## Check connection status
+
+```
+GET /api/v1/google-analytics/check
+```
+
+Returns whether the workspace has a live GA4 connection and which account and property are selected.
+
+### Query parameters
+
+<ParamField query="workspaceId" type="string" required>Workspace UUID.</ParamField>
+
+### Example
+
+```bash
+curl "https://api.linkutm.com/api/v1/google-analytics/check?workspaceId=8a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Response
+
+```json
+{
+  "GA4Connected": true,
+  "selected_account": "123456789",
+  "selected_property": "987654321",
+  "selected_account_name": "Acme Inc",
+  "selected_property_name": "Acme Marketing Site"
+}
+```
+
+When the workspace has no GA4 config, `GA4Connected` is `false` and every `selected_*` field is `null`.
+
+## Get OAuth URL
+
+```
+GET /api/v1/google-analytics/auth
+```
+
+Returns a Google OAuth consent URL. Redirect the user there to grant linkutm read-only access to their GA4 data. The workspace ID is carried through OAuth as the `state` parameter.
+
+### Query parameters
+
+<ParamField query="workspaceId" type="string" required>Workspace UUID.</ParamField>
+
+### Example
+
+```bash
+curl "https://api.linkutm.com/api/v1/google-analytics/auth?workspaceId=8a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Response
+
+```json
+{
+  "url": "https://accounts.google.com/o/oauth2/v2/auth?access_type=offline&scope=...&state=8a1b2c3d-..."
+}
+```
+
+## OAuth callback
+
+```
+GET /api/v1/google-analytics/callback
+```
+
+The redirect target Google sends the user to after consent. This is a browser redirect endpoint, not a JSON API. It does not require a JWT and should not be called directly by client code.
+
+### Query parameters
+
+<ParamField query="code" type="string" required>Authorization code issued by Google.</ParamField>
+<ParamField query="state" type="string" required>The workspace UUID, round-tripped from the `auth` step.</ParamField>
+
+### Behavior
+
+linkutm exchanges `code` for OAuth tokens and stores them against the workspace, then issues a 302 redirect to the app:
+
+- Success: `{FRONTEND_URL}/{workspaceSlug}/ga4-events?event=success`
+- Failure: `{FRONTEND_URL}/{workspaceSlug}/ga4-events?event=error`
+
+<Note>
+A successful callback only stores the OAuth tokens. The connection is not active until the user selects an account and property via `POST /google-analytics/connect`.
+</Note>
+
+## Connect a property
+
+```
+POST /api/v1/google-analytics/connect
+```
+
+Saves the selected GA4 account and property and marks the workspace as connected.
+
+### Body parameters
+
+<ParamField body="workspaceId" type="string" required>Workspace UUID.</ParamField>
+<ParamField body="accountId" type="string" required>GA4 account ID (the `code` from `metadata`).</ParamField>
+<ParamField body="accountName" type="string" required>GA4 account display name.</ParamField>
+<ParamField body="propertyId" type="string" required>GA4 property ID (the `code` from `metadata`).</ParamField>
+<ParamField body="propertyName" type="string" required>GA4 property display name.</ParamField>
+<ParamField body="accessToken" type="string">Optional. OAuth access token, for manual connection without the OAuth callback flow.</ParamField>
+<ParamField body="refreshToken" type="string">Optional. OAuth refresh token, for manual connection.</ParamField>
+<ParamField body="scope" type="string">Optional. OAuth scope string, for manual connection.</ParamField>
+
+### Example
+
+```bash
+curl -X POST https://api.linkutm.com/api/v1/google-analytics/connect \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "workspaceId": "8a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+    "accountId": "123456789",
+    "accountName": "Acme Inc",
+    "propertyId": "987654321",
+    "propertyName": "Acme Marketing Site"
+  }'
+```
+
+### Response
+
+```json
+{ "GA4Connected": true }
+```
+
+## Disconnect
+
+```
+DELETE /api/v1/google-analytics/disconnect
+```
+
+Clears the workspace's GA4 config, including stored OAuth tokens and the selected account and property.
+
+### Query parameters
+
+<ParamField query="workspaceId" type="string" required>Workspace UUID.</ParamField>
+
+### Example
+
+```bash
+curl -X DELETE "https://api.linkutm.com/api/v1/google-analytics/disconnect?workspaceId=8a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Response
+
+```json
+{ "success": true }
+```
+
+## List GA4 metadata
+
+```
+GET /api/v1/google-analytics/metadata
+```
+
+Lists the connected Google user's GA4 accounts, or the properties under one account. Used to populate the account and property pickers before calling `connect`.
+
+### Query parameters
+
+<ParamField query="workspaceId" type="string" required>Workspace UUID.</ParamField>
+<ParamField query="accountId" type="string">When provided, returns properties for this account. When omitted, returns accounts.</ParamField>
+
+### Example
+
+```bash
+# List accounts
+curl "https://api.linkutm.com/api/v1/google-analytics/metadata?workspaceId=8a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d" \
+  -H "Authorization: Bearer $TOKEN"
+
+# List properties for an account
+curl "https://api.linkutm.com/api/v1/google-analytics/metadata?workspaceId=8a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d&accountId=123456789" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Response - accounts
+
+```json
+[
+  {
+    "code": "123456789",
+    "name": "Acme Inc",
+    "createTime": "2024-01-10T08:00:00Z",
+    "updateTime": "2025-11-02T12:30:00Z",
+    "regionCode": "US",
+    "deleted": false
+  }
+]
+```
+
+### Response - properties
+
+```json
+[
+  {
+    "code": "987654321",
+    "name": "Acme Marketing Site",
+    "industryCategory": "TECHNOLOGY",
+    "timeZone": "America/Los_Angeles",
+    "currencyCode": "USD",
+    "createTime": "2024-02-01T09:00:00Z",
+    "updateTime": "2025-10-15T11:00:00Z",
+    "account": "accounts/123456789"
+  }
+]
+```
+
+The `code` field is the identifier to pass as `accountId` or `propertyId` to `connect`.
+
+## Get matched links
+
+```
+GET /api/v1/google-analytics/matched-links
+```
+
+Returns workspace links whose URL contains one of the connected GA4 property's web data stream URLs, paginated, each enriched with GA4 metrics. GA4 metrics are matched to a link by its UTM values (source, medium, campaign, term, content).
+
+### Query parameters
+
+<ParamField query="workspaceId" type="string" required>Workspace UUID.</ParamField>
+<ParamField query="startDate" type="string">ISO 8601 date. Defaults to 30 days before `endDate`.</ParamField>
+<ParamField query="endDate" type="string">ISO 8601 date. Defaults to now.</ParamField>
+<ParamField query="page" type="integer" default="1">1-indexed page number.</ParamField>
+<ParamField query="limit" type="integer" default="10">Page size.</ParamField>
+<ParamField query="search" type="string">Case-insensitive substring match on title, short code, or URL.</ParamField>
+
+### Example
+
+```bash
+curl "https://api.linkutm.com/api/v1/google-analytics/matched-links?workspaceId=8a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d&page=1&limit=10" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+      "url": "https://acme.com/landing",
+      "shortCode": "q2-launch",
+      "title": "Q2 Launch - Google",
+      "utmSource": "google",
+      "utmMedium": "cpc",
+      "utmCampaign": "q2_launch",
+      "utmTerm": null,
+      "utmContent": null,
+      "ga4Data": {
+        "views": 5120,
+        "clicks": 4102,
+        "conversions": 318,
+        "signUps": 92,
+        "rate": "7.8%"
+      }
+    }
+  ],
+  "meta": { "total": 42, "page": 1, "limit": 10, "totalPages": 5 }
+}
+```
+
+### Response fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `data[].id`, `url`, `shortCode`, `title` | mixed | Core link fields. |
+| `data[].utmSource` ... `utmContent` | string \| null | The link's UTM values used to match GA4 sessions. |
+| `data[].ga4Data` | object \| null | GA4 metrics for the link. `null` if the GA4 report request fails. |
+| `ga4Data.views` | integer | `screenPageViews` for matching sessions. |
+| `ga4Data.clicks` | integer | `sessions` count for matching sessions. |
+| `ga4Data.conversions` | integer | `conversions` for matching sessions. |
+| `ga4Data.signUps` | integer | `sign_up` event count. `0` in this endpoint (sign-up rows are not requested here). |
+| `ga4Data.rate` | string | Conversion rate, `conversions / clicks` as a percentage string. |
+| `meta` | object | Pagination: `total`, `page`, `limit`, `totalPages`. |
+
+<Note>
+If the GA4 property has no web data streams, `data` is empty and `meta.total` is `0`.
+</Note>
+
+## Get matched links totals
+
+```
+GET /api/v1/google-analytics/matched-links/totals
+```
+
+Returns aggregate GA4 metrics summed across every matched link in the workspace (not paginated).
+
+### Query parameters
+
+<ParamField query="workspaceId" type="string" required>Workspace UUID.</ParamField>
+<ParamField query="startDate" type="string">ISO 8601 date. Defaults to 30 days before `endDate`.</ParamField>
+<ParamField query="endDate" type="string">ISO 8601 date. Defaults to now.</ParamField>
+
+### Example
+
+```bash
+curl "https://api.linkutm.com/api/v1/google-analytics/matched-links/totals?workspaceId=8a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Response
+
+```json
+{
+  "totalViews": 48210,
+  "totalClicks": 39102,
+  "totalConversions": 2980,
+  "totalSignUps": 740
+}
+```
+
+### Response fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `totalViews` | integer | Sum of `screenPageViews` across all matched links. |
+| `totalClicks` | integer | Sum of GA4 `sessions` across all matched links. |
+| `totalConversions` | integer | Sum of `conversions` across all matched links. |
+| `totalSignUps` | integer | Sum of `sign_up` event counts across all matched links. |
+
+All values are `0` when the property has no web data streams or the GA4 report fails.
+
+## Get matched links combined
+
+```
+GET /api/v1/google-analytics/matched-links/combined
+```
+
+Returns the paginated matched links and the workspace totals in a single request. Use this instead of calling `matched-links` and `matched-links/totals` separately.
+
+### Query parameters
+
+<ParamField query="workspaceId" type="string" required>Workspace UUID.</ParamField>
+<ParamField query="startDate" type="string">ISO 8601 date. Defaults to 30 days before `endDate`.</ParamField>
+<ParamField query="endDate" type="string">ISO 8601 date. Defaults to now.</ParamField>
+<ParamField query="page" type="integer" default="1">1-indexed page number.</ParamField>
+<ParamField query="limit" type="integer" default="10">Page size.</ParamField>
+<ParamField query="search" type="string">Case-insensitive substring match on title, short code, or URL.</ParamField>
+
+### Example
+
+```bash
+curl "https://api.linkutm.com/api/v1/google-analytics/matched-links/combined?workspaceId=8a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d&page=1&limit=10" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Response
+
+```json
+{
+  "links": {
+    "data": [
+      {
+        "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+        "url": "https://acme.com/landing",
+        "shortCode": "q2-launch",
+        "title": "Q2 Launch - Google",
+        "utmSource": "google",
+        "utmMedium": "cpc",
+        "utmCampaign": "q2_launch",
+        "utmTerm": null,
+        "utmContent": null,
+        "ga4Data": {
+          "views": 5120,
+          "clicks": 4102,
+          "conversions": 318,
+          "signUps": 0,
+          "rate": "7.8%"
+        }
+      }
+    ],
+    "meta": { "total": 42, "page": 1, "limit": 10, "totalPages": 5 }
+  },
+  "totals": {
+    "totalViews": 48210,
+    "totalClicks": 39102,
+    "totalConversions": 2980,
+    "totalSignUps": 740
+  }
+}
+```
+
+### Response fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `links.data` | array | Page of matched links with `ga4Data`, same shape as `matched-links`. |
+| `links.meta` | object | Pagination: `total`, `page`, `limit`, `totalPages`. |
+| `totals` | object | Workspace-wide `totalViews`, `totalClicks`, `totalConversions`, `totalSignUps`. |
+
+The `signUps` value inside each `links.data[].ga4Data` is `0`; sign-up counts are only aggregated into `totals.totalSignUps`.
+
+## Get link metrics
+
+```
+GET /api/v1/google-analytics/link-metrics
+```
+
+Returns GA4 metrics for a single link over the date range. Results are cached for 2 hours.
+
+### Query parameters
+
+<ParamField query="workspaceId" type="string" required>Workspace UUID.</ParamField>
+<ParamField query="linkId" type="string" required>Link UUID. Must belong to the workspace.</ParamField>
+<ParamField query="startDate" type="string">ISO 8601 date. Defaults to 30 days before `endDate`.</ParamField>
+<ParamField query="endDate" type="string">ISO 8601 date. Defaults to now.</ParamField>
+
+### Example
+
+```bash
+curl "https://api.linkutm.com/api/v1/google-analytics/link-metrics?workspaceId=8a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d&linkId=5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Response
+
+```json
+{
+  "totalUsers": 3902,
+  "sessions": 4102,
+  "views": 5120,
+  "conversions": 318,
+  "bounceRate": 42.7,
+  "averageSessionDurationSeconds": 96.4
+}
+```
+
+### Response fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `totalUsers` | integer | GA4 `totalUsers`. |
+| `sessions` | integer | GA4 `sessions`. |
+| `views` | integer | GA4 `screenPageViews`. |
+| `conversions` | integer | GA4 `conversions`. |
+| `bounceRate` | number | Bounce rate as a percentage, 2 decimals. Normalized so a `0` to `1` ratio is multiplied by 100. |
+| `averageSessionDurationSeconds` | number | Average session duration in seconds, 2 decimals. |
+
+<Note>
+If the link's URL does not match any of the connected property's data stream URLs, every field returns `0`. The same all-zero response is returned if the GA4 report request fails.
+</Note>
+
+## Get link unique users over time
+
+```
+GET /api/v1/google-analytics/link-unique-users
+```
+
+Returns a daily series of GA4 `totalUsers` for a single link. Results are cached for 2 hours.
+
+### Query parameters
+
+<ParamField query="workspaceId" type="string" required>Workspace UUID.</ParamField>
+<ParamField query="linkId" type="string" required>Link UUID. Must belong to the workspace.</ParamField>
+<ParamField query="startDate" type="string">ISO 8601 date. Defaults to 30 days before `endDate`.</ParamField>
+<ParamField query="endDate" type="string">ISO 8601 date. Defaults to now.</ParamField>
+
+### Example
+
+```bash
+curl "https://api.linkutm.com/api/v1/google-analytics/link-unique-users?workspaceId=8a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d&linkId=5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Response
+
+```json
+{
+  "data": [
+    { "date": "2026-04-01", "totalUsers": 120 },
+    { "date": "2026-04-02", "totalUsers": 138 }
+  ]
+}
+```
+
+### Response fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `data` | array | One `{ date, totalUsers }` entry per day GA4 returned. `date` is `YYYY-MM-DD`. |
+
+`data` is an empty array if the link does not match the property's data streams, no GA4 property is selected, or the GA4 report fails.
+
+## Get link breakdown
+
+```
+GET /api/v1/google-analytics/link-breakdown
+```
+
+Returns a GA4 sessions breakdown for a single link grouped by a chosen dimension. The default date range is the last 7 days. Results are cached for 2 hours.
+
+### Query parameters
+
+<ParamField query="workspaceId" type="string" required>Workspace UUID.</ParamField>
+<ParamField query="linkId" type="string" required>Link UUID. Must belong to the workspace.</ParamField>
+<ParamField query="type" type="string" required>Breakdown dimension. One of `browsers`, `devices`, `os`, `screen`, `countries`, `regions`, `cities`, `referrers`, `channels`, `events`, `age`, `gender`, `language`.</ParamField>
+<ParamField query="startDate" type="string">ISO 8601 date. Defaults to 7 days before `endDate`.</ParamField>
+<ParamField query="endDate" type="string">ISO 8601 date. Defaults to now.</ParamField>
+
+### Type to GA4 dimension
+
+| `type` | GA4 dimension |
+|---|---|
+| `browsers` | `browser` |
+| `devices` | `deviceCategory` |
+| `os` | `operatingSystem` |
+| `screen` | `screenResolution` |
+| `countries` | `country` |
+| `regions` | `region` |
+| `cities` | `city` |
+| `referrers` | `sessionSource` |
+| `channels` | `sessionDefaultChannelGroup` |
+| `events` | `eventName` |
+| `age` | `userAgeBracket` |
+| `gender` | `userGender` |
+| `language` | `language` |
+
+### Example
+
+```bash
+curl "https://api.linkutm.com/api/v1/google-analytics/link-breakdown?workspaceId=8a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d&linkId=5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d&type=browsers" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Response
+
+```json
+{
+  "data": [
+    { "name": "Chrome", "sessions": 2900 },
+    { "name": "Safari", "sessions": 810 }
+  ]
+}
+```
+
+For `type=events`, each item carries `eventCount` instead of `sessions`:
+
+```json
+{
+  "data": [
+    { "name": "page_view", "eventCount": 5120 },
+    { "name": "sign_up", "eventCount": 92 }
+  ]
+}
+```
+
+### Response fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `data[].name` | string | The dimension value (browser name, country, event name, etc.). |
+| `data[].sessions` | integer | Session count for the value. Present for every `type` except `events`. |
+| `data[].eventCount` | integer | Event count for the value. Present only when `type=events`. |
+
+`data` is sorted by the metric descending. It is an empty array if the link does not match the property's data streams, no property is selected, or the GA4 report fails.
+
+## Errors
+
+| Code | When |
+|---|---|
+| `400` | GA4 not configured for the workspace, missing GA4 tokens, no GA4 property selected, failed Google authentication, or failed to fetch GA4 accounts, properties, or data streams |
+| `401` | Missing or invalid JWT (all endpoints except `callback`) |
+| `404` | Workspace not found, or link not found / not in the workspace |
+| `429` | Rate limit exceeded (100 requests/minute per IP) |
+
+See [Errors](/api/errors) for the full error envelope.

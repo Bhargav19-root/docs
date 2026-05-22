@@ -26,6 +26,8 @@ GET /api/v1/links
 <ParamField query="archived" type="boolean" default="false">Set `true` to fetch archived links.</ParamField>
 <ParamField query="folderId" type="string">UUID, or the literal `unsorted` for links with no folder.</ParamField>
 <ParamField query="tagIds" type="string">Comma-separated tag UUIDs. Returns links matching any of the tags.</ParamField>
+<ParamField query="dateFrom" type="string">ISO 8601 date. Only links created on or after this date.</ParamField>
+<ParamField query="dateTo" type="string">ISO 8601 date. Only links created on or before this date.</ParamField>
 
 ### Example
 
@@ -69,6 +71,42 @@ curl "https://api.linkutm.com/api/v1/links?page=1&limit=50&utmSource=google&tagI
 - Sorted by `createdAt DESC` - newest first.
 - Server caches headers explicitly disabled (`Cache-Control: no-cache`).
 - Includes folder, domain, and tags in one query (single round trip via SQL `json_agg`).
+
+---
+
+## List matching link IDs
+
+```
+GET /api/v1/links/ids
+```
+
+Returns every link ID matching the same filters as `GET /links` - `search`, `utmSource`, `utmMedium`, `archived`, `folderId`, `tagIds`, `dateFrom`, `dateTo` - with no pagination. Use it to power "select all across pages" before a bulk operation.
+
+### Headers
+
+| Header | Required |
+|---|---|
+| `Authorization: Bearer <jwt>` | Yes |
+| `x-workspace-id: <uuid_or_slug>` | Yes |
+
+### Example
+
+```bash
+curl "https://api.linkutm.com/api/v1/links/ids?utmSource=google&archived=false" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex"
+```
+
+### Response
+
+```json
+{
+  "ids": [
+    "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
+    "6a4c3b2d-5e7f-5b9c-ad1e-2f3a4b5c6d7e"
+  ]
+}
+```
 
 ---
 

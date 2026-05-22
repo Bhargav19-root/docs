@@ -1,0 +1,177 @@
+---
+title: "Permissions"
+description: "Read your permissions in a workspace and check whether you hold a specific permission."
+---
+
+## Overview
+
+Permissions are derived from a user's role in a workspace. Each workspace membership has a role, and each role grants a fixed set of permission actions. These endpoints let you read the caller's effective permissions for a given workspace.
+
+Endpoints live under `/api/v1/permissions` and require a JWT bearer token plus the `x-workspace-id` header.
+
+```
+Authorization: Bearer <jwt>
+x-workspace-id: <uuid_or_slug>
+```
+
+<Note>
+Permissions are resolved from the caller's `WorkspaceMember` record for the workspace in `x-workspace-id`. If the caller is not a member of that workspace, an empty permission set is returned - the endpoints do not error in that case.
+</Note>
+
+## Get my permissions
+
+```
+GET /api/v1/permissions/mine
+```
+
+Returns the array of permission actions the authenticated user holds in the workspace named by `x-workspace-id`.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace, by UUID or slug |
+
+### Example request
+
+```bash
+curl https://api.linkutm.com/api/v1/permissions/mine \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex"
+```
+
+### Example response
+
+A JSON array of permission action strings.
+
+```json
+[
+  "utm_templates.create",
+  "utm_templates.edit",
+  "utm_templates.delete",
+  "links.create",
+  "links.edit",
+  "analytics.view",
+  "data.export"
+]
+```
+
+If the caller is not a member of the workspace, the response is an empty array `[]`.
+
+## Check a permission
+
+```
+GET /api/v1/permissions/check?action=<permission>
+```
+
+Checks whether the authenticated user holds one specific permission action in the workspace named by `x-workspace-id`.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace, by UUID or slug |
+
+### Query parameters
+
+<ParamField query="action" type="string" required>
+  The permission action to check, for example `links.create`. See the [permission actions](#permission-actions) table for valid values.
+</ParamField>
+
+### Example request
+
+```bash
+curl "https://api.linkutm.com/api/v1/permissions/check?action=links.delete" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "x-workspace-id: client-globex"
+```
+
+### Example response
+
+```json
+{ "hasPermission": false }
+```
+
+`hasPermission` is `true` only when the caller's role in the workspace includes the requested action. A missing or unknown `action` value returns `false`; the endpoint does not reject it.
+
+## Permission actions
+
+The full set of permission actions:
+
+| Action | Description |
+|---|---|
+| `workspace.manage` | Manage workspace settings |
+| `billing.manage` | Upgrade or downgrade the plan |
+| `domains.create` | Add a custom domain |
+| `domains.update` | Update a custom domain |
+| `domains.delete` | Delete a custom domain |
+| `team.invite` | Invite team members |
+| `team.remove` | Remove team members |
+| `utm_rules.manage` | Define and edit UTM rules |
+| `utm_templates.create` | Create UTM templates |
+| `utm_templates.edit` | Edit UTM templates |
+| `utm_templates.delete` | Delete UTM templates |
+| `links.create` | Create links |
+| `links.edit` | Edit links |
+| `links.delete` | Delete links |
+| `links.import` | Import links |
+| `analytics.view` | View link click analytics and GA4 data |
+| `data.export` | Export data as CSV |
+| `api_keys.manage` | Manage API keys |
+
+## Roles and their permissions
+
+There are four built-in roles. The table below shows the default permission set granted to each.
+
+| Permission action | owner | admin | member | viewer |
+|---|:---:|:---:|:---:|:---:|
+| `workspace.manage` | Yes | - | - | - |
+| `billing.manage` | Yes | - | - | - |
+| `domains.create` | Yes | Yes | - | - |
+| `domains.update` | Yes | Yes | - | - |
+| `domains.delete` | Yes | Yes | - | - |
+| `team.invite` | Yes | Yes | - | - |
+| `team.remove` | Yes | Yes | - | - |
+| `utm_rules.manage` | Yes | Yes | - | - |
+| `utm_templates.create` | Yes | Yes | Yes | - |
+| `utm_templates.edit` | Yes | Yes | Yes | - |
+| `utm_templates.delete` | Yes | Yes | Yes | - |
+| `links.create` | Yes | Yes | Yes | - |
+| `links.edit` | Yes | Yes | Yes | - |
+| `links.delete` | Yes | Yes | - | - |
+| `links.import` | Yes | Yes | - | - |
+| `analytics.view` | Yes | Yes | Yes | Yes |
+| `data.export` | Yes | Yes | Yes | - |
+| `api_keys.manage` | Yes | Yes | - | - |
+
+### Role summary
+
+<AccordionGroup>
+  <Accordion title="owner">
+    Full access. Holds every permission action, including `workspace.manage` and `billing.manage`, which no other role has.
+  </Accordion>
+  <Accordion title="admin">
+    Holds every permission except `workspace.manage` and `billing.manage`. Can manage domains, team, UTM rules, links, API keys, analytics, and exports.
+  </Accordion>
+  <Accordion title="member">
+    Can create and edit links, manage UTM templates, view analytics, and export data. Cannot delete or import links, manage domains, manage team, manage UTM rules, or manage API keys.
+  </Accordion>
+  <Accordion title="viewer">
+    Read-only. Holds `analytics.view` only.
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+The table above lists the default role to permission mapping. Effective permissions are read from the `RolePermission` records at runtime, so a workspace's actual mapping may differ if it has been customized.
+</Note>
+
+## Errors
+
+| Code | When |
+|---|---|
+| `401` | Missing or invalid JWT |
+| `429` | Rate limit exceeded (100 requests/minute per IP) |
+
+See [Errors](/api/errors) for the full error envelope.

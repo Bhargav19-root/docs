@@ -1,0 +1,106 @@
+---
+title: "URL metadata"
+description: "Fetch Open Graph metadata, title, description, image, and favicon for any URL."
+---
+
+## Overview
+
+The metadata API fetches a target URL server-side and extracts its Open Graph and standard meta tags - title, description, image, favicon, and site name. It is useful for building link previews when a user pastes a destination URL.
+
+Endpoints live under `/api/v1/metadata`. There are two: an authenticated endpoint and a public one. Both return the same response shape and run the same extraction logic. Neither uses the `x-workspace-id` header.
+
+## Authenticated endpoint
+
+```
+GET /api/v1/metadata?url=<url>
+```
+
+Fetches metadata for the given URL. Requires a JWT bearer token.
+
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <jwt>` | Yes | |
+
+### Query parameters
+
+<ParamField query="url" type="string" required>
+  The URL to fetch metadata from. Must be a valid absolute URL (parseable by the standard `URL` constructor).
+</ParamField>
+
+### Example request
+
+```bash
+curl "https://api.linkutm.com/api/v1/metadata?url=https://example.com/article" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+## Public endpoint
+
+```
+GET /api/v1/metadata/public?url=<url>
+```
+
+Same behavior as the authenticated endpoint, but it does not require a JWT. Use it for unauthenticated surfaces such as a public link preview widget.
+
+### Query parameters
+
+<ParamField query="url" type="string" required>
+  The URL to fetch metadata from. Must be a valid absolute URL.
+</ParamField>
+
+### Example request
+
+```bash
+curl "https://api.linkutm.com/api/v1/metadata/public?url=https://example.com/article"
+```
+
+<Warning>
+The public endpoint is rate limited. Keep client-side calls modest and cache results where you can.
+</Warning>
+
+## Response
+
+Both endpoints return the same object.
+
+| Field | Type | Notes |
+|---|---|---|
+| `url` | string | The URL that was requested, echoed back. |
+| `title` | string \| null | Page title, from the `<title>` tag, falling back to `og:title` then `twitter:title`. |
+| `ogTitle` | string \| null | Open Graph title, from `og:title` falling back to `twitter:title`. |
+| `description` | string \| null | From `og:description`, falling back to `twitter:description` then the standard `description` meta tag. |
+| `image` | string \| null | Preview image, from `og:image` or a `twitter:image` tag. Relative URLs are resolved to absolute. |
+| `favicon` | string \| null | Favicon URL, resolved to absolute. Defaults to `<origin>/favicon.ico` when no icon link is found. |
+| `siteName` | string \| null | From `og:site_name`, falling back to the hostname with a leading `www.` stripped. |
+
+### Example response
+
+```json
+{
+  "url": "https://example.com/article",
+  "title": "How to Track Campaigns - Example Blog",
+  "ogTitle": "How to Track Campaigns",
+  "description": "A practical guide to UTM tagging for marketing teams.",
+  "image": "https://example.com/images/article-cover.png",
+  "favicon": "https://example.com/favicon.ico",
+  "siteName": "Example Blog"
+}
+```
+
+## Behavior notes
+
+- Results are cached server-side for 5 minutes per URL. Repeated requests for the same URL within that window return the cached metadata.
+- The fetch uses a 10 second timeout and follows redirects.
+- If the target URL cannot be reached, returns a non-OK status, or the fetch errors, the endpoint still responds `200` with an empty-metadata object: every field is `null` except `url` (echoed) and `siteName` (derived from the hostname when possible). The endpoint does not surface upstream failures as errors.
+- A malformed `url` query value is rejected up front with `400`.
+
+## Errors
+
+| Code | When |
+|---|---|
+| `400` | The `url` query parameter is missing or is not a valid URL |
+| `401` | Missing or invalid JWT (authenticated endpoint only) |
+| `429` | Rate limit exceeded (100 requests/minute per IP) |
+
+See [Errors](/api/errors) for the full error envelope.

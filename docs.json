@@ -102,12 +102,62 @@
             ]
           },
           {
+            "group": "Auth & Account",
+            "pages": [
+              "api/auth",
+              "api/users",
+              "api/api-keys",
+              "api/permissions"
+            ]
+          },
+          {
             "group": "Links",
             "pages": [
               "api/links-create",
               "api/links-get",
+              "api/links-update",
               "api/links-delete",
-              "api/links-parameters"
+              "api/links-parameters",
+              "api/redirects"
+            ]
+          },
+          {
+            "group": "Organization",
+            "pages": [
+              "api/workspaces",
+              "api/team",
+              "api/invites",
+              "api/folders",
+              "api/tags"
+            ]
+          },
+          {
+            "group": "UTM Standards",
+            "pages": [
+              "api/templates",
+              "api/parameters",
+              "api/utm-rules"
+            ]
+          },
+          {
+            "group": "Domains",
+            "pages": [
+              "api/domains"
+            ]
+          },
+          {
+            "group": "Analytics & Tracking",
+            "pages": [
+              "api/analytics",
+              "api/google-analytics",
+              "api/pixels",
+              "api/metadata"
+            ]
+          },
+          {
+            "group": "Payments",
+            "pages": [
+              "api/payments"
             ]
           }
         ]
