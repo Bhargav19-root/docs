@@ -7,10 +7,6 @@ description: "Gate access to a link behind a password. Useful for previews, draf
 
 A link with a password set has its password stored on the record. The password is captured at link-creation time and surfaced in the link details so a teammate or recipient knows what to enter when prompted.
 
-<Warning>
-**Password protection is enforced server-side at redirect time.** Visitors who lack a valid session cookie are shown a password prompt and cannot proceed without entering the correct password. However, the password is stored in plaintext on the link record and cookies are base64-encoded — this is a convenience gate, not a cryptographic security boundary. For sensitive content, use real authentication on the destination page.
-</Warning>
-
 ## When to use it
 
 - Sharing a draft preview with a client before launch (the URL is private; the password is shared context).
@@ -56,9 +52,6 @@ The destination page enforces the password; linkutm tracks the click and passes 
 <AccordionGroup>
   <Accordion title="Assuming it gates the redirect">
     The current public redirect does not block visitors based on the link's password - your destination page must enforce access.
-  </Accordion>
-  <Accordion title="Treating it as security at all">
-    Even if redirect-time gating ships later, a password on a link is shareable. Use real authentication for sensitive content.
   </Accordion>
   <Accordion title="Reusing one password across many links">
     If one link leaks, all leak. Generate per-link.
