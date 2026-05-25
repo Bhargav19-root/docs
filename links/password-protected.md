@@ -8,7 +8,7 @@ description: "Gate access to a link behind a password. Useful for previews, draf
 A link with a password set has its password stored on the record. The password is captured at link-creation time and surfaced in the link details so a teammate or recipient knows what to enter when prompted.
 
 <Warning>
-**Enforcement is currently UI-only.** The password is captured on the link record, but the public short-URL redirect does not gate on it server-side today. Treat this as a label/hint for shared links rather than a security boundary. For protected content, use real authentication on the destination page.
+**Password protection is enforced server-side at redirect time.** Visitors who lack a valid session cookie are shown a password prompt and cannot proceed without entering the correct password. However, the password is stored in plaintext on the link record and cookies are base64-encoded — this is a convenience gate, not a cryptographic security boundary. For sensitive content, use real authentication on the destination page.
 </Warning>
 
 ## When to use it
@@ -21,10 +21,10 @@ A link with a password set has its password stored on the record. The password i
 
 <Steps>
   <Step title="Open Advanced">
-    In the create new link panel, expand the **Advanced** section.
+    In the create new link panel, click the **Advanced** button in the bottom bar.
   </Step>
   <Step title="Set a password">
-    Toggle **Password protect** and either type a password.
+    In the **Password Protection** field, type a password.
   </Step>
   <Step title="Save the link">
     The password is stored on the link record.
@@ -68,5 +68,5 @@ The destination page enforces the password; linkutm tracks the click and passes 
 ## Edge cases
 
 <Note>
-**Password and expiration interact at the redirect layer.** Past the expiry date, the link returns `410 Gone` regardless of any password.
+**Password and expiration interact at the redirect layer.** Past the expiry date, the link returns `404 Not Found` regardless of any password.
 </Note>
