@@ -11,10 +11,10 @@ GET /api/v1/links
 
 ### Headers
 
-| Header | Required |
-|---|---|
-| `Authorization: Bearer <jwt>` | Yes |
-| `x-workspace-id: <uuid_or_slug>` | Yes |
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <token>` | Yes | JWT or `lk_live_` API key |
+| `x-workspace-id: <uuid_or_slug>` | Yes (JWT) / Optional (API key) | Inferred from API key if omitted |
 
 ### Query parameters
 
@@ -28,6 +28,8 @@ GET /api/v1/links
 <ParamField query="tagIds" type="string">Comma-separated tag UUIDs. Returns links matching any of the tags.</ParamField>
 <ParamField query="dateFrom" type="string">ISO 8601 date. Only links created on or after this date.</ParamField>
 <ParamField query="dateTo" type="string">ISO 8601 date. Only links created on or before this date.</ParamField>
+<ParamField query="orderBy" type="string" default="createdAt">Sort field. Accepted values: `createdAt`, `updatedAt`, `clicks`, `title`.</ParamField>
+<ParamField query="order" type="string" default="desc">Sort direction: `asc` or `desc`.</ParamField>
 
 ### Example
 
@@ -68,7 +70,7 @@ curl "https://api.linkutm.com/api/v1/links?page=1&limit=50&utmSource=google&tagI
 
 ### Notes
 
-- Sorted by `createdAt DESC` - newest first.
+- Default sort is `createdAt DESC` (newest first). Use `orderBy` and `order` query params to change.
 - Server caches headers explicitly disabled (`Cache-Control: no-cache`).
 - Includes folder, domain, and tags in one query (single round trip via SQL `json_agg`).
 
@@ -84,10 +86,10 @@ Returns every link ID matching the same filters as `GET /links` - `search`, `utm
 
 ### Headers
 
-| Header | Required |
-|---|---|
-| `Authorization: Bearer <jwt>` | Yes |
-| `x-workspace-id: <uuid_or_slug>` | Yes |
+| Header | Required | Notes |
+|---|---|---|
+| `Authorization: Bearer <token>` | Yes | JWT or `lk_live_` API key |
+| `x-workspace-id: <uuid_or_slug>` | Yes (JWT) / Optional (API key) | Inferred from API key if omitted |
 
 ### Example
 

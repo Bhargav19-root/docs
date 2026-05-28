@@ -13,8 +13,8 @@ POST /api/v1/links
 
 | Header | Required | Notes |
 |---|---|---|
-| `Authorization: Bearer <jwt>` | Yes | |
-| `x-workspace-id: <uuid_or_slug>` | Yes | Target workspace |
+| `Authorization: Bearer <token>` | Yes | JWT or `lk_live_` API key |
+| `x-workspace-id: <uuid_or_slug>` | Yes (JWT) / Optional (API key) | Inferred from key if omitted; must match key's workspace if included |
 | `Content-Type: application/json` | Yes | |
 
 ## Body

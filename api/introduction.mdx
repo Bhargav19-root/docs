@@ -27,7 +27,7 @@ curl https://api.linkutm.com/api/v1/links \
 ```
 
 <Note>
-**Workspace context.** Most endpoints require an `x-workspace-id` header carrying a workspace UUID or slug. Without it, the call returns `404` or `400`.
+**Workspace context.** Most endpoints require an `x-workspace-id` header carrying a workspace UUID or slug. For JWT auth, omitting it returns `404` or `400`. For API key auth the header is optional — the key is workspace-scoped so the workspace is injected automatically. If you include the header with an API key, it must match the key's workspace or the request is rejected with `401`.
 </Note>
 
 ### API keys

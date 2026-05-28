@@ -161,6 +161,37 @@ Revocation is immediate and permanent. Any integration still using the key start
 
 A key with `expiresAt` set in the past is treated as invalid and fails authentication, even though the record still exists. Revoke keys you no longer need rather than relying on expiry alone.
 
+## API key endpoint scope
+
+An API key covers only the Links module. The table below is the authoritative list of what the key can and cannot reach.
+
+| Endpoint | API key supported |
+|---|---|
+| `GET /links` | Yes |
+| `GET /links/stats` | Yes |
+| `GET /links/ids` | Yes |
+| `GET /links/:id` | Yes |
+| `POST /links` | Yes |
+| `PATCH /links/:id` | Yes |
+| `DELETE /links/:id` | Yes |
+| `POST /links/bulk-delete` | Yes |
+| `POST /links/bulk-archive` | Yes |
+| `POST /links/bulk-move` | Yes |
+| `POST /links/bulk-tag` | Yes |
+| `POST /links/bulk-create` | Yes |
+| `POST /links/check-shortcodes` | Yes |
+| `POST /links/import/*` | Yes |
+| `GET /links/:id/analytics` | No — returns `401` |
+| `GET /links/:id/tags` | No — route not registered |
+| `GET /links/:id/pixels` | No — returns `401` |
+| `GET /analytics` | No — returns `401` |
+| `GET /templates` | No — returns `401` |
+| `GET /folders` | No — returns `401` |
+| `GET /tags` | No — returns `401` |
+| `GET /utm-rules` | No — returns `401` |
+| `POST /pixels` | No — returns `401` |
+| All other modules | No — returns `401` |
+
 ## Errors
 
 | Code | When |
