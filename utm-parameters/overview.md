@@ -3,6 +3,22 @@ title: "UTM Parameter library"
 description: "The workspace dictionary of allowed UTM values. Powers autocomplete and consistency."
 ---
 
+## What are UTMs?
+
+UTMs (Urchin Tracking Modules) are short tags you add to the end of any URL so your analytics tool can tell you exactly where each visitor came from. Without them, GA4 and other tools report most traffic as "Direct" — meaning unknown origin.
+
+A UTM-tagged link looks like this:
+
+```
+https://yoursite.com/pricing?utm_source=newsletter&utm_medium=email&utm_campaign=q2-launch
+```
+
+When someone clicks it, GA4 reads those tags and records: this session came from `newsletter`, via `email`, for campaign `q2-launch`. You can then compare newsletter vs Google Ads vs LinkedIn in one report, for the same campaign.
+
+The five standard parameters are: `utm_source` (platform), `utm_medium` (channel type), `utm_campaign` (campaign name), `utm_content` (creative variant), and `utm_term` (paid keyword). The first three are the ones that matter most.
+
+---
+
 ## What it is
 
 The Parameter library is your workspace's hierarchical dictionary of UTM values:
@@ -40,7 +56,11 @@ When the library is empty, you can seed defaults that include:
   </Tab>
 </Tabs>
 
-The five parents (`source`/`medium`/`campaign`/`term`/`content`) are **system parameters** - they cannot be deleted, and only their `name` and `tooltip` can be edited. Children are fully editable.
+The five parents (`source`/`medium`/`campaign`/`term`/`content`) are built-in and can't be deleted. Only their display name and tooltip can be edited. All child values are fully editable.
+
+<Note>
+The default seed values are generic starting points. Before using them, check them against your [UTM naming convention](/playbooks/utm-naming-convention) and delete or rename any that don't match — for example, rename `paid_social` to `paid-social` if you're using hyphens as your convention.
+</Note>
 
 ## How to manage it
 
@@ -94,13 +114,13 @@ The autocomplete now reflects how this team actually drives traffic - partner si
     Codes are forced lowercase on insert. `Newsletter` becomes `newsletter`. Don't try to maintain casing here.
   </Accordion>
   <Accordion title="Duplicate codes">
-    Codes are unique per workspace. Trying to add `google` when it exists returns `409 Conflict`.
+    Codes are unique per workspace. If you try to add a value that already exists (e.g., `google` when it's already there), the save will fail. Check the existing list first.
   </Accordion>
   <Accordion title="Deleting a parent with children">
-    Blocked. Returns `400` with `"Cannot delete parameter with N child value(s). Delete child values first."`
+    You can't delete a parent parameter (like `source`) while it still has child values under it. Delete the child values first, then the parent.
   </Accordion>
   <Accordion title="Treating library as the enforcer">
-    Library powers autocomplete. To **enforce** allowed values, configure a [Required field rule](/utm-rules/overview) with `validation_type=allowed_values`.
+    Library powers autocomplete — it suggests values but doesn't block anything. To enforce naming standards, configure [UTM Rules](/utm-rules/overview) with prohibited values and character restrictions.
   </Accordion>
 </AccordionGroup>
 

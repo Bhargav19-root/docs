@@ -81,21 +81,13 @@ This is the most important step. Do it before the client or any team member crea
     - Whether they need `utm_content` tracking (almost always yes for paid)
   </Step>
   <Step title="Configure UTM Rules for this workspace">
-    Go to **Settings → UTM Rules** and set:
+    Go to **Settings → UTM Rules** and turn on:
 
-    ```
-    forceLowercase: true
-    spaceCharacter: "-"
-    
-    Required field rules:
-    - utm_source: allowed_values = [their approved list]
-    - utm_medium: allowed_values = [cpc, paid-social, email, display, video, affiliate, organic-social, qr, referral]
-    - utm_campaign: not_empty
-    
-    Prohibited values: ["test", "draft", "tbd", "todo"]
-    ```
+    - **Force lowercase** — prevents casing drift (`Google` vs `google`)
+    - **Space character** — set to hyphen (`-`) to match the naming convention
+    - **Prohibited values** — add: test, draft, tbd, todo (blocks garbage values from polluting reports)
 
-    Anyone creating a link in this workspace with an off-list source or empty campaign gets rejected on save, not after the campaign has already run.
+    Anyone creating a link with a prohibited term gets rejected on save, not after the campaign has already run.
   </Step>
   <Step title="Create templates for their top 5 channels">
     Go to **UTM Templates → Create Template** for each channel the client actively uses. At minimum:

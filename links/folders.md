@@ -3,9 +3,13 @@ title: "Folders"
 description: "Organize links into separate folders; set a default folder for new links."
 ---
 
+<Tip>
+**Folders vs tags:** Use folders for primary grouping (one per link) — by campaign, client, or channel. Use tags for cross-cutting labels a link can belong to many of — status, quarter, experiment flag. Think of a folder as the filing cabinet drawer and tags as sticky notes on the file.
+</Tip>
+
 ## What it is
 
-Folders are flat containers for organizing links inside a workspace. Each folder is separate; folders don't support nesting, parent/child relationships, or linked folder structures. Each link belongs to zero or one folder. Unfiled links live in **Unsorted**.
+Folders are flat containers for organizing links inside a workspace. Each folder is separate; folders don't support nesting. Each link belongs to zero or one folder. Unfiled links live in **Unsorted**.
 
 <Frame>
   <img src="/images/fodler&tags.png" alt="Folders and Tags page - folder list with color indicators and tags panel" />

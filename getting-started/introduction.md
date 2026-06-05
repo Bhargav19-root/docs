@@ -24,11 +24,15 @@ description: "Sign up, create a workspace, ship your first tracked link in under
   </Step>
 </Steps>
 
+<Tip>
+**Setting this up for a team or agency?** Agree on your [UTM naming convention](/playbooks/utm-naming-convention) and configure UTM Rules _before_ inviting anyone. Rules apply to all new links going forward — it's much harder to enforce consistency after 50 links already exist.
+</Tip>
+
 ## 2. Create your first link
 
 <Steps>
   <Step title="Open the link builder">
-    From the sidebar: **Links → New Link** (or press the **+** button).
+    From the sidebar: **Links → Create Link** (or press the **+** button).
   </Step>
   <Step title="Paste destination URL">
     Full URL with `https://`. Example: `https://example.com/pricing`.
@@ -96,15 +100,15 @@ The click is recorded. Open the link's analytics tab - country, device, browser,
 
 <AccordionGroup>
   <Accordion title="Workspaces are the unit of isolation">
-    Links, folders, tags, templates, UTM rules, custom domains, pixels, API keys, analytics - all scoped per workspace. Members of one workspace can't see another. Useful for agency-style multi-client setups.
+    Links, folders, tags, templates, UTM rules, custom domains, pixels, API keys, analytics - all scoped per workspace. A user in one workspace cannot access the links, analytics, or settings of any other workspace. Useful for agency-style multi-client setups.
   </Accordion>
   <Accordion title="Short codes are globally unique">
     Even though links are workspace-scoped, the short code (the part after `yourshort.link/`) is unique across the system. If you try to use a slug another workspace already grabbed, creation fails with a conflict error.
   </Accordion>
   <Accordion title="UTMs run through workspace rules">
-    Before a link saves, your workspace's UTM Rules are applied: lowercase, space replacement, max length, prohibited terms, conditional logic. The cleaned values are what gets stored. See [UTM Rules](/utm-rules/overview).
+    Before a link saves, your workspace's UTM Rules are applied: lowercase, space replacement, max length, prohibited terms. The cleaned values are what gets stored. See [UTM Rules](/utm-rules/overview).
   </Accordion>
   <Accordion title="Analytics has a retention window">
-    Each workspace has a retention window for click data. Queries beyond that window are clipped to it. Older clicks are not deleted from the database - they're just outside the queryable range.
+    Each workspace has a retention window for click data. Queries beyond that window are clipped to it.
   </Accordion>
 </AccordionGroup>

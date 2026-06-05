@@ -48,7 +48,7 @@ Each workspace:
 ├── Domains (each client's branded short domain)
 ├── Templates (per-client UTM presets)
 ├── UTM Rules (per-client naming convention)
-└── Billing (per-client)
+└── Plan & usage (billed per workspace)
 ```
 
 ## Common mistakes

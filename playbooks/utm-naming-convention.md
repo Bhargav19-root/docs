@@ -59,7 +59,7 @@ Use the **platform name**, lowercase, hyphen-separated. Lock this to a fixed voc
 Don't use `email` as a source. It's ambiguous. Is it your newsletter, a cold outreach sequence, or a transactional send? Use `newsletter`, `outbound`, or `transactional` instead.
 </Warning>
 
-**Enforce it:** Add an `allowed_values` rule on `utm_source` in [UTM Rules](/utm-rules/overview). Anyone using an off-list value gets a rejection on save, not a messy row in GA4 three weeks later.
+**Enforce it:** Configure [UTM Rules](/utm-rules/overview) to block values outside your approved list. Anyone using an off-list value gets a rejection on save, not a messy row in GA4 three weeks later.
 
 ---
 
@@ -238,28 +238,14 @@ Setting this convention once doesn't help if someone ignores it two weeks later.
 **Minimum ruleset to configure:**
 
 <Steps>
-  <Step title="Force lowercase + hyphen">
-    Enable `forceLowercase: true` and set `spaceCharacter: "-"`. This catches 80% of drift automatically.
+  <Step title="Force lowercase and hyphens">
+    Turn on **Force lowercase** and set **Space character** to hyphen (`-`). This catches 80% of drift automatically — no more `Google` vs `google` or `Q2 Launch` vs `q2-launch`.
   </Step>
-  <Step title="Lock utm_source to your vocab">
-    Add a Required Field rule: `validationType=allowed_values` on `utm_source`. Paste in your approved source list. Anyone using `FB`, `Email`, or `Insta` gets rejected on save.
+  <Step title="Block test and draft values">
+    Under **Prohibited values**, add: test, draft, tbd, todo. Prevents test links from leaking into production data and polluting your reports.
   </Step>
-  <Step title="Lock utm_medium to your vocab">
-    Same rule on `utm_medium`. Your allowed list: `cpc`, `paid-social`, `email`, `display`, `video`, `affiliate`, `organic-social`, `podcast`, `qr`, `referral`.
-  </Step>
-  <Step title="Require utm_campaign">
-    Required Field rule: `validationType=not_empty` on `campaign`. No campaign name, no link saved.
-  </Step>
-  <Step title="Block test / draft values">
-    Add `prohibitedValues: ["test", "draft", "tbd", "todo", "xxx"]`. Prevents test links from leaking into production data.
-  </Step>
-  <Step title="Auto-fill medium from source (optional)">
-    Add Conditional Logic rules for common pairs:
-    - `if source=google → set medium=cpc`
-    - `if source=newsletter → set medium=email`
-    - `if source=meta → set medium=paid-social`
-    
-    Reduces manual entry errors on high-volume link creation.
+  <Step title="Set your allowed characters (optional)">
+    Under **Allowed characters**, restrict to letters, numbers, and hyphens. Rejects anything with special characters or accidental spaces that slipped through.
   </Step>
 </Steps>
 
@@ -277,7 +263,7 @@ A naming convention rots if no one owns it. Assign these before you ship.
 
 **Adding a new source or medium:**
 1. Convention owner approves the new value
-2. Add it to the `allowed_values` list in UTM Rules
+2. Update UTM Rules with the new approved value
 3. Create a new template for the channel (see [Create a template](/utm-templates/create-template))
 4. Update this playbook
 
@@ -292,7 +278,7 @@ Don't let individuals add new values ad hoc. One rogue `utm_source=IG` takes one
     Edit them to match your actual channels. Delete any you don't use.
   </Step>
   <Step title="Configure UTM Rules">
-    Minimum: `forceLowercase`, `source allowed_values`, `medium allowed_values`, `campaign not_empty`.
+    Minimum: force lowercase on, hyphen as space character, blocked values: test/draft/tbd.
   </Step>
   <Step title="Create templates for your top 5 channels">
     Newsletter, Google Ads, Meta, LinkedIn, and your highest-volume partner. See [Create a template](/utm-templates/create-template).

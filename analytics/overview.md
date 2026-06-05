@@ -9,15 +9,15 @@ Every click on a linkutm short URL is logged with rich context. The Analytics pa
 
 ## What's tracked per click
 
-| Field                         | Source           | Notes                                   |
-| ----------------------------- | ---------------- | --------------------------------------- |
-| `timestamp`                   | server clock     | UTC                                     |
-| `ip`                          | request headers  | `x-forwarded-for` or socket             |
-| `country`, `region`, `city`   | geoip-lite       | falls back to ipinfo.io for private IPs |
-| `device`                      | UA parse         | `mobile`, `tablet`, `desktop`           |
-| `browser`, `os`               | UA parse         | best-effort string                      |
-| `referrer` + `referrerDomain` | `Referer` header | fallback: messaging-app UA detection    |
-| `userAgent`                   | request header   | full string                             |
+Every click captures:
+
+| What you see | Notes |
+| ------------ | ----- |
+| **Time** | When the click happened |
+| **Country, region, city** | Based on the visitor's IP address |
+| **Device** | Mobile, tablet, or desktop |
+| **Browser & OS** | Chrome, Safari, iOS, Android, etc. |
+| **Referrer** | Where they came from — the site or app that sent them to your link |
 
 ## When to use it
 
@@ -103,14 +103,14 @@ This tells the marketer: Google ads driving most volume, mostly mobile, mostly U
     Some referrers are crawlers (Slack, Twitter, etc. when fetching OG previews). The system identifies common ones via UA pattern (Slack, WhatsApp, LinkedIn-bot, etc.) and labels them in the referrer column.
   </Accordion>
   <Accordion title="Querying beyond the retention window">
-    Each workspace has a retention window for click data. Queries that ask for older data are silently clipped to the start of the window. Old clicks aren't deleted - they're just outside the queryable range.
+    Each workspace has a retention window for click data. Queries that ask for older data are silently clipped to the start of the window.
   </Accordion>
 </AccordionGroup>
 
 ## Edge cases
 
 <Note>
-**Retention window.** The Analytics API silently clips `startDate` to `now - retentionDays` if you ask for older data. Historical clicks remain in the database but aren't returned past the window.
+**Retention window.** Queries are automatically capped to your plan's retention window. Data beyond the window isn't returned.
 </Note>
 
 <Note>

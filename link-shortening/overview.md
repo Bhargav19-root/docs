@@ -27,23 +27,20 @@ Always - there's no "long-URL only" mode. Pick which short domain to use per lin
 ## How the redirect works
 
 <Steps>
-  <Step title="Visitor hits the short URL">
-    `GET https://go.acme.com/q2-launch`
+  <Step title="Visitor clicks the short link">
+    Their browser opens `go.acme.com/q2-launch`.
   </Step>
-  <Step title="System looks up the short code">
-    Checks expiration (returns `410 Gone` if past) and archived state (returns `404`).
+  <Step title="linkutm validates the link">
+    Checks whether the link is active. Expired or archived links show an error page instead of redirecting.
   </Step>
-  <Step title="Records the click">
-    Async insert into the click log: timestamp, IP, country/region/city (geoip), user-agent → device/browser/OS, referrer.
+  <Step title="Click is recorded">
+    Country, city, device type, browser, OS, and referrer are captured. This is what populates your analytics.
   </Step>
-  <Step title="Builds the destination URL">
-    Appends `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`, plus any custom UTM keys.
+  <Step title="UTMs are appended to the destination URL">
+    The visitor's browser is sent to your destination URL with all UTM parameters attached.
   </Step>
-  <Step title="Fires pixels (if any)">
-    If the link or workspace has enabled pixels (Facebook, GA4, GTM, TikTok, etc.), serves a brief HTML interstitial that fires the pixels, then JS-redirects.
-  </Step>
-  <Step title="302 to destination">
-    No pixels → direct `302` redirect.
+  <Step title="Pixels fire (if configured)">
+    If you've added pixels (Facebook, TikTok, GTM, etc.) to the link or workspace, they fire before the final redirect. Adds ~300ms but does not affect ad quality scores.
   </Step>
 </Steps>
 
@@ -76,15 +73,15 @@ What happens:
 ## Edge cases
 
 <Note>
-**Pixel interstitial adds ~300ms.** If you don't have pixels configured, the redirect is direct (`302`). Pixels insert a brief HTML page that fires tracking before redirecting via JS.
+**Pixel interstitial adds ~300ms.** This only applies if you've enabled pixels (Facebook, TikTok, GTM, etc.) on the link or workspace. With no pixels configured, the redirect is a direct `302` with no added latency. The delay happens before the destination page loads and does not affect Google Ads Quality Score or paid social delivery.
 </Note>
 
 <Note>
-**Bare domain.** Hitting `https://go.acme.com/` with no slug returns a not-found response unless your deployment is configured to forward bare-domain hits to a configured `defaultRedirect`. Treat slug-less hits as undefined for now and always include a path.
+**Bare domain.** Visiting `https://go.acme.com/` with no slug after it shows a not-found page. Always share the full short URL including the slug.
 </Note>
 
 <Note>
-**Click counting on archived/expired links.** Archived links return `404` and don't count. Expired links return `410` and don't count.
+**Clicks on archived or expired links don't count.** The link stops working and the click is not recorded.
 </Note>
 
 <Note>

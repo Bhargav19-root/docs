@@ -15,7 +15,6 @@ Workspace members are users attached to a workspace with a role. Each gets per-w
 | `member`     | Default invite role. Create/edit links, manage folders/tags/templates within RBAC permissions.       |
 | Custom roles | Defined via the RBAC system (admin, viewer, etc.) - workspace-level configurable.                    |
 
-The exact action-level permissions are tied to the RBAC permission table - each role has a list of allowed `(method, path)` tuples.
 
 ## How to invite
 
@@ -43,7 +42,7 @@ The exact action-level permissions are tied to the RBAC permission table - each 
 The invitee clicks the link in the email. They sign in (or create an account with the same email) and confirm.
 
 <Warning>
-The invite is bound to the email it was sent to. If the invitee signs in with a different email, acceptance fails with `403 "This invite was sent to a different email address"`.
+The invite is bound to the email it was sent to. If the invitee signs in with a different email address, the invite won't work — they need to sign in with the exact email the invite was sent to.
 </Warning>
 
 ## Removing members
@@ -63,12 +62,12 @@ The system can't remove the owner via this flow. Transfer ownership or delete th
 
 Each member controls what triggers an email to them:
 
-| Setting              | Trigger                                                       |
-| -------------------- | ------------------------------------------------------------- |
-| `notifyNewLinks`     | A teammate creates a link in this workspace                   |
-| `notifyLinkClicks`   | Click milestones (100, 500, 1k, 5k, 10k, 50k, 100k, 500k, 1M) |
-| `notifyTeamChanges`  | Member joins/leaves, role changes                             |
-| `notifyWeeklyReport` | Weekly digest of workspace activity                           |
+| Notification | When you get it |
+| ------------ | --------------- |
+| New link created | A teammate creates a link in this workspace |
+| Click milestones | Your link hits 100, 500, 1k, 5k, 10k, 50k, 100k, 500k, or 1M clicks |
+| Team changes | A member joins, leaves, or has their role changed |
+| Weekly report | Weekly digest of workspace activity |
 
 <Frame>
   <img src="/images/notificationsettings.png" alt="Notification settings - Short links, Link alerts, and Team members sections each with ON/OFF toggles per event type" />
@@ -99,10 +98,10 @@ Jane gets all notifications. Kim gets click milestones + weekly report. Nick dis
     Each workspace has a team-member maximum. The invite endpoint rejects new invites once the workspace is at capacity, with a message naming the current count and limit.
   </Accordion>
   <Accordion title="Re-inviting an existing member">
-    Returns `409 Conflict` - *"User is already a member of this workspace"*.
+    You can't invite someone who's already a member. Remove them first if you want to change their role, or use the role change option directly.
   </Accordion>
   <Accordion title="Changing the owner's role">
-    Blocked by `403 "Cannot change owner role"`. Transfer ownership separately.
+    The owner's role can't be changed. Transfer ownership separately if needed.
   </Accordion>
   <Accordion title="Removing the owner">
     Blocked. The owner can leave by deleting the workspace.
@@ -112,7 +111,7 @@ Jane gets all notifications. Kim gets click milestones + weekly report. Nick dis
 ## Edge cases
 
 <Note>
-**Invite expiry.** 7 days. After expiry the link returns `403 "Invite has expired"`. Resend to issue a new token.
+**Invite expiry.** Invites expire after 7 days. If the invitee tries to accept after that, the link won't work. Resend the invite from the Members page to generate a fresh one.
 </Note>
 
 <Note>

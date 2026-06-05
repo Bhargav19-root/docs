@@ -4,16 +4,16 @@ description: "Quick fixes for the things that break most often."
 ---
 
 <AccordionGroup>
-  <Accordion title="My short link returns 404">
+  <Accordion title="My short link isn't working">
     Possible causes:
-    - **Slug typo.** Compare what you typed vs the saved short code.
-    - **Link archived.** Archived links 404. Unarchive from the link list.
-    - **Wrong domain.** Visiting `go.example.com/abc` when the link was created on `link.example.com`. Check the domain on the link.
-    - **System path collision.** Slugs that collide with system paths (`api`, `health`, `docs`, `favicon.ico`) won't resolve. Rename the slug.
+    - **Slug typo.** Compare what you typed vs the saved short code in linkutm.
+    - **Link archived.** Archived links stop working. Find the link and unarchive it.
+    - **Wrong domain.** You might be visiting the link on a different domain than it was created on. Check the full short URL on the link detail page.
+    - **Reserved path.** A small set of paths are reserved by the system (`api`, `health`, `docs`). If your slug matches one of these, rename it.
   </Accordion>
 
-<Accordion title="My short link returns 410 Gone">
-    The link has expired. Edit the link → clear or extend `expires_at`.
+<Accordion title="My short link says it's expired">
+    The link has passed its expiration date. Edit the link and extend or clear the expiry date.
 </Accordion>
 
 <Accordion title="Custom domain stuck on 'pending'">
@@ -26,11 +26,10 @@ description: "Quick fixes for the things that break most often."
 
   <Accordion title="UTM values get changed on save">
     Workspace UTM Rules are running. Default behavior:
-    - `Force lowercase` lowercases everything.
-    - `Space character` replaces spaces with `_` (or your configured char).
-    - Conditional rules can auto-set fields based on others (e.g., `source=google` → `medium=cpc`).
+    - **Force lowercase** lowercases everything automatically.
+    - **Space character** replaces spaces with `_` (or your configured character).
 
-    Conditional rule overrides happen silently - open the saved link to see the final stored values. To change behavior, edit [UTM Rules].
+    Open the saved link to see the final stored values. To change this behavior, go to [UTM Rules](/utm-rules/overview).
 
   </Accordion>
 
@@ -39,25 +38,17 @@ description: "Quick fixes for the things that break most often."
     rename the value or remove the prohibited term from rules.
 </Accordion>
 
-<Accordion title="Validation error: 'campaign is required'">
-    A required-field rule says `utm_campaign` can't be empty. Fill it, or relax
-    the rule.
+<Accordion title="Error: 'Link limit reached'">
+    Your workspace is at its maximum link count. Delete or archive unused links
+    to free up space. The workspace owner gets a warning email when approaching the limit.
 </Accordion>
 
-<Accordion title="403: 'Link limit reached'">
-    Your workspace is at its maximum link count. Either delete or archive unused
-    links to free up headroom. The workspace owner gets a warning email when
-    they are near the link limit.
+<Accordion title="Error: 'Domain or Template limit reached'">
+    Each resource type has its own maximum per workspace. Remove unused ones before adding new.
 </Accordion>
 
-<Accordion title="403: 'Domain / Template limit reached'">
-    Same pattern as the link limit. Each resource type has its own maximum per
-    workspace. Remove unused records before adding new ones.
-</Accordion>
-
-<Accordion title="409: 'Short code already exists'">
-    Short codes are globally unique. Pick another slug or let the system
-    auto-generate.
+<Accordion title="Error: 'Short code already exists'">
+    Short link slugs are unique across all of linkutm, not just your workspace. Pick a different slug or leave it blank to auto-generate one.
 </Accordion>
 
 <Accordion title="Click count is zero after testing">
