@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GA4 Link Detail</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f9fafb; display: flex; height: 100vh; overflow: hidden; }
+
+  /* Sidebar */
+  .sidebar { width: 210px; background: #fff; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-logo { padding: 16px; border-bottom: 1px solid #e5e7eb; }
+  .logo-icon { width: 32px; height: 32px; background: #ff6200; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .logo-icon svg { fill: #fff; }
+  .nav-section { padding: 12px 8px 4px; }
+  .nav-label { font-size: 11px; color: #9ca3af; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; padding: 0 8px; margin-bottom: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; font-size: 13px; color: #374151; cursor: pointer; margin-bottom: 1px; }
+  .nav-item:hover { background: #f3f4f6; }
+  .nav-item.active { background: #fff4ed; color: #ff6200; font-weight: 500; }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .sidebar-bottom { margin-top: auto; padding: 12px; border-top: 1px solid #e5e7eb; }
+  .usage-row { display: flex; justify-content: space-between; font-size: 11px; color: #6b7280; margin-bottom: 3px; }
+  .usage-reset { font-size: 10px; color: #9ca3af; margin-bottom: 10px; }
+  .upgrade-btn { display: block; background: #ff6200; color: #fff; text-align: center; padding: 9px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .avatar { width: 28px; height: 28px; background: #1f2937; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 600; }
+
+  /* Main */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { height: 48px; background: #fff; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; }
+  .breadcrumb { font-size: 13px; color: #6b7280; display: flex; align-items: center; gap: 6px; }
+  .breadcrumb span { color: #374151; font-weight: 500; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .bell { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: #6b7280; cursor: pointer; }
+
+  .content { flex: 1; overflow-y: auto; padding: 24px; }
+
+  /* Header */
+  .page-header { margin-bottom: 20px; }
+  .back-link { display: flex; align-items: center; gap: 6px; color: #6b7280; font-size: 13px; cursor: pointer; margin-bottom: 12px; }
+  .back-link:hover { color: #374151; }
+  .page-title { font-size: 22px; font-weight: 700; color: #111827; margin-bottom: 4px; }
+  .page-subtitle { font-size: 13px; color: #6b7280; }
+  .link-url { color: #ff6200; font-size: 13px; font-weight: 500; text-decoration: none; }
+  .link-destination { color: #9ca3af; font-size: 12px; margin-top: 2px; }
+
+  .header-row { display: flex; align-items: flex-start; justify-content: space-between; }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .btn { padding: 7px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #e5e7eb; background: #fff; color: #374151; display: flex; align-items: center; gap: 6px; }
+  .btn-primary { background: #ff6200; color: #fff; border-color: #ff6200; }
+  .date-btn { padding: 7px 12px; border-radius: 6px; font-size: 13px; background: #fff; border: 1px solid #e5e7eb; color: #374151; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+
+  /* Metric cards */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+  .metric-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px 18px; }
+  .metric-label { font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .metric-value { font-size: 28px; font-weight: 700; color: #111827; margin-bottom: 2px; }
+  .metric-icon { float: right; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .metric-sub { font-size: 12px; color: #9ca3af; }
+  .metric-change { font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 3px; }
+  .metric-change.up { color: #16a34a; }
+  .metric-change.down { color: #dc2626; }
+  .icon-blue { background: #eff6ff; }
+  .icon-orange { background: #fff4ed; }
+  .icon-green { background: #f0fdf4; }
+  .icon-purple { background: #faf5ff; }
+
+  /* Chart section */
+  .section { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 20px; margin-bottom: 16px; }
+  .section-title { font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .section-sub { font-size: 12px; color: #9ca3af; margin-bottom: 16px; }
+
+  /* Chart */
+  .chart-wrap { position: relative; height: 180px; }
+  svg.chart { width: 100%; height: 100%; }
+
+  /* Tabs */
+  .chart-tabs { display: flex; gap: 4px; margin-bottom: 14px; }
+  .tab { padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; color: #6b7280; border: 1px solid transparent; }
+  .tab.active { background: #fff4ed; color: #ff6200; border-color: #fed7aa; font-weight: 500; }
+
+  /* Events table */
+  .table { width: 100%; border-collapse: collapse; }
+  .table th { text-align: left; font-size: 11px; color: #9ca3af; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; padding: 0 0 10px; border-bottom: 1px solid #f3f4f6; }
+  .table th:not(:first-child) { text-align: right; }
+  .table td { padding: 12px 0; border-bottom: 1px solid #f9fafb; font-size: 13px; color: #374151; vertical-align: middle; }
+  .table td:not(:first-child) { text-align: right; }
+  .table tr:last-child td { border-bottom: none; }
+  .event-badge { display: inline-flex; align-items: center; gap: 5px; background: #f3f4f6; border-radius: 5px; padding: 3px 8px; font-size: 12px; color: #374151; font-family: monospace; }
+  .event-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .bar-wrap { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+  .bar-bg { width: 80px; height: 6px; background: #f3f4f6; border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; }
+
+  /* UTM section */
+  .utm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .utm-item { background: #f9fafb; border-radius: 8px; padding: 12px 14px; }
+  .utm-key { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 5px; }
+  .utm-val { font-size: 13px; color: #111827; font-weight: 500; font-family: monospace; }
+
+  .trend-chip { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 500; padding: 2px 6px; border-radius: 4px; }
+  .trend-up { background: #f0fdf4; color: #16a34a; }
+  .trend-down { background: #fef2f2; color: #dc2626; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </div>
+      <span style="font-size:14px;font-weight:700;color:#111827;">linkutm</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+      Links
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Analytics
+    </div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="6" height="18" rx="1"/><rect x="9" y="8" width="6" height="13" rx="1"/><rect x="16" y="13" width="6" height="8" rx="1"/></svg>
+      GA4 Events
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Templates
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+      Settings
+    </div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="usage-row"><span>Clicks</span><span>5668 of 100K</span></div>
+    <div class="usage-row"><span>Links</span><span>2561 of 4K</span></div>
+    <div class="usage-reset">Usage will reset Jul 15, 2026</div>
+    <div class="upgrade-btn">Get linkutm Pro</div>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      linkutm
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      <a href="#" style="color:#6b7280;text-decoration:none;">GA4-events</a>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      <span>linkutm Product Hunt Launch</span>
+    </div>
+    <div class="topbar-right">
+      <div class="bell">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      </div>
+      <div class="avatar">V</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Header -->
+    <div class="page-header">
+      <div class="back-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to GA4 Events
+      </div>
+      <div class="header-row">
+        <div>
+          <div class="page-title">linkutm Product Hunt Launch</div>
+          <div style="margin-top:4px;">
+            <a class="link-url">go.linkutm.com/ph-launch</a>
+          </div>
+          <div class="link-destination">→ https://linkutm.com/product?utm_source=producthunt&utm_medium=launch&utm_campaign=ph-2025</div>
+        </div>
+        <div class="header-actions">
+          <div class="date-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Last 30 days
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+            Reload
+          </div>
+          <div class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Open in GA4
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metrics -->
+    <div class="metrics">
+      <div class="metric-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div class="metric-label">Page Views</div>
+            <div class="metric-value">5,284</div>
+            <div class="metric-change up">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+              +12.4% vs prev period
+            </div>
+          </div>
+          <div class="metric-icon icon-blue">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div class="metric-label">Link Clicks</div>
+            <div class="metric-value">4,109</div>
+            <div class="metric-change up">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+              +8.7% vs prev period
+            </div>
+          </div>
+          <div class="metric-icon icon-orange">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff6200" stroke-width="2"><path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div class="metric-label">Conversions</div>
+            <div class="metric-value">612</div>
+            <div class="metric-change up">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+              +5.2% vs prev period
+            </div>
+          </div>
+          <div class="metric-icon icon-green">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.98 1.61h9.72a2 2 0 001.98-1.61L23 6H6"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div class="metric-label">Conv. Rate</div>
+            <div class="metric-value">14.9%</div>
+            <div class="metric-change up">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+              +1.3pp vs prev period
+            </div>
+          </div>
+          <div class="metric-icon icon-purple">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Events over time chart -->
+    <div class="section">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+        <div>
+          <div class="section-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            GA4 Events Over Time
+          </div>
+          <div class="section-sub">Daily event counts tracked via Google Analytics 4</div>
+        </div>
+        <div class="chart-tabs">
+          <div class="tab active">Views</div>
+          <div class="tab">Clicks</div>
+          <div class="tab">Conversions</div>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <svg class="chart" viewBox="0 0 900 180" preserveAspectRatio="none">
+          <!-- Grid lines -->
+          <line x1="0" y1="30" x2="900" y2="30" stroke="#f3f4f6" stroke-width="1"/>
+          <line x1="0" y1="70" x2="900" y2="70" stroke="#f3f4f6" stroke-width="1"/>
+          <line x1="0" y1="110" x2="900" y2="110" stroke="#f3f4f6" stroke-width="1"/>
+          <line x1="0" y1="150" x2="900" y2="150" stroke="#f3f4f6" stroke-width="1"/>
+
+          <!-- Y labels -->
+          <text x="0" y="28" font-size="11" fill="#9ca3af">600</text>
+          <text x="0" y="68" font-size="11" fill="#9ca3af">400</text>
+          <text x="0" y="108" font-size="11" fill="#9ca3af">200</text>
+          <text x="0" y="148" font-size="11" fill="#9ca3af">0</text>
+
+          <!-- Area fill -->
+          <defs>
+            <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ff6200" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#ff6200" stop-opacity="0.01"/>
+            </linearGradient>
+          </defs>
+          <path d="M 40,148 L 70,142 L 110,138 L 150,130 L 190,125 L 230,118 L 270,105 L 310,95 L 350,88 L 390,75 L 430,62 L 470,50 L 510,58 L 550,70 L 590,78 L 630,65 L 670,52 L 710,60 L 750,72 L 790,82 L 830,95 L 860,148 Z" fill="url(#areaGrad)"/>
+
+          <!-- Line -->
+          <polyline points="40,148 70,142 110,138 150,130 190,125 230,118 270,105 310,95 350,88 390,75 430,62 470,50 510,58 550,70 590,78 630,65 670,52 710,60 750,72 790,82 830,95" fill="none" stroke="#ff6200" stroke-width="2" stroke-linejoin="round"/>
+
+          <!-- Dots -->
+          <circle cx="470" cy="50" r="4" fill="#ff6200" stroke="#fff" stroke-width="2"/>
+          <circle cx="670" cy="52" r="4" fill="#ff6200" stroke="#fff" stroke-width="2"/>
+
+          <!-- X axis labels -->
+          <text x="40" y="170" font-size="10" fill="#9ca3af" text-anchor="middle">Apr 21</text>
+          <text x="150" y="170" font-size="10" fill="#9ca3af" text-anchor="middle">Apr 25</text>
+          <text x="270" y="170" font-size="10" fill="#9ca3af" text-anchor="middle">Apr 30</text>
+          <text x="390" y="170" font-size="10" fill="#9ca3af" text-anchor="middle">May 5</text>
+          <text x="510" y="170" font-size="10" fill="#9ca3af" text-anchor="middle">May 10</text>
+          <text x="630" y="170" font-size="10" fill="#9ca3af" text-anchor="middle">May 15</text>
+          <text x="750" y="170" font-size="10" fill="#9ca3af" text-anchor="middle">May 19</text>
+          <text x="830" y="170" font-size="10" fill="#9ca3af" text-anchor="middle">May 21</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- GA4 Events breakdown + UTM side by side -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+
+      <!-- Event Breakdown -->
+      <div class="section" style="margin-bottom:0;">
+        <div class="section-title" style="margin-bottom:4px;">GA4 Event Breakdown</div>
+        <div class="section-sub">Events fired for this link in last 30 days</div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Event Name</th>
+              <th>Count</th>
+              <th>Share</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="event-badge"><span class="event-dot" style="background:#3b82f6;"></span>page_view</span></td>
+              <td>5,284</td>
+              <td>
+                <div class="bar-wrap">
+                  <div class="bar-bg"><div class="bar-fill" style="width:100%;background:#3b82f6;"></div></div>
+                  <span style="font-size:12px;color:#6b7280;width:32px;">100%</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="event-badge"><span class="event-dot" style="background:#ff6200;"></span>click</span></td>
+              <td>4,109</td>
+              <td>
+                <div class="bar-wrap">
+                  <div class="bar-bg"><div class="bar-fill" style="width:78%;background:#ff6200;"></div></div>
+                  <span style="font-size:12px;color:#6b7280;width:32px;">77.8%</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="event-badge"><span class="event-dot" style="background:#16a34a;"></span>trial_start</span></td>
+              <td>612</td>
+              <td>
+                <div class="bar-wrap">
+                  <div class="bar-bg"><div class="bar-fill" style="width:12%;background:#16a34a;"></div></div>
+                  <span style="font-size:12px;color:#6b7280;width:32px;">11.6%</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="event-badge"><span class="event-dot" style="background:#9333ea;"></span>sign_up</span></td>
+              <td>1,048</td>
+              <td>
+                <div class="bar-wrap">
+                  <div class="bar-bg"><div class="bar-fill" style="width:20%;background:#9333ea;"></div></div>
+                  <span style="font-size:12px;color:#6b7280;width:32px;">19.8%</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="event-badge"><span class="event-dot" style="background:#f59e0b;"></span>scroll</span></td>
+              <td>3,821</td>
+              <td>
+                <div class="bar-wrap">
+                  <div class="bar-bg"><div class="bar-fill" style="width:72%;background:#f59e0b;"></div></div>
+                  <span style="font-size:12px;color:#6b7280;width:32px;">72.3%</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="event-badge"><span class="event-dot" style="background:#06b6d4;"></span>session_start</span></td>
+              <td>4,892</td>
+              <td>
+                <div class="bar-wrap">
+                  <div class="bar-bg"><div class="bar-fill" style="width:93%;background:#06b6d4;"></div></div>
+                  <span style="font-size:12px;color:#6b7280;width:32px;">92.6%</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- UTM Parameters -->
+      <div class="section" style="margin-bottom:0;">
+        <div class="section-title" style="margin-bottom:4px;">UTM Parameters</div>
+        <div class="section-sub">Tracking parameters attached to this link</div>
+        <div class="utm-grid">
+          <div class="utm-item">
+            <div class="utm-key">utm_source</div>
+            <div class="utm-val">producthunt</div>
+          </div>
+          <div class="utm-item">
+            <div class="utm-key">utm_medium</div>
+            <div class="utm-val">launch</div>
+          </div>
+          <div class="utm-item">
+            <div class="utm-key">utm_campaign</div>
+            <div class="utm-val">ph-2025</div>
+          </div>
+          <div class="utm-item">
+            <div class="utm-key">utm_content</div>
+            <div class="utm-val">hero-banner</div>
+          </div>
+          <div class="utm-item">
+            <div class="utm-key">utm_term</div>
+            <div class="utm-val">utm+builder</div>
+          </div>
+          <div class="utm-item" style="background:#fff4ed;border:1px solid #fed7aa;">
+            <div class="utm-key" style="color:#ff6200;">GA4 Property</div>
+            <div class="utm-val" style="color:#ff6200;">linkutm.com</div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid #f3f4f6;">
+          <div class="section-title" style="font-size:13px;margin-bottom:10px;">Top Devices</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:12px;color:#374151;width:60px;">Desktop</span>
+              <div style="flex:1;height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden;"><div style="width:62%;height:100%;background:#3b82f6;border-radius:3px;"></div></div>
+              <span style="font-size:12px;color:#6b7280;width:32px;text-align:right;">62%</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:12px;color:#374151;width:60px;">Mobile</span>
+              <div style="flex:1;height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden;"><div style="width:30%;height:100%;background:#ff6200;border-radius:3px;"></div></div>
+              <span style="font-size:12px;color:#6b7280;width:32px;text-align:right;">30%</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:12px;color:#374151;width:60px;">Tablet</span>
+              <div style="flex:1;height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden;"><div style="width:8%;height:100%;background:#9ca3af;border-radius:3px;"></div></div>
+              <span style="font-size:12px;color:#6b7280;width:32px;text-align:right;">8%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

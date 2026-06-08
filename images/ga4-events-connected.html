@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GA4 Events - linkutm</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f9fafb; display: flex; height: 100vh; overflow: hidden; font-size: 14px; }
+
+  /* Sidebar */
+  .sidebar { width: 220px; background: #fff; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-logo { padding: 18px 16px; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; gap: 9px; }
+  .logo-mark { width: 30px; height: 30px; }
+  .logo-text { font-size: 15px; font-weight: 700; color: #111827; }
+
+  .nav { padding: 10px 8px; flex: 1; }
+  .nav-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 7px; font-size: 13.5px; color: #4b5563; cursor: pointer; margin-bottom: 2px; }
+  .nav-item:hover { background: #f9fafb; }
+  .nav-item.active { background: #fff4ed; color: #ea580c; font-weight: 500; }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.85; }
+
+  .sidebar-footer { padding: 14px 14px 16px; border-top: 1px solid #f3f4f6; }
+  .usage-line { display: flex; justify-content: space-between; font-size: 11.5px; color: #6b7280; margin-bottom: 3px; }
+  .usage-reset { font-size: 11px; color: #9ca3af; margin-bottom: 11px; }
+  .upgrade-btn { display: block; background: #ea580c; color: #fff; text-align: center; padding: 9px 0; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+  /* Topbar */
+  .layout { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { height: 50px; background: #fff; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; flex-shrink: 0; }
+  .breadcrumb { font-size: 13px; color: #6b7280; display: flex; align-items: center; gap: 5px; }
+  .breadcrumb .current { color: #111827; font-weight: 500; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .icon-btn { width: 34px; height: 34px; border-radius: 7px; border: 1px solid #e5e7eb; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #6b7280; }
+  .avatar { width: 30px; height: 30px; background: #1f2937; border-radius: 50%; color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+  /* Content */
+  .content { flex: 1; overflow-y: auto; padding: 26px 28px; }
+
+  /* Page header */
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 22px; }
+  .page-title { font-size: 22px; font-weight: 700; color: #111827; margin-bottom: 3px; }
+  .page-sub { font-size: 13px; color: #6b7280; }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .btn { display: flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 7px; font-size: 13px; cursor: pointer; border: 1px solid #e5e7eb; background: #fff; color: #374151; }
+  .btn svg { width: 14px; height: 14px; }
+
+  /* Connected card */
+  .connected-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
+  .connected-left { display: flex; align-items: center; gap: 14px; }
+  .ga4-icon { width: 42px; height: 42px; background: #fff7ed; border-radius: 9px; display: flex; align-items: center; justify-content: center; }
+  .connected-info { }
+  .connected-name { font-size: 15px; font-weight: 600; color: #111827; display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+  .connected-badge { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; border-radius: 20px; font-size: 11.5px; font-weight: 500; padding: 2px 9px; display: flex; align-items: center; gap: 4px; }
+  .connected-badge::before { content: ''; width: 6px; height: 6px; background: #16a34a; border-radius: 50%; display: block; }
+  .connected-sub { font-size: 12.5px; color: #6b7280; }
+  .disconnect-btn { padding: 7px 14px; border: 1px solid #fca5a5; border-radius: 7px; color: #dc2626; font-size: 13px; background: #fff; cursor: pointer; }
+
+  /* Metrics */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+  .metric-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 20px; display: flex; justify-content: space-between; align-items: flex-start; }
+  .metric-label { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
+  .metric-value { font-size: 30px; font-weight: 700; color: #111827; line-height: 1; }
+  .metric-icon { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  /* Table section */
+  .section { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 18px; overflow: hidden; }
+  .section-header { padding: 16px 20px 0; }
+  .section-title { font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 3px; }
+  .section-sub { font-size: 12.5px; color: #9ca3af; margin-bottom: 14px; }
+
+  .search-wrap { padding: 0 20px 14px; }
+  .search-box { display: flex; align-items: center; gap: 8px; border: 1px solid #e5e7eb; border-radius: 7px; padding: 8px 12px; width: 260px; color: #9ca3af; font-size: 13px; }
+  .search-box svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th { text-align: left; font-size: 11.5px; color: #9ca3af; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; padding: 0 20px 10px; border-bottom: 1px solid #f3f4f6; }
+  thead th:not(:first-child) { text-align: right; }
+  tbody td { padding: 14px 20px; border-bottom: 1px solid #f9fafb; font-size: 13.5px; color: #374151; vertical-align: middle; }
+  tbody td:not(:first-child) { text-align: right; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #fafafa; }
+
+  .link-icon { width: 32px; height: 32px; background: #f3f4f6; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .link-name { font-size: 13.5px; font-weight: 500; color: #111827; margin-bottom: 2px; }
+  .link-short { color: #ea580c; font-size: 12.5px; margin-bottom: 1px; }
+  .link-dest { color: #9ca3af; font-size: 11.5px; font-family: monospace; }
+
+  .rate-up { color: #16a34a; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: flex-end; gap: 3px; }
+  .rate-down { color: #dc2626; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: flex-end; gap: 3px; }
+
+  .ga4-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 12px; color: #6b7280; background: #fff; cursor: pointer; }
+
+  .table-footer { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-top: 1px solid #f3f4f6; }
+  .table-footer span { font-size: 12.5px; color: #6b7280; }
+  .pagination { display: flex; gap: 6px; }
+  .page-btn { padding: 5px 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 12.5px; color: #374151; background: #fff; cursor: pointer; }
+
+  /* How it works */
+  .how-section { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; }
+  .how-title { font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 4px; }
+  .how-sub { font-size: 12.5px; color: #ea580c; margin-bottom: 16px; }
+  .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .how-card { background: #f9fafb; border-radius: 8px; padding: 14px 16px; }
+  .how-num { font-size: 11px; font-weight: 700; color: #ea580c; background: #fff4ed; width: 20px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+  .how-card-title { font-size: 13px; font-weight: 600; color: #111827; margin-bottom: 4px; }
+  .how-card-sub { font-size: 12px; color: #6b7280; line-height: 1.5; }
+
+  .help-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; border-top: 1px solid #f3f4f6; margin-top: 14px; }
+  .help-footer span { font-size: 13px; color: #6b7280; }
+  .view-docs { font-size: 13px; color: #374151; font-weight: 500; cursor: pointer; }
+
+  /* chevron */
+  .chev { display: inline-block; width: 14px; height: 14px; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <svg class="logo-mark" viewBox="0 0 30 30" fill="none">
+      <rect width="30" height="30" rx="7" fill="#ea580c"/>
+      <path d="M8 15a7 7 0 0 1 7-7 7 7 0 0 1 5 2.1" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      <path d="M22 15a7 7 0 0 1-7 7 7 7 0 0 1-5-2.1" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="20" cy="10" r="2" fill="#fff"/>
+      <circle cx="10" cy="20" r="2" fill="#fff"/>
+    </svg>
+    <span class="logo-text">linkutm</span>
+  </div>
+
+  <div class="nav">
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+      Links
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Analytics
+    </div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="6" height="18" rx="1"/><rect x="9" y="8" width="6" height="13" rx="1"/><rect x="16" y="13" width="6" height="8" rx="1"/></svg>
+      GA4 Events
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Templates
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+      Settings
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="usage-line"><span>Clicks</span><span>5668 of 100K</span></div>
+    <div class="usage-line"><span>Links</span><span>2561 of 4K</span></div>
+    <div class="usage-reset">Usage will reset Jul 15, 2026</div>
+    <div class="upgrade-btn">Get linkutm Pro</div>
+  </div>
+</div>
+
+<!-- Layout -->
+<div class="layout">
+  <div class="topbar">
+    <div class="breadcrumb">
+      linkutm
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      <span class="current">Ga4-events</span>
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      </div>
+      <div class="avatar">V</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">GA4 Events</div>
+        <div class="page-sub">Track Google Analytics 4 events for your links</div>
+      </div>
+      <div class="header-actions">
+        <div class="btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Last 30 days
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+        </div>
+        <div class="btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+          Configure
+        </div>
+      </div>
+    </div>
+
+    <!-- Connected card -->
+    <div class="connected-card">
+      <div class="connected-left">
+        <div class="ga4-icon">
+          <svg width="24" height="24" viewBox="0 0 48 48" fill="none">
+            <rect x="4" y="28" width="10" height="16" rx="2" fill="#f97316"/>
+            <rect x="18" y="18" width="10" height="26" rx="2" fill="#fb923c"/>
+            <rect x="32" y="8" width="10" height="36" rx="2" fill="#ea580c"/>
+          </svg>
+        </div>
+        <div class="connected-info">
+          <div class="connected-name">
+            Google Analytics 4
+            <span class="connected-badge">Connected</span>
+          </div>
+          <div class="connected-sub">linkutm · linkutm.com - GA4</div>
+        </div>
+      </div>
+      <div class="disconnect-btn">Disconnect</div>
+    </div>
+
+    <!-- Metrics -->
+    <div class="metrics">
+      <div class="metric-card">
+        <div>
+          <div class="metric-label">Page Views</div>
+          <div class="metric-value">18,420</div>
+        </div>
+        <div class="metric-icon" style="background:#eff6ff;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div>
+          <div class="metric-label">Link Clicks</div>
+          <div class="metric-value">14,832</div>
+        </div>
+        <div class="metric-icon" style="background:#fff7ed;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2"><path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div>
+          <div class="metric-label">Conversions</div>
+          <div class="metric-value">2,156</div>
+        </div>
+        <div class="metric-icon" style="background:#f0fdf4;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.98 1.61h9.72a2 2 0 001.98-1.61L23 6H6"/></svg>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div>
+          <div class="metric-label">Sign Ups</div>
+          <div class="metric-value">891</div>
+        </div>
+        <div class="metric-icon" style="background:#faf5ff;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Link Performance Table -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Link Performance</div>
+        <div class="section-sub">GA4 events tracked for each of your links</div>
+      </div>
+
+      <div class="search-wrap">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Search links...
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="padding-left:20px;">Link</th>
+            <th>Views</th>
+            <th>Clicks</th>
+            <th>Conv.</th>
+            <th>Rate</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- Row 1 -->
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:11px;">
+                <div class="link-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                </div>
+                <div>
+                  <div class="link-name">linkutm Product Hunt Launch</div>
+                  <div class="link-short">go.linkutm.com/ph-launch</div>
+                  <div class="link-dest">https://linkutm.com/product?utm_source=producthunt&utm_medium=launch&utm_campaign=ph-2025</div>
+                </div>
+              </div>
+            </td>
+            <td>5,284</td>
+            <td>4,109</td>
+            <td>612</td>
+            <td><div class="rate-up"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>14.9%</div></td>
+            <td><div class="ga4-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> GA4</div></td>
+          </tr>
+
+          <!-- Row 2 -->
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:11px;">
+                <div class="link-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                </div>
+                <div>
+                  <div class="link-name">Newsletter — UTM Best Practices Guide</div>
+                  <div class="link-short">go.linkutm.com/nl-utm-guide</div>
+                  <div class="link-dest">https://linkutm.com/blog/utm-best-practices?utm_source=newsletter&utm_medium=email&utm_campaign=may-edition</div>
+                </div>
+              </div>
+            </td>
+            <td>3,917</td>
+            <td>3,441</td>
+            <td>508</td>
+            <td><div class="rate-up"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>14.8%</div></td>
+            <td><div class="ga4-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> GA4</div></td>
+          </tr>
+
+          <!-- Row 3 -->
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:11px;">
+                <div class="link-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                </div>
+                <div>
+                  <div class="link-name">LinkedIn — Short Link Feature Announcement</div>
+                  <div class="link-short">go.linkutm.com/li-shortlink</div>
+                  <div class="link-dest">https://linkutm.com/features/short-links?utm_source=linkedin&utm_medium=social&utm_campaign=feature-launch</div>
+                </div>
+              </div>
+            </td>
+            <td>2,840</td>
+            <td>2,156</td>
+            <td>287</td>
+            <td><div class="rate-down"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>13.3%</div></td>
+            <td><div class="ga4-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> GA4</div></td>
+          </tr>
+
+          <!-- Row 4 -->
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:11px;">
+                <div class="link-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                </div>
+                <div>
+                  <div class="link-name">Podcast — SaaS Attribution Deep Dive</div>
+                  <div class="link-short">go.linkutm.com/pod-attribution</div>
+                  <div class="link-dest">https://linkutm.com/blog/saas-attribution?utm_source=podcast&utm_medium=audio&utm_campaign=sponsor-may</div>
+                </div>
+              </div>
+            </td>
+            <td>2,103</td>
+            <td>1,892</td>
+            <td>421</td>
+            <td><div class="rate-up"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>22.3%</div></td>
+            <td><div class="ga4-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> GA4</div></td>
+          </tr>
+
+          <!-- Row 5 -->
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:11px;">
+                <div class="link-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                </div>
+                <div>
+                  <div class="link-name">Google Ads — Free Trial Campaign</div>
+                  <div class="link-short">go.linkutm.com/gads-trial</div>
+                  <div class="link-dest">https://linkutm.com/signup?utm_source=google&utm_medium=cpc&utm_campaign=free-trial&utm_content=spring-retarget</div>
+                </div>
+              </div>
+            </td>
+            <td>1,984</td>
+            <td>1,614</td>
+            <td>198</td>
+            <td><div class="rate-down"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>12.3%</div></td>
+            <td><div class="ga4-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> GA4</div></td>
+          </tr>
+
+        </tbody>
+      </table>
+
+      <div class="table-footer">
+        <span>Page 1 of 5 · 24 links</span>
+        <div class="pagination">
+          <div class="page-btn">Previous</div>
+          <div class="page-btn">Next</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="how-section">
+      <div class="how-title">How GA4 Integration Works</div>
+      <div class="how-sub">linkutm automatically tracks events when users interact with your links.</div>
+      <div class="how-grid">
+        <div class="how-card">
+          <div class="how-num">1</div>
+          <div class="how-card-title">UTM Parameters</div>
+          <div class="how-card-sub">Your links include UTM parameters that GA4 uses to attribute traffic.</div>
+        </div>
+        <div class="how-card">
+          <div class="how-num">2</div>
+          <div class="how-card-title">Event Tracking</div>
+          <div class="how-card-sub">GA4 tracks page views, clicks, and conversions from your links.</div>
+        </div>
+        <div class="how-card">
+          <div class="how-num">3</div>
+          <div class="how-card-title">Data Sync</div>
+          <div class="how-card-sub">We sync event data from GA4 to show link-wise performance here.</div>
+        </div>
+      </div>
+      <div class="help-footer">
+        <span>Need help setting up GA4 integration?</span>
+        <span class="view-docs">View Documentation</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
