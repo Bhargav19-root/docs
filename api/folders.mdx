@@ -1,6 +1,7 @@
 ---
 title: "Folders"
 description: "Create, organize, and manage link folders - including tree views, moves, and the default folder."
+api: "POST /folders"
 ---
 
 ## Overview
@@ -52,6 +53,8 @@ POST /api/v1/folders
 
 ### Example request
 
+<RequestExample>
+
 ```bash
 curl -X POST https://api.linkutm.com/api/v1/folders \
   -H "Authorization: Bearer $TOKEN" \
@@ -64,9 +67,13 @@ curl -X POST https://api.linkutm.com/api/v1/folders \
   }'
 ```
 
+</RequestExample>
+
 ### Example response
 
-```json
+<ResponseExample>
+
+```json 201
 {
   "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
   "name": "Q2 Campaigns",
@@ -81,6 +88,8 @@ curl -X POST https://api.linkutm.com/api/v1/folders \
   "_count": { "links": 0, "children": 0 }
 }
 ```
+
+</ResponseExample>
 
 ### Errors
 

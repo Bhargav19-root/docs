@@ -1,0 +1,783 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "linkutm API",
+    "description": "REST API for managing UTM links, short URLs, domains, analytics, tags, and folders.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.linkutm.com/api/v1",
+      "description": "Production"
+    },
+    {
+      "url": "http://localhost:3333/api/v1",
+      "description": "Local development"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token obtained from `/auth/login`."
+      },
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Pass your API key as `Bearer lk_live_<key>`. Generated from **Settings → Developer → API Keys**."
+      }
+    },
+    "parameters": {
+      "WorkspaceId": {
+        "name": "x-workspace-id",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "example": "ws_01hx9ab3cd4ef5gh6ij7kl"
+        },
+        "description": "The workspace to operate in. **Required when authenticating with a JWT token.** Optional when using an API key — the workspace is automatically resolved from the key itself."
+      }
+    },
+    "schemas": {
+      "Link": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "lnk_01hx9ab3cd4ef5gh6ij7kl" },
+          "shortCode": { "type": "string", "example": "spring-sale" },
+          "shortUrl": { "type": "string", "example": "https://telzi.com/spring-sale" },
+          "url": { "type": "string", "example": "https://example.com/landing" },
+          "title": { "type": "string", "nullable": true, "example": "Spring Campaign" },
+          "description": { "type": "string", "nullable": true },
+          "utmSource": { "type": "string", "nullable": true, "example": "newsletter" },
+          "utmMedium": { "type": "string", "nullable": true, "example": "email" },
+          "utmCampaign": { "type": "string", "nullable": true, "example": "spring-2025" },
+          "utmTerm": { "type": "string", "nullable": true },
+          "utmContent": { "type": "string", "nullable": true },
+          "password": { "type": "string", "nullable": true },
+          "expiresAt": { "type": "string", "format": "date-time", "nullable": true, "example": "2025-12-31T00:00:00Z" },
+          "fallbackUrl": { "type": "string", "nullable": true },
+          "clickLimit": { "type": "integer", "nullable": true, "example": 1000 },
+          "clicks": { "type": "integer", "example": 42 },
+          "archived": { "type": "boolean", "example": false },
+          "folderId": { "type": "string", "nullable": true },
+          "workspaceId": { "type": "string", "example": "ws_01hx9ab3cd4ef5gh6ij7kl" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Domain": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "dom_01hx9ab3cd4ef5gh6ij7kl" },
+          "domain": { "type": "string", "example": "links.example.com" },
+          "verified": { "type": "boolean", "example": false },
+          "isDefault": { "type": "boolean", "example": false },
+          "defaultRedirect": { "type": "string", "nullable": true, "example": "https://example.com" },
+          "workspaceId": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Tag": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "tag_01hx9ab3cd4ef5gh6ij7kl" },
+          "name": { "type": "string", "example": "paid-ads" },
+          "color": { "type": "string", "nullable": true, "example": "#ff6200" },
+          "workspaceId": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Folder": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "fld_01hx9ab3cd4ef5gh6ij7kl" },
+          "name": { "type": "string", "example": "Q2 Campaigns" },
+          "parentId": { "type": "string", "nullable": true },
+          "workspaceId": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "statusCode": { "type": "integer", "example": 400 },
+          "message": { "type": "string", "example": "Validation failed" },
+          "error": { "type": "string", "example": "Bad Request" }
+        }
+      }
+    }
+  },
+  "security": [
+    { "BearerAuth": [] },
+    { "ApiKeyAuth": [] }
+  ],
+  "paths": {
+    "/links": {
+      "post": {
+        "summary": "Create link",
+        "description": "Create a new shortened URL with optional UTM parameters, custom slug, expiry, geo-targeting, and more.",
+        "operationId": "createLink",
+        "tags": ["Links"],
+        "parameters": [{ "$ref": "#/components/parameters/WorkspaceId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["url"],
+                "properties": {
+                  "url": { "type": "string", "description": "The destination URL to shorten.", "example": "https://example.com/landing" },
+                  "title": { "type": "string", "description": "Human-readable title for the link.", "example": "Spring Campaign" },
+                  "description": { "type": "string", "description": "Internal notes or description." },
+                  "customSlug": { "type": "string", "description": "Custom short code. Auto-generated if omitted.", "example": "spring-sale" },
+                  "utmSource": { "type": "string", "description": "UTM source parameter.", "example": "newsletter" },
+                  "utmMedium": { "type": "string", "description": "UTM medium parameter.", "example": "email" },
+                  "utmCampaign": { "type": "string", "description": "UTM campaign parameter.", "example": "spring-2025" },
+                  "utmTerm": { "type": "string", "description": "UTM term parameter." },
+                  "utmContent": { "type": "string", "description": "UTM content parameter." },
+                  "password": { "type": "string", "description": "Password-protect the link. Visitors must enter this before being redirected." },
+                  "expiresAt": { "type": "string", "format": "date-time", "description": "ISO 8601 datetime after which the link stops redirecting.", "example": "2025-12-31T00:00:00Z" },
+                  "fallbackUrl": { "type": "string", "description": "URL to redirect to when the link is expired or click-limited." },
+                  "clickLimit": { "type": "integer", "description": "Maximum number of clicks before the link is disabled.", "example": 1000 },
+                  "iosUrl": { "type": "string", "description": "Deep link URL for iOS devices." },
+                  "androidUrl": { "type": "string", "description": "Deep link URL for Android devices." },
+                  "geoTargets": {
+                    "type": "object",
+                    "description": "Map of ISO country codes to redirect URLs for geo-targeting.",
+                    "additionalProperties": { "type": "string" },
+                    "example": { "US": "https://example.com/us", "GB": "https://example.com/gb" }
+                  },
+                  "ogTitle": { "type": "string", "description": "Custom Open Graph title for link previews." },
+                  "ogDescription": { "type": "string", "description": "Custom Open Graph description." },
+                  "ogImage": { "type": "string", "description": "Custom Open Graph image URL." },
+                  "folderId": { "type": "string", "description": "ID of the folder to place this link in." },
+                  "tagIds": { "type": "array", "items": { "type": "string" }, "description": "Tag IDs to attach to this link." },
+                  "templateId": { "type": "string", "description": "UTM template ID to apply." }
+                }
+              },
+              "example": {
+                "url": "https://example.com/landing",
+                "title": "Spring Campaign",
+                "utmSource": "newsletter",
+                "utmMedium": "email",
+                "utmCampaign": "spring-2025",
+                "customSlug": "spring-sale",
+                "expiresAt": "2025-12-31T00:00:00Z",
+                "clickLimit": 1000
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Link created successfully", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Link" } } } },
+          "400": { "description": "Validation error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Plan limit reached or insufficient permissions" },
+          "409": { "description": "Short code already in use" }
+        }
+      },
+      "get": {
+        "summary": "List links",
+        "description": "Retrieve a paginated list of links in the workspace with optional filters.",
+        "operationId": "listLinks",
+        "tags": ["Links"],
+        "parameters": [
+          { "$ref": "#/components/parameters/WorkspaceId" },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 }, "description": "Page number." },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 }, "description": "Results per page. Maximum 100." },
+          { "name": "search", "in": "query", "schema": { "type": "string" }, "description": "Full-text search across title, URL, and short code." },
+          { "name": "utmSource", "in": "query", "schema": { "type": "string" }, "description": "Filter by UTM source (comma-separated for multiple)." },
+          { "name": "utmMedium", "in": "query", "schema": { "type": "string" }, "description": "Filter by UTM medium (comma-separated for multiple)." },
+          { "name": "archived", "in": "query", "schema": { "type": "boolean" }, "description": "Set `true` to return only archived links." },
+          { "name": "folderId", "in": "query", "schema": { "type": "string" }, "description": "Filter by folder ID." },
+          { "name": "tagIds", "in": "query", "schema": { "type": "string" }, "description": "Filter by tag IDs (comma-separated)." },
+          { "name": "dateFrom", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "Filter links created on or after this date." },
+          { "name": "dateTo", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "Filter links created on or before this date." },
+          { "name": "orderBy", "in": "query", "schema": { "type": "string", "enum": ["date_created", "date_updated", "clicks", "title"], "default": "date_created" }, "description": "Field to sort results by." }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of links",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "links": { "type": "array", "items": { "$ref": "#/components/schemas/Link" } },
+                    "total": { "type": "integer" },
+                    "page": { "type": "integer" },
+                    "limit": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/links/{id}": {
+      "get": {
+        "summary": "Get link",
+        "description": "Retrieve a single link by its ID.",
+        "operationId": "getLink",
+        "tags": ["Links"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Link ID.", "example": "lnk_01hx9ab3cd4ef5gh6ij7kl" }
+        ],
+        "responses": {
+          "200": { "description": "Link object", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Link" } } } },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Link not found" }
+        }
+      },
+      "patch": {
+        "summary": "Update link",
+        "description": "Update any field on an existing link. Only provided fields are changed.",
+        "operationId": "updateLink",
+        "tags": ["Links"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Link ID." }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": { "type": "string" },
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "utmSource": { "type": "string" },
+                  "utmMedium": { "type": "string" },
+                  "utmCampaign": { "type": "string" },
+                  "utmTerm": { "type": "string" },
+                  "utmContent": { "type": "string" },
+                  "password": { "type": "string", "nullable": true },
+                  "expiresAt": { "type": "string", "format": "date-time", "nullable": true, "description": "Pass `null` to remove expiry." },
+                  "fallbackUrl": { "type": "string", "nullable": true },
+                  "clickLimit": { "type": "integer", "nullable": true },
+                  "iosUrl": { "type": "string" },
+                  "androidUrl": { "type": "string" },
+                  "geoTargets": { "type": "object", "additionalProperties": { "type": "string" } },
+                  "ogTitle": { "type": "string" },
+                  "ogDescription": { "type": "string" },
+                  "ogImage": { "type": "string" },
+                  "folderId": { "type": "string", "nullable": true },
+                  "archived": { "type": "boolean" },
+                  "tagIds": { "type": "array", "items": { "type": "string" }, "description": "Replaces all existing tags on this link." }
+                }
+              },
+              "example": { "title": "Updated Title", "utmCampaign": "summer-2025", "archived": false }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated link", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Link" } } } },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Insufficient permissions" },
+          "404": { "description": "Link not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete link",
+        "description": "Permanently delete a link. This action cannot be undone.",
+        "operationId": "deleteLink",
+        "tags": ["Links"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Link ID." }
+        ],
+        "responses": {
+          "200": { "description": "Link deleted", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string", "example": "Link deleted successfully" } } } } } },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Insufficient permissions" },
+          "404": { "description": "Link not found" }
+        }
+      }
+    },
+    "/links/bulk-delete": {
+      "post": {
+        "summary": "Bulk delete links",
+        "description": "Delete multiple links in a single request.",
+        "operationId": "bulkDeleteLinks",
+        "tags": ["Links"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["ids"],
+                "properties": {
+                  "ids": { "type": "array", "items": { "type": "string" }, "description": "Array of link IDs to delete.", "example": ["lnk_abc123", "lnk_def456"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Links deleted" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Insufficient permissions" }
+        }
+      }
+    },
+    "/links/bulk-archive": {
+      "post": {
+        "summary": "Bulk archive links",
+        "description": "Archive or unarchive multiple links in a single request.",
+        "operationId": "bulkArchiveLinks",
+        "tags": ["Links"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["ids", "archived"],
+                "properties": {
+                  "ids": { "type": "array", "items": { "type": "string" }, "description": "Array of link IDs.", "example": ["lnk_abc123", "lnk_def456"] },
+                  "archived": { "type": "boolean", "description": "Set `true` to archive, `false` to unarchive.", "example": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Links updated" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/links/bulk-move": {
+      "post": {
+        "summary": "Bulk move links",
+        "description": "Move multiple links into a folder (or out of any folder).",
+        "operationId": "bulkMoveLinks",
+        "tags": ["Links"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["ids"],
+                "properties": {
+                  "ids": { "type": "array", "items": { "type": "string" }, "description": "Array of link IDs to move." },
+                  "folderId": { "type": "string", "nullable": true, "description": "Destination folder ID. Pass `null` to remove from folder." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Links moved" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/links/bulk-tag": {
+      "post": {
+        "summary": "Bulk tag links",
+        "description": "Add or replace tags on multiple links at once.",
+        "operationId": "bulkTagLinks",
+        "tags": ["Links"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["ids", "tagIds"],
+                "properties": {
+                  "ids": { "type": "array", "items": { "type": "string" }, "description": "Array of link IDs." },
+                  "tagIds": { "type": "array", "items": { "type": "string" }, "description": "Tag IDs to apply." },
+                  "mode": { "type": "string", "enum": ["add", "set"], "default": "add", "description": "`add` appends to existing tags. `set` replaces all existing tags." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Tags applied" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/analytics": {
+      "get": {
+        "summary": "Workspace analytics",
+        "description": "Aggregate click statistics across all links in the workspace for a given date range.",
+        "operationId": "getWorkspaceAnalytics",
+        "tags": ["Analytics"],
+        "parameters": [
+          { "$ref": "#/components/parameters/WorkspaceId" },
+          { "name": "startDate", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "Start of the reporting period (ISO 8601).", "example": "2025-01-01" },
+          { "name": "endDate", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "End of the reporting period (ISO 8601).", "example": "2025-03-31" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Workspace analytics summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalClicks": { "type": "integer" },
+                    "uniqueClicks": { "type": "integer" },
+                    "clicksByDate": { "type": "array", "items": { "type": "object", "properties": { "date": { "type": "string" }, "clicks": { "type": "integer" } } } },
+                    "clicksByCountry": { "type": "array", "items": { "type": "object" } },
+                    "clicksByDevice": { "type": "array", "items": { "type": "object" } },
+                    "clicksByBrowser": { "type": "array", "items": { "type": "object" } }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/links/{linkId}/analytics": {
+      "get": {
+        "summary": "Link analytics",
+        "description": "Click statistics for a specific link broken down by date, country, device, browser, and referrer.",
+        "operationId": "getLinkAnalytics",
+        "tags": ["Analytics"],
+        "parameters": [
+          { "name": "linkId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Link ID.", "example": "lnk_01hx9ab3cd4ef5gh6ij7kl" },
+          { "name": "startDate", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "Start of the reporting period." },
+          { "name": "endDate", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "End of the reporting period." }
+        ],
+        "responses": {
+          "200": {
+            "description": "Link analytics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalClicks": { "type": "integer" },
+                    "clicksByDate": { "type": "array", "items": { "type": "object", "properties": { "date": { "type": "string" }, "clicks": { "type": "integer" } } } },
+                    "clicksByCountry": { "type": "array", "items": { "type": "object" } },
+                    "clicksByDevice": { "type": "array", "items": { "type": "object" } },
+                    "clicksByBrowser": { "type": "array", "items": { "type": "object" } },
+                    "clicksByReferrer": { "type": "array", "items": { "type": "object" } }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Link not found" }
+        }
+      }
+    },
+    "/domains": {
+      "post": {
+        "summary": "Create domain",
+        "description": "Add a custom domain to the workspace. After creation, set the required DNS CNAME record and call the verify endpoint.",
+        "operationId": "createDomain",
+        "tags": ["Domains"],
+        "parameters": [{ "$ref": "#/components/parameters/WorkspaceId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["domain"],
+                "properties": {
+                  "domain": { "type": "string", "description": "Fully qualified domain name to add.", "example": "links.example.com" },
+                  "defaultRedirect": { "type": "string", "description": "URL to redirect visitors who hit the bare domain (no short code).", "example": "https://example.com" }
+                }
+              },
+              "example": { "domain": "links.example.com", "defaultRedirect": "https://example.com" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Domain created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Domain" } } } },
+          "400": { "description": "Invalid domain format" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Plan limit reached" },
+          "409": { "description": "Domain already registered" }
+        }
+      },
+      "get": {
+        "summary": "List domains",
+        "description": "Retrieve all custom domains registered to the workspace.",
+        "operationId": "listDomains",
+        "tags": ["Domains"],
+        "parameters": [
+          { "$ref": "#/components/parameters/WorkspaceId" },
+          { "name": "search", "in": "query", "schema": { "type": "string" }, "description": "Search by domain name." },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } }
+        ],
+        "responses": {
+          "200": { "description": "List of domains", "content": { "application/json": { "schema": { "type": "object", "properties": { "domains": { "type": "array", "items": { "$ref": "#/components/schemas/Domain" } }, "total": { "type": "integer" } } } } } },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/domains/{id}": {
+      "get": {
+        "summary": "Get domain",
+        "description": "Retrieve a single custom domain by ID.",
+        "operationId": "getDomain",
+        "tags": ["Domains"],
+        "parameters": [
+          { "$ref": "#/components/parameters/WorkspaceId" },
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Domain ID." }
+        ],
+        "responses": {
+          "200": { "description": "Domain object", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Domain" } } } },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Domain not found" }
+        }
+      },
+      "patch": {
+        "summary": "Update domain",
+        "description": "Update the domain name or its default redirect URL.",
+        "operationId": "updateDomain",
+        "tags": ["Domains"],
+        "parameters": [
+          { "$ref": "#/components/parameters/WorkspaceId" },
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Domain ID." }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "domain": { "type": "string", "description": "New fully qualified domain name.", "example": "links.newdomain.com" },
+                  "defaultRedirect": { "type": "string", "description": "New default redirect URL." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated domain", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Domain" } } } },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Insufficient permissions" },
+          "404": { "description": "Domain not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete domain",
+        "description": "Remove a custom domain from the workspace. All links using this domain will stop resolving.",
+        "operationId": "deleteDomain",
+        "tags": ["Domains"],
+        "parameters": [
+          { "$ref": "#/components/parameters/WorkspaceId" },
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Domain ID." }
+        ],
+        "responses": {
+          "200": { "description": "Domain deleted" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Insufficient permissions" },
+          "404": { "description": "Domain not found" }
+        }
+      }
+    },
+    "/domains/{id}/verify": {
+      "post": {
+        "summary": "Verify domain",
+        "description": "Trigger a DNS verification check. The domain must have a CNAME record pointing to the linkutm CNAME target before this succeeds.",
+        "operationId": "verifyDomain",
+        "tags": ["Domains"],
+        "parameters": [
+          { "$ref": "#/components/parameters/WorkspaceId" },
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Domain ID." }
+        ],
+        "responses": {
+          "200": { "description": "Verification result", "content": { "application/json": { "schema": { "type": "object", "properties": { "verified": { "type": "boolean", "example": true }, "message": { "type": "string", "example": "Domain verified successfully" } } } } } },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Domain not found" }
+        }
+      }
+    },
+    "/tags": {
+      "post": {
+        "summary": "Create tag",
+        "description": "Create a new tag in the workspace for organizing links.",
+        "operationId": "createTag",
+        "tags": ["Tags"],
+        "parameters": [{ "$ref": "#/components/parameters/WorkspaceId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "description": "Tag name. Must be unique within the workspace.", "example": "paid-ads", "maxLength": 50 },
+                  "color": { "type": "string", "description": "Hex color for the tag badge.", "example": "#ff6200" }
+                }
+              },
+              "example": { "name": "paid-ads", "color": "#ff6200" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Tag created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Tag" } } } },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Plan limit reached" },
+          "409": { "description": "Tag name already exists" }
+        }
+      },
+      "get": {
+        "summary": "List tags",
+        "description": "Retrieve all tags in the workspace.",
+        "operationId": "listTags",
+        "tags": ["Tags"],
+        "parameters": [{ "$ref": "#/components/parameters/WorkspaceId" }],
+        "responses": {
+          "200": { "description": "Array of tags", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Tag" } } } } },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/tags/{id}": {
+      "patch": {
+        "summary": "Update tag",
+        "description": "Rename a tag or change its color.",
+        "operationId": "updateTag",
+        "tags": ["Tags"],
+        "parameters": [
+          { "$ref": "#/components/parameters/WorkspaceId" },
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Tag ID." }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "description": "New tag name." },
+                  "color": { "type": "string", "description": "New hex color." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated tag", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Tag" } } } },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Tag not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete tag",
+        "description": "Delete a tag. The tag is removed from all links it was attached to.",
+        "operationId": "deleteTag",
+        "tags": ["Tags"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Tag ID." }
+        ],
+        "responses": {
+          "200": { "description": "Tag deleted" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Tag not found" }
+        }
+      }
+    },
+    "/folders": {
+      "post": {
+        "summary": "Create folder",
+        "description": "Create a new folder for organizing links in the workspace.",
+        "operationId": "createFolder",
+        "tags": ["Folders"],
+        "parameters": [{ "$ref": "#/components/parameters/WorkspaceId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "description": "Folder name.", "example": "Q2 Campaigns", "maxLength": 100 },
+                  "parentId": { "type": "string", "nullable": true, "description": "Parent folder ID for nested folders. Omit for a root-level folder." }
+                }
+              },
+              "example": { "name": "Q2 Campaigns" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Folder created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Folder" } } } },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Plan limit reached" }
+        }
+      },
+      "get": {
+        "summary": "List folders",
+        "description": "Retrieve the folder tree for the workspace.",
+        "operationId": "listFolders",
+        "tags": ["Folders"],
+        "parameters": [{ "$ref": "#/components/parameters/WorkspaceId" }],
+        "responses": {
+          "200": { "description": "Folder tree", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Folder" } } } } },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/folders/{id}": {
+      "patch": {
+        "summary": "Update folder",
+        "description": "Rename a folder or move it under a different parent.",
+        "operationId": "updateFolder",
+        "tags": ["Folders"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Folder ID." }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "description": "New folder name." },
+                  "parentId": { "type": "string", "nullable": true, "description": "New parent folder ID. Pass `null` to move to root." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated folder", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Folder" } } } },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Folder not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete folder",
+        "description": "Delete a folder. Links inside the folder are moved to root (not deleted).",
+        "operationId": "deleteFolder",
+        "tags": ["Folders"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Folder ID." }
+        ],
+        "responses": {
+          "200": { "description": "Folder deleted" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Folder not found" }
+        }
+      }
+    }
+  }
+}

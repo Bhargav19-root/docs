@@ -1,6 +1,7 @@
 ---
 title: "API keys"
 description: "Create, list, and revoke workspace API keys used to authenticate the Links API."
+api: "POST /api-keys"
 ---
 
 ## Overview
@@ -54,6 +55,8 @@ Generates a new `lk_live_` key for the workspace in `x-workspace-id`. The key is
 
 ### Example request
 
+<RequestExample>
+
 ```bash
 curl -X POST https://api.linkutm.com/api/v1/api-keys \
   -H "Authorization: Bearer $TOKEN" \
@@ -65,9 +68,13 @@ curl -X POST https://api.linkutm.com/api/v1/api-keys \
   }'
 ```
 
+</RequestExample>
+
 ### Example response
 
-```json
+<ResponseExample>
+
+```json 201
 {
   "id": "7c8d9e0f-1a2b-4c3d-8e5f-6a7b8c9d0e1f",
   "name": "production-server",
@@ -79,6 +86,8 @@ curl -X POST https://api.linkutm.com/api/v1/api-keys \
   "createdAt": "2026-05-22T14:00:00.000Z"
 }
 ```
+
+</ResponseExample>
 
 <Note>
 The `key` field holds the value you use to authenticate the Links API. This is the only response that returns it as part of a fresh generation, so capture it now.

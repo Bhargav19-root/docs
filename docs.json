@@ -1,6 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
+  "openapi": "openapi.json",
   "name": "linkutm",
   "colors": {
     "primary": "#ff6200",
@@ -102,62 +103,63 @@
             ]
           },
           {
-            "group": "Auth & Account",
+            "group": "Endpoints",
             "pages": [
-              "api/auth",
-              "api/users",
-              "api/api-keys",
-              "api/permissions"
-            ]
-          },
-          {
-            "group": "Links",
-            "pages": [
-              "api/links-create",
-              "api/links-get",
-              "api/links-update",
-              "api/links-delete",
-              "api/links-parameters",
-              "api/redirects"
-            ]
-          },
-          {
-            "group": "Organization",
-            "pages": [
-              "api/workspaces",
-              "api/team",
-              "api/invites",
-              "api/folders",
-              "api/tags"
-            ]
-          },
-          {
-            "group": "UTM Standards",
-            "pages": [
-              "api/templates",
-              "api/parameters",
-              "api/utm-rules"
-            ]
-          },
-          {
-            "group": "Domains",
-            "pages": [
-              "api/domains"
-            ]
-          },
-          {
-            "group": "Analytics & Tracking",
-            "pages": [
-              "api/analytics",
-              "api/google-analytics",
-              "api/pixels",
-              "api/metadata"
-            ]
-          },
-          {
-            "group": "Payments",
-            "pages": [
-              "api/payments"
+              {
+                "group": "Links",
+                "expanded": false,
+                "pages": [
+                  "api/links/create",
+                  "api/links/list",
+                  "api/links/get",
+                  "api/links/update",
+                  "api/links/delete",
+                  "api/links/bulk-delete",
+                  "api/links/bulk-archive",
+                  "api/links/bulk-move",
+                  "api/links/bulk-tag"
+                ]
+              },
+              {
+                "group": "Analytics",
+                "expanded": false,
+                "pages": [
+                  "api/analytics/workspace",
+                  "api/analytics/link"
+                ]
+              },
+              {
+                "group": "Domains",
+                "expanded": false,
+                "pages": [
+                  "api/domains/create",
+                  "api/domains/list",
+                  "api/domains/get",
+                  "api/domains/update",
+                  "api/domains/delete",
+                  "api/domains/verify"
+                ]
+              },
+              {
+                "group": "Tags",
+                "expanded": false,
+                "pages": [
+                  "api/tags/create",
+                  "api/tags/list",
+                  "api/tags/update",
+                  "api/tags/delete"
+                ]
+              },
+              {
+                "group": "Folders",
+                "expanded": false,
+                "pages": [
+                  "api/folders/create",
+                  "api/folders/list",
+                  "api/folders/update",
+                  "api/folders/delete"
+                ]
+              }
             ]
           }
         ]
@@ -183,6 +185,10 @@
       "label": "Dashboard",
       "href": "https://app.linkutm.com"
     }
+  },
+  "contextual": {
+    "options": ["copy", "view", "chatgpt", "claude", "cursor", "vscode"],
+    "display": "header"
   },
   "footer": {
     "socials": {

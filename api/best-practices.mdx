@@ -1,87 +1,35 @@
 ---
-title: "Best practices"
-description: "Auth, retries, idempotency, secrets, rate limits."
+title: 'API Best Practices'
+description: 'Guidelines for authentication, security, and reliable integrations'
 ---
+
+# API Best Practices
 
 ## Authentication
 
-- **Use JWT bearer** for end-user-acting calls.
-- **Use an API key** (`lk_live_`) for server-to-server access to the Links API. A key is workspace-bound, so it does not need the `x-workspace-id` header.
-- **Store tokens and keys server-side**, never in client bundles, browser localStorage on untrusted pages, or repo files.
-- **Rotate** credentials periodically. Revoke a leaked API key from **Settings → Developer → API keys**; revoke a JWT by removing the user's session via the auth endpoint.
-- **Workspace header** is required on workspace-scoped endpoints (`x-workspace-id: <uuid_or_slug>`). Get used to including it.
+- Use API keys (`lk_live_...`) for server-to-server integrations — never expose them in client-side code
+- Store API keys in environment variables, not in source code
+- Rotate keys regularly from **Settings → Developer → API Keys**
+- Give each integration its own named key so you can revoke it independently
 
-## Idempotency
+## Workspace Resolution
 
-Creation endpoints (`POST /links`) are not idempotent unless you provide a `customSlug`. Pattern for safe retries:
+When using an API key you do **not** need to pass `x-workspace-id` — the key already encodes the workspace. Only include the header if you want to explicitly validate which workspace you're operating in. Passing an `x-workspace-id` that doesn't match the key's workspace returns a `401`.
 
-```typescript
-const slug = `q2-launch-${nanoid(6)}`; // generate once, retry safely
-await fetch('/api/v1/links', {
-  method: 'POST',
-  headers: { /* ... */ },
-  body: JSON.stringify({ url, customSlug: slug, /* ... */ }),
-});
-```
+## Error Handling
 
-If the call fails midway and you retry with the same `customSlug`, the second call returns `409 Conflict` - you know it succeeded the first time.
-
-## Pagination
-
-List endpoints accept:
-
-| Param | Default | Notes |
-|---|---|---|
-| `page` | 1 | 1-indexed |
-| `limit` | 20 | Max varies; expect ≤100 |
-
-Response shape:
-
-```json
-{
-  "links": [ /* ... */ ],
-  "pagination": { "page": 1, "limit": 20, "total": 273, "pages": 14 }
-}
-```
-
-Iterate by incrementing `page` until `pagination.page === pagination.pages`. Don't rely on a "next cursor" - these endpoints are page-based.
-
-## Rate limiting
-
-A global rate limit of **100 requests per minute per IP** applies at the API edge. Exceeding it returns `429 Too Many Requests`. Back off and retry - the window resets every 60 seconds.
-
-## Usage limits
-
-Separate from the request-rate limit, workspaces have per-resource maximums set by their plan:
-
-- **Total links** in a workspace.
-- **Total clicks tracked** in the current period.
-- **API call volume** in the current period.
-
-Hitting a maximum returns `403` with a message naming the exact `used / limit`. Don't retry - free up headroom (delete unused records, wait for the next period, or upgrade the plan) before retrying. See [Payments](/api/payments) for per-plan limits.
-
-For sustained high-volume access, contact support.
+- Always check the HTTP status code before reading the response body
+- For `403` errors, check whether the account has hit a plan limit or the API key lacks the required role
+- For `409` (conflict), the short code or domain already exists — use a different value
 
 ## Retries
 
-- **Retry**: `5xx`, network timeouts, `429` (rate limit - back off first).
-- **Don't retry**: `4xx` (except `429`) - caller error, won't pass on retry.
-- **Backoff**: exponential with jitter. Suggested: `min(500ms × 2^attempt + jitter, 8s)`, max 3 retries.
+- Retry `5xx` errors and network timeouts with exponential backoff
+- Do not retry `4xx` errors — they indicate a problem with the request itself
+- Add jitter to retry delays to avoid thundering-herd problems
 
-## Bulk imports
+## Security
 
-Importing links from another shortener is a **two-step flow**: call the provider's `/import/<provider>/fetch` endpoint with your credentials to pull links, then post the returned set to `/import/<provider>` to write them in. Splitting fetch from import lets you review or filter before committing. After a large import, call `POST /links/notify-import` to email the workspace.
-
-Before a `POST /links/bulk-create` or import with explicit slugs, run `POST /links/check-shortcodes` as a pre-flight conflict check - short codes are globally unique and a bulk write that hits a taken slug is easier to avoid than to clean up.
-
-## Secrets and PII
-
-- **Never** put secrets (API tokens, passwords, customer IDs) in UTM values. They land in destination URLs and analytics.
-- **Never** put PII (emails, names, phone) in UTMs.
-- **Custom slugs** are visible in URL bars - don't encode anything sensitive in them.
-
-## Performance tips
-
-- **Batch where possible.** Bulk endpoints exist for delete (`POST /links/bulk-delete`), archive (`/bulk-archive`), move (`/bulk-move`), tag (`/bulk-tag`).
-- **Use `archived=true` filter** to exclude archived links from list queries - they're excluded by default but you can also explicitly query them.
-- **Workspace-level analytics** is one query for the workspace, not N queries per link. Use it for dashboards.
+- Use HTTPS only — the API does not accept plain HTTP
+- Never log raw API keys or JWT tokens
+- Scope each key to the minimum required workspace and revoke unused keys

@@ -1,6 +1,7 @@
 ---
 title: "Domains"
 description: "Add, verify, and manage custom domains for branded short links."
+api: "POST /domains"
 ---
 
 ## Overview
@@ -63,6 +64,8 @@ Requires JWT (`@UseGuards(JwtAuthGuard)`).
 
 ### Example request
 
+<RequestExample>
+
 ```bash
 curl -X POST https://api.linkutm.com/api/v1/domains \
   -H "Authorization: Bearer $TOKEN" \
@@ -74,9 +77,13 @@ curl -X POST https://api.linkutm.com/api/v1/domains \
   }'
 ```
 
+</RequestExample>
+
 ### Example response
 
-```json
+<ResponseExample>
+
+```json 201
 {
   "id": "9e8d7c6b-5a4b-4c3d-2e1f-0a9b8c7d6e5f",
   "domain": "go.acme.com",
@@ -93,6 +100,8 @@ curl -X POST https://api.linkutm.com/api/v1/domains \
   "cnameTarget": "cname.linkutm.com"
 }
 ```
+
+</ResponseExample>
 
 <Note>
 The `cnameTarget` field tells you where to point the CNAME record. Use this value, not a hardcoded host - it is environment driven.

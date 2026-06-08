@@ -1,6 +1,7 @@
 ---
 title: "Authentication"
 description: "Signup with OTP, login, password management, sessions, and Google OAuth."
+api: "POST /auth/login"
 ---
 
 ## Overview
@@ -82,11 +83,26 @@ POST /api/v1/auth/login
 
 Returns a JWT and the user object, same shape as `verify-otp`.
 
+<RequestExample>
+
 ```bash
 curl -X POST https://api.linkutm.com/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{ "email": "jane@example.com", "password": "<password>" }'
 ```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 200
+{
+  "token": "<jwt_token>",
+  "user": { "id": "1a2b3c4d-...", "name": "Jane", "email": "jane@example.com" }
+}
+```
+
+</ResponseExample>
 
 ## Password management
 

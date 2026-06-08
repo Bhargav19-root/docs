@@ -1,6 +1,7 @@
 ---
 title: "List & get links"
 description: "GET /links and GET /links/:id"
+api: "GET /links"
 ---
 
 ## List links in a workspace
@@ -33,15 +34,21 @@ GET /api/v1/links
 
 ### Example
 
+<RequestExample>
+
 ```bash
 curl "https://api.linkutm.com/api/v1/links?page=1&limit=50&utmSource=google&tagIds=tag-uuid-1,tag-uuid-2" \
   -H "Authorization: Bearer $TOKEN" \
   -H "x-workspace-id: client-globex"
 ```
 
+</RequestExample>
+
 ### Response
 
-```json
+<ResponseExample>
+
+```json 200
 {
   "links": [
     {
@@ -67,6 +74,8 @@ curl "https://api.linkutm.com/api/v1/links?page=1&limit=50&utmSource=google&tagI
   "pagination": { "page": 1, "limit": 50, "total": 273, "pages": 6 }
 }
 ```
+
+</ResponseExample>
 
 ### Notes
 

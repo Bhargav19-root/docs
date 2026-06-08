@@ -1,6 +1,7 @@
 ---
 title: "Tags"
 description: "Create and manage workspace tags, list links by tag, and attach or detach tags on individual links."
+api: "POST /tags"
 ---
 
 ## Overview
@@ -44,6 +45,8 @@ POST /api/v1/tags
 
 ### Example request
 
+<RequestExample>
+
 ```bash
 curl -X POST https://api.linkutm.com/api/v1/tags \
   -H "Authorization: Bearer $TOKEN" \
@@ -55,9 +58,13 @@ curl -X POST https://api.linkutm.com/api/v1/tags \
   }'
 ```
 
+</RequestExample>
+
 ### Example response
 
-```json
+<ResponseExample>
+
+```json 201
 {
   "id": "tag-5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
   "name": "paid-social",
@@ -70,6 +77,8 @@ curl -X POST https://api.linkutm.com/api/v1/tags \
   "_count": { "links": 0 }
 }
 ```
+
+</ResponseExample>
 
 ### Errors
 

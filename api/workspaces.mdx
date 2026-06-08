@@ -1,6 +1,7 @@
 ---
 title: "Workspaces"
 description: "Create and manage workspaces, logos, soft delete and restore, and import API keys."
+api: "POST /workspaces"
 ---
 
 ## Overview
@@ -56,6 +57,8 @@ This endpoint accepts `multipart/form-data` so an optional logo file can be uplo
 
 ### Example request
 
+<RequestExample>
+
 ```bash
 curl -X POST https://api.linkutm.com/api/v1/workspaces \
   -H "Authorization: Bearer $TOKEN" \
@@ -64,9 +67,13 @@ curl -X POST https://api.linkutm.com/api/v1/workspaces \
   -F "logo=@/path/to/logo.png"
 ```
 
+</RequestExample>
+
 ### Example response
 
-```json
+<ResponseExample>
+
+```json 201
 {
   "id": "8a7b6c5d-4e3f-4a2b-9c1d-0e1f2a3b4c5d",
   "name": "Acme Marketing",
@@ -77,6 +84,8 @@ curl -X POST https://api.linkutm.com/api/v1/workspaces \
   "updatedAt": "2026-05-22T10:00:00.000Z"
 }
 ```
+
+</ResponseExample>
 
 If a logo was sent but the upload failed, the response also includes `"logoUploadError": "<reason>"`.
 

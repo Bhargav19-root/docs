@@ -1,6 +1,7 @@
 ---
 title: "Create link"
 description: "POST /links - create a tracked short URL."
+api: "POST /links"
 ---
 
 ## Endpoint
@@ -96,6 +97,8 @@ POST /api/v1/links
 
 ## Example request
 
+<RequestExample>
+
 ```bash
 curl -X POST https://api.linkutm.com/api/v1/links \
   -H "Authorization: Bearer $TOKEN" \
@@ -113,11 +116,15 @@ curl -X POST https://api.linkutm.com/api/v1/links \
   }'
 ```
 
+</RequestExample>
+
 ## Example response
 
 All `id` fields are UUIDs.
 
-```json
+<ResponseExample>
+
+```json 201
 {
   "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
   "url": "https://example.com/q2-launch",
@@ -146,6 +153,8 @@ All `id` fields are UUIDs.
   "createdBy": { "id": "1a2b3c4d-...", "name": "Jane", "email": "jane@example.com", "avatar": null }
 }
 ```
+
+</ResponseExample>
 
 ## Errors
 

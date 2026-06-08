@@ -1,108 +1,54 @@
 ---
-title: "Errors"
-description: "Status codes, error response shape, and how to recover."
+title: 'API Errors'
+description: 'HTTP status codes and error response format for the linkutm API'
 ---
 
-## Error response shape
+# API Errors
 
-NestJS standard error envelope:
+All errors return a JSON body with a `statusCode`, `message`, and `error` field.
 
-```json
-{
-  "statusCode": 400,
-  "message": "Short code already exists",
-  "error": "Conflict"
-}
-```
-
-Some endpoints return `message` as an array (validation errors with multiple fields):
+## Error Response Format
 
 ```json
 {
   "statusCode": 400,
-  "message": [
-    "url should not be empty",
-    "url must be a URL"
-  ],
+  "message": "Validation failed",
   "error": "Bad Request"
 }
 ```
 
-## Status codes
+## HTTP Status Codes
 
-| Code | Meaning | When you'll see it |
+| Code | Meaning | Common cause |
 |---|---|---|
-| `200` | OK | Successful GET/PATCH/DELETE |
-| `201` | Created | Successful POST. NestJS returns `201` for every POST route by default, including validation or processing POSTs that do not persist a new record |
-| `400` | Bad request | Invalid payload, missing required fields, invalid domain, validation rule violation |
-| `401` | Unauthorized | Missing or invalid JWT |
-| `403` | Forbidden | Workspace usage limit reached, role lacks permission, owner-only action |
-| `404` | Not found | Resource doesn't exist or is in a different workspace |
-| `409` | Conflict | Duplicate slug, duplicate name, member already invited |
-| `410` | Gone | Short URL past `expiresAt` (redirect endpoint) |
-| `429` | Too many requests | Global rate limit exceeded - 100 requests/minute per IP. Retry after backoff. |
-| `500` | Server error | Unexpected - open a support ticket with timestamp |
+| `400` | Bad Request | Invalid or missing request fields |
+| `401` | Unauthorized | Missing, expired, or invalid API key / JWT |
+| `403` | Forbidden | Insufficient permissions or plan limit reached |
+| `404` | Not Found | Resource does not exist |
+| `409` | Conflict | Duplicate resource (e.g. short code already in use) |
+| `500` | Internal Server Error | Something went wrong on our end |
 
-## Common error patterns
+## Auth Errors
 
-<AccordionGroup>
-  <Accordion title="403 Forbidden - usage limit reached">
-    ```json
-    {
-      "statusCode": 403,
-      "message": "Link limit reached. Workspace has used 100 of 100 links.",
-      "error": "Forbidden"
-    }
-    ```
-    The message includes the exact `used / limit` numbers - surface it to the user verbatim so they know how much headroom they need to free up.
-  </Accordion>
+A `401` is returned when:
+- The `Authorization` header is missing
+- The API key is expired or revoked
+- A JWT token is invalid or expired
+- An API key is used with an `x-workspace-id` that doesn't match the key's workspace
 
-  <Accordion title="400 Bad Request - UTM rule violation">
-    ```json
-    {
-      "statusCode": 400,
-      "message": "UTM parameter validation failed: campaign: campaign is required; source: Value contains prohibited term: \"test\"",
-      "error": "Bad Request"
-    }
-    ```
-    Multiple field errors are joined with `; ` in the message.
-  </Accordion>
+A `403` is returned when:
+- The authenticated user doesn't have the required role (e.g. viewer trying to create a link)
+- The workspace has reached its plan limit for the resource being created
 
-  <Accordion title="409 Conflict - short code taken">
-    ```json
-    { "statusCode": 409, "message": "Short code already exists", "error": "Conflict" }
-    ```
-    Slugs are globally unique. Pick a different one.
-  </Accordion>
+## Handling Errors
 
-  <Accordion title="400 Bad Request - invalid domain">
-    Possible messages: `"Invalid domain for this workspace"`, `"Cannot use an unverified domain"`, `"This domain is deactivated. Reactivate it or choose another domain."`.
-  </Accordion>
+```javascript
+const res = await fetch('https://api.linkutm.com/api/v1/links', {
+  headers: { Authorization: 'Bearer lk_live_...' },
+});
 
-  <Accordion title="404 Not found - workspace lookup">
-    `"Workspace not found"`. Check that `x-workspace-id` is a UUID or slug you belong to.
-  </Accordion>
-
-  <Accordion title="400 Bad Request - folder validation">
-    Examples: `"Folder name already exists"`, `"Folder not found"`, `"Folder belongs to a different workspace"`.
-  </Accordion>
-
-  <Accordion title="429 Too Many Requests - rate limit">
-    ```json
-    { "statusCode": 429, "message": "ThrottlerException: Too Many Requests", "error": "Too Many Requests" }
-    ```
-    The global limit is 100 requests per minute per IP. The window resets every 60 seconds - back off and retry. See [Best practices](/api/best-practices) for backoff guidance.
-  </Accordion>
-</AccordionGroup>
-
-## Idempotency
-
-POST endpoints are not idempotent by default. Re-sending a `POST /links` creates a second record (with a different auto-slug). To make creation safe to retry, supply a `customSlug` - the second call returns `409 Conflict` if you already created one.
-
-## Retries
-
-Retry on `5xx` and network timeouts with exponential backoff. Don't retry `4xx` - those are caller errors and won't pass on retry.
-
-```
-Suggested: 3 retries, base 500ms, 2x backoff, max 8s
+if (!res.ok) {
+  const err = await res.json();
+  console.error(err.message); // "Link limit reached. Upgrade your plan."
+}
 ```

@@ -1,6 +1,7 @@
 ---
 title: "Update link"
 description: "PATCH /links/:id - change the destination, UTMs, archive state, tags, and more on an existing link."
+api: "PATCH /links/{id}"
 ---
 
 ## Endpoint
@@ -148,6 +149,8 @@ The tag insert runs after the link row is already updated. If a tag UUID does no
 
 ## Example request
 
+<RequestExample>
+
 ```bash
 curl -X PATCH https://api.linkutm.com/api/v1/links/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
   -H "Authorization: Bearer $TOKEN" \
@@ -162,20 +165,22 @@ curl -X PATCH https://api.linkutm.com/api/v1/links/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3
   }'
 ```
 
-The same call with an API key:
-
-```bash
+```bash API key
 curl -X PATCH https://api.linkutm.com/api/v1/links/5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d \
   -H "Authorization: Bearer lk_live_xxxxxxxxxxxxxxxxxxxx" \
   -H "Content-Type: application/json" \
   -d '{ "archived": true }'
 ```
 
+</RequestExample>
+
 ## Example response
 
 All `id` fields are UUIDs. When `tagIds` is present in the request, the response is the link re-fetched after the tag rows are rewritten, and `tags` contains `{ tagId }` entries. When `tagIds` is absent, the response is the updated link with fully expanded `tags` (each carrying the joined `tag` object).
 
-```json
+<ResponseExample>
+
+```json 200
 {
   "id": "5f3b2a1c-4d6e-4a8b-9c0d-1e2f3a4b5c6d",
   "url": "https://example.com/q2-launch",
@@ -215,6 +220,8 @@ All `id` fields are UUIDs. When `tagIds` is present in the request, the response
   "tags": [{ "tagId": "tag-uuid-1" }, { "tagId": "tag-uuid-3" }]
 }
 ```
+
+</ResponseExample>
 
 ## Errors
 
