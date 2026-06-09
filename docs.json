@@ -109,30 +109,14 @@
                 "group": "Links",
                 "expanded": false,
                 "pages": [
-                  "api/links/create",
-                  "api/links/list",
                   "api/links/get",
-                  "api/links/update",
-                  "api/links/delete",
-                  "api/links/bulk-delete",
-                  "api/links/bulk-archive",
-                  "api/links/bulk-move",
-                  "api/links/bulk-tag"
-                ]
-              },
-              {
-                "group": "Analytics",
-                "expanded": false,
-                "pages": [
-                  "api/analytics/workspace",
-                  "api/analytics/link"
+                  "api/links/delete"
                 ]
               },
               {
                 "group": "Domains",
                 "expanded": false,
                 "pages": [
-                  "api/domains/create",
                   "api/domains/list",
                   "api/domains/get",
                   "api/domains/update",
@@ -144,7 +128,6 @@
                 "group": "Tags",
                 "expanded": false,
                 "pages": [
-                  "api/tags/create",
                   "api/tags/list",
                   "api/tags/update",
                   "api/tags/delete"
@@ -154,7 +137,6 @@
                 "group": "Folders",
                 "expanded": false,
                 "pages": [
-                  "api/folders/create",
                   "api/folders/list",
                   "api/folders/update",
                   "api/folders/delete"
