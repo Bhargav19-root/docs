@@ -9,10 +9,6 @@
     {
       "url": "https://api.linkutm.com/api/v1",
       "description": "Production"
-    },
-    {
-      "url": "http://localhost:3333/api/v1",
-      "description": "Local development"
     }
   ],
   "components": {
